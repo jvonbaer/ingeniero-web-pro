@@ -2,23 +2,16 @@
 name: ingeniero-web-pro
 version: 1.0.0
 description: >
+  description: >-
   Skill end-to-end para construir webs y landings profesionales con Next.js 16,
-  React 19, Tailwind CSS v4, shadcn/ui y Framer Motion. Pensada para que un
-  usuario sin conocimientos técnicos pueda PREVISUALIZAR estilos en su navegador
-  antes de elegir, y completar la página de principio a fin (intake, brief,
-  diseño, build, QA, deploy). Combina 8 direcciones visuales narrativas
-  (Editorial Serif, Swiss Minimal, Luxury Dark Warm, Corporate Bold, Understated
-  Elegance, Neo-Brutalist, Playful Gradient, Retro Terminal) con 10 paletas y
-  10 emparejamientos tipográficos en un sistema mix-and-match con build-log
-  para no repetir combos. Incluye módulos opcionales de excelencia (Lenis smooth
-  scroll, SplitText cinético, parallax, scroll storytelling, Three.js).
-  USAR cuando el usuario diga: "crea una web", "diseña una landing", "haz una
-  página para mi negocio", "rediseña esta web [URL]", "construye el frontend",
-  "preview de estilos", "monta una web para [nombre]", "necesito web nueva",
-  "quiero ver opciones de diseño", o cualquier intención de crear una interfaz
-  web pública (landing, corporate, portfolio, e-commerce, blog).
-  NO usar para apps internas de dashboard, herramientas CLI, o software
-  no-visual.
+  Tailwind CSS v4, shadcn/ui y Framer Motion, con previsualización real de estilos
+  en el navegador antes de elegir. Pipeline completo: intake, brief, diseño, build,
+  QA y deploy. 8 direcciones visuales × 10 paletas × 10 tipografías. Activar cuando
+  el usuario diga "crea una web", "diseña una landing", "haz una página para mi
+  negocio", "rediseña [URL]", "construye el frontend", "monta la web de [nombre]",
+  "necesito web nueva", o cualquier intención de crear una interfaz web pública
+  (landing, portfolio, e-commerce, blog). NO usar para dashboards internos, CLIs
+  o software no-visual.
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 ---
 
