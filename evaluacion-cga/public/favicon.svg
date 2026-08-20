@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="CGA">
+  <circle cx="50" cy="50" r="47" fill="#1C1C1C" stroke="#C8102E" stroke-width="6"/>
+  <circle cx="50" cy="43" r="20" fill="none" stroke="#EAAA00" stroke-width="4"/>
+  <path d="M50 29 L61 37 L57 50 L43 50 L39 37 Z" fill="#EAAA00"/>
+  <text x="50" y="80" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif"
+        font-size="21" font-weight="800" letter-spacing="2" fill="#FFFFFF">CGA</text>
+</svg>

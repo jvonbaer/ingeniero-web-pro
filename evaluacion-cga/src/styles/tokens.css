@@ -1,0 +1,68 @@
+/* ============================================================
+   TOKENS DE IDENTIDAD — Club Gimnástico Alemán (CGA)
+   Rama: Fútbol  ·  Color de rama: Amarillo DFB #EAAA00
+   Regla dura: el azul #006EA6 es exclusivo de Natación.
+   Ninguna variable de este archivo puede ser azul.
+   ============================================================ */
+:root {
+  /* --- Base institucional --- */
+  --cga-rojo: #c8102e;
+  --cga-carbon: #1c1c1c;
+  --cga-gris: #5a5a5a;
+  --cga-blanco: #ffffff;
+  --cga-amarillo: #eaaa00;
+
+  /* --- Rama Fútbol --- */
+  --rama-futbol: #eaaa00;
+
+  /* --- Escala neutra derivada del Negro Carbón --- */
+  --carbon-900: #101010;
+  --carbon-800: #161616;
+  --carbon-700: #1c1c1c;
+  --carbon-600: #242424;
+  --carbon-500: #2e2e2e;
+  --carbon-400: #3a3a3a;
+  --gris-300: #5a5a5a;
+  --gris-200: #8a8a8a;
+  --gris-100: #c9c9c9;
+  --hueso: #f4f3f1;
+  --hueso-2: #e9e7e3;
+
+  /* --- Roles semánticos --- */
+  --bg: var(--hueso);
+  --bg-panel: var(--cga-blanco);
+  --bg-oscuro: var(--carbon-700);
+  --texto: var(--carbon-700);
+  --texto-suave: var(--cga-gris);
+  --texto-inverso: var(--cga-blanco);
+  --borde: #dedbd6;
+  --borde-oscuro: var(--carbon-500);
+  --acento: var(--rama-futbol);
+  --acento-contraste: var(--carbon-900);
+
+  /* --- Niveles de desempeño (sin azul) --- */
+  --nivel-inicial: #8a8a8a;
+  --nivel-desarrollo: #b07a1a;
+  --nivel-intermedio: #c8102e;
+  --nivel-avanzado: #eaaa00;
+  --nivel-excelente: #1c1c1c;
+
+  /* --- Series del gráfico de tela de araña --- */
+  --serie-1: #eaaa00; /* evaluación actual  — Amarillo DFB */
+  --serie-2: #c8102e; /* evaluación previa  — Rojo CGA */
+  --serie-3: #5a5a5a; /* dos atrás          — Gris Círculo */
+
+  /* --- Tipografía --- */
+  --fuente: "Barlow", system-ui, -apple-system, sans-serif;
+  --fuente-cond: "Barlow Condensed", "Barlow", system-ui, sans-serif;
+
+  /* --- Métricas --- */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --franja: 5px; /* franja institucional obligatoria */
+  --sombra-1: 0 1px 2px rgba(28, 28, 28, 0.06), 0 2px 8px rgba(28, 28, 28, 0.05);
+  --sombra-2: 0 2px 6px rgba(28, 28, 28, 0.08), 0 12px 32px rgba(28, 28, 28, 0.1);
+  --tap: 48px; /* área táctil mínima en tablet/teléfono */
+}
