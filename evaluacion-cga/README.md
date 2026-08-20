@@ -5,7 +5,7 @@ Aplicación para evaluar a los jugadores de la Escuela de Fútbol del **Club Gim
 - **Se llena como una encuesta**, pensada para usarse de pie en la cancha, desde teléfono o tablet.
 - **Los datos se acumulan**: cada evaluación nueva se suma al historial y se compara con las anteriores.
 - **Gráfico de tela de araña** que superpone hasta tres evaluaciones para ver el avance de un vistazo.
-- **Informe en una hoja A4** que se imprime o se guarda como PDF desde el propio navegador.
+- **Informe en una hoja A4 vertical** que se imprime o se guarda como PDF desde el propio navegador.
 - Identidad visual del CGA, rama Fútbol: Rojo CGA, Negro Carbón, Amarillo DFB, tipografía Barlow.
 
 ---
@@ -69,9 +69,14 @@ Detalles pensados para el uso real:
 
 ### Entregar el informe
 
-**Ficha → Informe** (o se abre solo al finalizar). El botón **Imprimir / Guardar PDF** abre el diálogo del navegador; hay que elegir *Guardar como PDF*, orientación **horizontal** y activar **Gráficos de fondo**. El resultado es una hoja A4 apaisada.
+**Ficha → Informe** (o se abre solo al finalizar). El botón **Imprimir / Guardar PDF** abre el diálogo del navegador; hay que elegir *Guardar como PDF*, orientación **vertical** y activar **Gráficos de fondo**. El resultado es una hoja A4 vertical.
 
 Si la ficha tiene el correo del apoderado, el botón **Escribir al apoderado** abre el correo con el asunto y el mensaje ya redactados, listo para adjuntar el PDF.
+
+> El informe reserva un espacio fijo para las observaciones (380 caracteres) y para cada objetivo
+> (68). La pantalla de cierre muestra cuántos quedan: es el largo que entra sin que el PDF corte la
+> frase. Si cambia las alturas de esos bloques en `src/styles/informe.css`, ajuste también los topes
+> de `src/pages/Evaluar.tsx`.
 
 ### Ajustar qué se evalúa
 
@@ -198,7 +203,7 @@ evaluacion-cga/
 │   ├── pages/                   Jugadores, ficha, encuesta, informe, parámetros
 │   ├── styles/
 │   │   ├── tokens.css           Paleta y tipografía CGA
-│   │   ├── informe.css          Maqueta A4 del informe
+│   │   ├── informe.css          Maqueta A4 vertical del informe
 │   │   └── print.css            Reglas de impresión
 │   └── fuentes/                 Barlow (la repone `npm install`, no se versiona)
 ├── scripts/preparar-fuentes.mjs Descarga las tipografías al proyecto

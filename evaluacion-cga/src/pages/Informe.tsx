@@ -3,8 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import { useDatos } from "../data/DatosContext";
 import { Escudo, MarcaDeAgua } from "../components/Marca";
 import { RadarChart, type SerieRadar } from "../components/RadarChart";
-import { Delta } from "../components/ui";
 import { Icono } from "../components/Iconos";
+import { Delta } from "../components/ui";
 import {
   calcular,
   delta,
@@ -18,7 +18,7 @@ import {
 
 const COLORES_SERIE = ["var(--serie-1)", "var(--serie-2)", "var(--serie-3)"];
 const VALORES_CLUB = ["Trabajo en equipo", "Disciplina", "Respeto", "Pasión", "Superación"];
-const ANCHO_HOJA = 1123; // A4 apaisada a 96 dpi
+const ANCHO_HOJA = 794; // A4 vertical a 96 dpi (794 × 1123)
 
 export function Informe() {
   const { evaluacionId = "" } = useParams();
@@ -114,8 +114,8 @@ export function Informe() {
 
       <div className="aviso aviso--acento no-print">
         En el cuadro de impresión elija <strong>Destino: Guardar como PDF</strong>,{" "}
-        <strong>Orientación: horizontal</strong> y active <strong>Gráficos de fondo</strong>.
-        El informe está diseñado para una hoja A4 apaisada.
+        <strong>Orientación: vertical</strong> y active <strong>Gráficos de fondo</strong>.
+        El informe está diseñado para una hoja A4 vertical.
       </div>
 
       {evaluacion.estado === "borrador" && (
@@ -128,18 +128,24 @@ export function Informe() {
       <div className="informe-marco" ref={marco}>
         <div
           className="informe"
-          style={{ transform: `scale(${escala})`, marginBottom: (escala - 1) * 794 }}
+          style={{ transform: `scale(${escala})`, marginBottom: (escala - 1) * 1123 }}
         >
           <MarcaDeAgua />
 
           <header className="informe__header">
-            <div className="informe__marca">
-              <Escudo tamano={54} />
-              <div>
-                <div className="informe__marca-titulo">Escuela de Fútbol</div>
-                <div className="informe__marca-lema">
-                  Formamos jugadores,<br />formamos personas
+            <div className="informe__header-fila">
+              <div className="informe__marca">
+                <Escudo tamano={44} />
+                <div>
+                  <div className="informe__marca-titulo">Escuela de Fútbol</div>
+                  <div className="informe__marca-lema">
+                    Formamos jugadores, formamos personas
+                  </div>
                 </div>
+              </div>
+              <div className="informe__fecha">
+                <span>Fecha de evaluación</span>
+                <strong>{fechaLarga(evaluacion.fecha)}</strong>
               </div>
             </div>
 
@@ -147,15 +153,10 @@ export function Informe() {
               <h1>Evaluación de Habilidades</h1>
               <p>Desarrollando talento, construyendo futuro</p>
             </div>
-
-            <div className="informe__fecha">
-              <span>Fecha de evaluación</span>
-              <strong>{fechaLarga(evaluacion.fecha)}</strong>
-            </div>
           </header>
 
           <div className="informe__cuerpo">
-            <aside className="informe__perfil">
+            <section className="informe__identidad">
               <div className="informe__foto">
                 {jugador.fotoDataUrl ? (
                   <img src={jugador.fotoDataUrl} alt={nombreCompleto(jugador)} />
@@ -165,127 +166,151 @@ export function Informe() {
                 {jugador.dorsal && <span className="informe__dorsal">#{jugador.dorsal}</span>}
               </div>
 
-              <h2 className="informe__nombre">{nombreCompleto(jugador)}</h2>
-              <div className="informe__categoria">Categoría: {jugador.categoria}</div>
-              <div className="informe__codigo">Código {jugador.codigo}</div>
+              <div className="informe__perfil">
+                <h2 className="informe__nombre">{nombreCompleto(jugador)}</h2>
+                <div className="informe__chips">
+                  <span className="informe__chip informe__chip--acento">{jugador.categoria}</span>
+                  <span className="informe__chip">{jugador.posicion}</span>
+                  <span className="informe__chip informe__chip--codigo">{jugador.codigo}</span>
+                </div>
 
-              <dl className="informe__datos">
-                <DatoInforme rotulo="Fecha de nacimiento" valor={fechaCorta(jugador.fechaNacimiento)} />
-                <DatoInforme
-                  rotulo="Edad"
-                  valor={`${edadEn(jugador.fechaNacimiento, evaluacion.fecha) ?? "—"} años`}
-                />
-                <DatoInforme rotulo="Altura" valor={jugador.alturaCm ? `${jugador.alturaCm} cm` : "—"} />
-                <DatoInforme rotulo="Pie hábil" valor={jugador.pieHabil} />
-                <DatoInforme rotulo="Posición" valor={jugador.posicion} />
-                <DatoInforme rotulo="En la escuela desde" valor={fechaCorta(jugador.ingreso)} />
-              </dl>
-
-              <div className="informe__entrenador">
-                <span>Entrenador</span>
-                <strong>{evaluacion.entrenador || "—"}</strong>
+                <dl className="informe__datos">
+                  <DatoInforme
+                    rotulo="Nacimiento"
+                    valor={`${fechaCorta(jugador.fechaNacimiento)} · ${
+                      edadEn(jugador.fechaNacimiento, evaluacion.fecha) ?? "—"
+                    } años`}
+                  />
+                  <DatoInforme rotulo="Pie hábil" valor={jugador.pieHabil} />
+                  <DatoInforme
+                    rotulo="Altura"
+                    valor={jugador.alturaCm ? `${jugador.alturaCm} cm` : "—"}
+                  />
+                  <DatoInforme rotulo="En la escuela desde" valor={fechaCorta(jugador.ingreso)} />
+                  <DatoInforme rotulo="Entrenador" valor={evaluacion.entrenador || "—"} />
+                  <DatoInforme rotulo="Temporada" valor={evaluacion.temporada} />
+                </dl>
               </div>
-            </aside>
 
-            <section className="informe__contenido">
-              <div className="informe__fila-superior">
-                <div className="informe__bloque">
-                  <h3 className="informe__bloque-titulo">Progreso general</h3>
-                  <div className="informe__panel-oscuro">
-                    <div className="informe__general">
-                      <span className="informe__panel-rotulo">Puntaje general</span>
-                      <span className="puntaje" style={{ fontSize: 44, color: "var(--rama-futbol)" }}>
-                        {actual.general}
-                        <small style={{ color: "var(--gris-200)" }}>/100</small>
-                      </span>
-                    </div>
-                    <div className="informe__nivel">
-                      <span className="informe__panel-rotulo">Nivel actual</span>
+              <div className="informe__panel-oscuro">
+                <span className="informe__panel-rotulo">Puntaje general</span>
+                <span className="puntaje informe__panel-puntaje">
+                  {actual.general}
+                  <small>/100</small>
+                </span>
+                <span className="informe__panel-rotulo">Nivel actual</span>
+                <span className="nivel informe__panel-nivel">
+                  {actual.nivel?.etiqueta ?? "—"}
+                </span>
+                {previo && (
+                  <span className="informe__panel-delta">
+                    <Delta valor={delta(actual.general, previo.general)} /> respecto de la
+                    evaluación anterior
+                  </span>
+                )}
+              </div>
+            </section>
+
+            <section className="informe__bloque">
+              <div className="informe__bloque-cabecera">
+                <h3 className="informe__bloque-titulo">Comparativo de evaluaciones</h3>
+                <ul className="informe__leyenda">
+                  {series.map((s) => (
+                    <li key={s.id}>
                       <span
-                        className="nivel informe__panel-nivel"
-                        style={{ color: "var(--rama-futbol)" }}
-                      >
-                        {actual.nivel?.etiqueta ?? "—"}
-                      </span>
-                      {previo && (
-                        <span className="informe__panel-delta">
-                          <Delta valor={delta(actual.general, previo.general)} /> respecto de la
-                          evaluación anterior
-                        </span>
-                      )}
-                    </div>
-                  </div>
+                        className={`informe__leyenda-linea${
+                          s.discontinua ? " informe__leyenda-linea--corte" : ""
+                        }`}
+                        style={{ color: s.color }}
+                      />
+                      {s.etiqueta}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <RadarChart
+                ejes={ejes}
+                series={series}
+                ancho={766}
+                alto={367}
+                radio={108}
+                mostrarLeyenda={false}
+              />
+            </section>
 
-                  <h3 className="informe__bloque-titulo" style={{ marginTop: 12 }}>
-                    Niveles de evaluación por categoría
-                  </h3>
-                  <table className="informe__tabla">
-                    <tbody>
-                      {actual.categorias.map((cat) => {
-                        const d = previo
-                          ? delta(
-                              cat.puntaje,
-                              previo.categorias.find((c) => c.categoriaId === cat.categoriaId)
-                                ?.puntaje ?? null,
-                            )
-                          : null;
-                        return (
-                          <tr key={cat.categoriaId}>
-                            <td className="informe__tabla-icono"><Icono nombre={cat.icono} tamano={16} /></td>
-                            <td className="informe__tabla-nombre">{cat.nombre}</td>
-                            <td className="informe__tabla-valor">
-                              {cat.puntaje ?? "—"}<small>/100</small>
-                            </td>
-                            <td className="informe__tabla-delta"><Delta valor={d} /></td>
-                            <td className="informe__tabla-nivel">
-                              <span className={`nivel nivel--${cat.nivel?.id ?? "inicial"}`}>
-                                {cat.nivel?.etiqueta ?? "—"}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+            <section className="informe__bloque">
+              <h3 className="informe__bloque-titulo">Niveles de evaluación por categoría</h3>
+              <table className="informe__tabla">
+                <tbody>
+                  {actual.categorias.map((cat) => {
+                    const d = previo
+                      ? delta(
+                          cat.puntaje,
+                          previo.categorias.find((c) => c.categoriaId === cat.categoriaId)
+                            ?.puntaje ?? null,
+                        )
+                      : null;
+                    return (
+                      <tr key={cat.categoriaId}>
+                        <td className="informe__tabla-icono">
+                          <Icono nombre={cat.icono} tamano={16} />
+                        </td>
+                        <td className="informe__tabla-nombre">{cat.nombre}</td>
+                        <td className="informe__tabla-desc">{cat.descripcion}</td>
+                        <td className="informe__tabla-barra">
+                          <span className="informe__pista">
+                            <span
+                              className="informe__relleno"
+                              style={{ width: `${cat.puntaje ?? 0}%` }}
+                            />
+                          </span>
+                        </td>
+                        <td className="informe__tabla-valor">
+                          {cat.puntaje ?? "—"}<small>/100</small>
+                        </td>
+                        <td className="informe__tabla-delta"><Delta valor={d} /></td>
+                        <td className="informe__tabla-nivel">
+                          <span className={`nivel nivel--${cat.nivel?.id ?? "inicial"}`}>
+                            {cat.nivel?.etiqueta ?? "—"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </section>
 
-                <div className="informe__bloque">
-                  <h3 className="informe__bloque-titulo">Comparativo de evaluaciones</h3>
-                  <RadarChart ejes={ejes} series={series} ancho={452} alto={384} radio={100} />
-                </div>
+            <section className="informe__fila-inferior">
+              <div className="informe__caja">
+                <h3 className="informe__bloque-titulo">Observaciones del entrenador</h3>
+                <p className="informe__observaciones">
+                  {evaluacion.observaciones || "Sin observaciones registradas en esta evaluación."}
+                </p>
               </div>
 
-              <div className="informe__fila-inferior">
-                <div className="informe__caja">
-                  <h3 className="informe__bloque-titulo">Observaciones del entrenador</h3>
-                  <p className="informe__observaciones">
-                    {evaluacion.observaciones || "Sin observaciones registradas en esta evaluación."}
-                  </p>
-                </div>
-
-                <div className="informe__caja">
-                  <h3 className="informe__bloque-titulo">Próximos objetivos</h3>
-                  <ul className="informe__objetivos">
-                    {evaluacion.objetivos.length > 0 ? (
-                      evaluacion.objetivos.map((o) => <li key={o}>{o}</li>)
-                    ) : (
-                      <li>Se definirán en la próxima sesión de trabajo.</li>
-                    )}
-                  </ul>
-                </div>
-
-                <div className="informe__lema">
-                  <span>Tu esfuerzo de hoy</span>
-                  <strong>es tu éxito de mañana</strong>
-                </div>
+              <div className="informe__caja">
+                <h3 className="informe__bloque-titulo">Próximos objetivos</h3>
+                <ul className="informe__objetivos">
+                  {evaluacion.objetivos.length > 0 ? (
+                    evaluacion.objetivos.map((o) => <li key={o}>{o}</li>)
+                  ) : (
+                    <li>Se definirán en la próxima sesión de trabajo.</li>
+                  )}
+                </ul>
               </div>
             </section>
           </div>
 
-          <footer className="informe__footer">
-            {VALORES_CLUB.map((valor) => (
-              <span key={valor}>{valor}</span>
-            ))}
+          <footer className="informe__pie">
+            <div className="informe__lema">
+              Tu esfuerzo de hoy <strong>es tu éxito de mañana</strong>
+            </div>
+            <div className="informe__valores">
+              {VALORES_CLUB.map((valor) => (
+                <span key={valor}>{valor}</span>
+              ))}
+            </div>
           </footer>
         </div>
       </div>

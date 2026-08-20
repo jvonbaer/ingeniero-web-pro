@@ -1,10 +1,10 @@
 /* ============================================================
-   IMPRESIÓN — el informe sale en una hoja A4 apaisada.
+   IMPRESIÓN — el informe sale en una hoja A4 vertical.
    El navegador genera el PDF; no se necesita ninguna librería.
    ============================================================ */
 @media print {
   @page {
-    size: A4 landscape;
+    size: A4 portrait;
     margin: 0;
   }
 
@@ -46,7 +46,9 @@
   .informe__header,
   .informe__perfil,
   .informe__panel-oscuro,
-  .informe__footer,
+  .informe__pie,
+  .informe__lema,
+  .informe__valores,
   .informe__categoria,
   .informe__dorsal,
   .informe__lema {

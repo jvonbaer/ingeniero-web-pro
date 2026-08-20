@@ -207,10 +207,14 @@ export function RadarChart({
           const valor = destacada?.valores[i] ?? null;
           const arriba = Math.sin(p.angulo) < -0.5;
           const y0 = arriba ? p.y - 34 : p.y + 6;
-          // Arriba y abajo el rótulo va centrado y hay poco alto disponible, así
-          // que la descripción se reparte ancha y en dos líneas. A los costados
-          // ocurre lo contrario: sobra alto y falta ancho.
-          const anchoLinea = anclaje === "middle" ? 32 : 16;
+          // El ancho de la descripción sale del espacio que realmente queda entre
+          // el rótulo y el borde del lienzo, no de un número fijo: así el mismo
+          // gráfico se ve bien en la ficha (ancho) y en el informe (angosto).
+          // Arriba y abajo el texto va centrado y sobra ancho, pero falta alto;
+          // a los costados ocurre lo contrario.
+          const espacio =
+            anclaje === "middle" ? ancho - 20 : (anclaje === "start" ? ancho - p.x : p.x) - 10;
+          const anchoLinea = Math.max(14, Math.min(38, Math.floor(espacio / 4.6)));
           const maxLineas = anclaje === "middle" ? 2 : 4;
           const lineas = mostrarDescripciones && eje.descripcion
             ? envolver(eje.descripcion, anchoLinea).slice(0, maxLineas)

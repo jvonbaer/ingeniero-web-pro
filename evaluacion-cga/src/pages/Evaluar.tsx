@@ -15,6 +15,13 @@ import {
 } from "../domain/scoring";
 import type { Evaluacion, Jugador, Rubrica } from "../domain/types";
 
+// Topes de largo. El informe A4 reserva un espacio fijo para estos dos textos y
+// estos números son lo que cabe medido: seis líneas para las observaciones y dos
+// por objetivo. Pasarse no da error, pero el apoderado recibiría la frase cortada
+// en el PDF. Si cambia el alto de esos bloques en informe.css, recalcule acá.
+const MAX_OBSERVACIONES = 380;
+const MAX_OBJETIVO = 68;
+
 function evaluacionVacia(jugadorId: string, rubrica: Rubrica): Evaluacion {
   const fecha = hoyISO();
   return {
@@ -406,17 +413,22 @@ function PasoCierre({
 
         <Campo
           label="Observaciones del entrenador"
-          ayuda="Dos o tres frases concretas: qué destacar y en qué seguir trabajando."
+          ayuda={`Dos o tres frases concretas: qué destacar y en qué seguir trabajando. Quedan ${
+            MAX_OBSERVACIONES - borrador.observaciones.length
+          } caracteres para que entre completo en el informe.`}
         >
           <textarea
             className="textarea"
             value={borrador.observaciones}
             onChange={(e) => actualizar({ observaciones: e.target.value })}
-            maxLength={700}
+            maxLength={MAX_OBSERVACIONES}
           />
         </Campo>
 
-        <div className="campo__label" style={{ marginBottom: 8 }}>Próximos objetivos</div>
+        <div className="campo__label" style={{ marginBottom: 2 }}>Próximos objetivos</div>
+        <p className="campo__ayuda" style={{ margin: "0 0 8px" }}>
+          Uno por línea, en una frase corta. Puede dejar los que no use en blanco.
+        </p>
         {objetivos.map((objetivo, i) => (
           <input
             key={i}
@@ -424,7 +436,7 @@ function PasoCierre({
             style={{ marginBottom: 9 }}
             value={objetivo}
             placeholder={`Objetivo ${i + 1}`}
-            maxLength={120}
+            maxLength={MAX_OBJETIVO}
             aria-label={`Objetivo ${i + 1}`}
             onChange={(e) => {
               const copia = [...objetivos];
