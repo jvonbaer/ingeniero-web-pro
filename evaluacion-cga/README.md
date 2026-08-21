@@ -47,7 +47,20 @@ Sin configurar nada, la aplicación guarda todo en el propio dispositivo. Para c
 **Jugadores → + Nuevo jugador**. Se piden nombre, fecha de nacimiento, categoría, posición, pie hábil, altura, dorsal, fecha de ingreso y los datos del apoderado.
 
 - El **código de seguimiento** se genera solo con el formato `CGA-F-AA-000` (`AA` = año de nacimiento). Se puede escribir uno propio si el club ya tiene su numeración.
-- La **foto** se toma con la cámara del teléfono o tablet directamente desde el formulario. La aplicación la reduce a 640 px y la recodifica antes de guardarla, así una foto de 4 MB queda en unos 60 KB.
+- La **foto** tiene dos caminos, ambos disponibles en el formulario y en la ficha del jugador:
+  - **Tomar foto** abre un visor de cámara con vista previa y botón de disparo. Funciona igual en el
+    teléfono o la tablet —parte con la cámara trasera y se puede cambiar a la frontal— que en el
+    computador con la webcam. Antes de guardar muestra la captura, con opción de repetirla.
+  - **Subir archivo** abre la galería del teléfono o el explorador del computador.
+
+  En la ficha del jugador la foto **queda guardada en el momento**, sin pasar por el formulario ni
+  por un botón de confirmar. La aplicación la reduce y recodifica antes de guardarla, así una foto
+  de 4 MB queda en unos 70 KB.
+
+  > El visor de cámara necesita que el sitio esté servido por **https** — es una exigencia del
+  > navegador, no de la aplicación. En la dirección de Netlify o Vercel ya lo está, y en
+  > `localhost` también. Si abre la aplicación por http, el visor avisa y queda disponible
+  > *Subir archivo*.
 
 ### Evaluar
 
@@ -199,7 +212,8 @@ evaluacion-cga/
 │   │   ├── RadarChart.tsx       Tela de araña en SVG
 │   │   ├── Marca.tsx            Escudo y marca de agua
 │   │   ├── Iconos.tsx           Iconos monocromos de categoría
-│   │   └── Foto.tsx             Cámara y compresión de imágenes
+│   │   ├── Foto.tsx             Compresión de imágenes y acciones de foto
+│   │   └── Camara.tsx           Visor de cámara (teléfono y webcam)
 │   ├── pages/                   Jugadores, ficha, encuesta, informe, parámetros
 │   ├── styles/
 │   │   ├── tokens.css           Paleta y tipografía CGA

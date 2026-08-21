@@ -16,6 +16,7 @@
 
   /* Todo lo que es interfaz de la aplicación desaparece del papel. */
   .no-print,
+  .modal,
   .topbar,
   .page-head,
   .aviso {

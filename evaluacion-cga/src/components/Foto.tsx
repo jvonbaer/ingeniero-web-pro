@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import type { Jugador } from "../domain/types";
 import { iniciales } from "../domain/scoring";
+import { Camara } from "./Camara";
 
 interface FotoProps {
   jugador: Pick<Jugador, "nombre" | "apellido" | "fotoDataUrl">;
@@ -23,13 +24,17 @@ export function Foto({ jugador, mini, className = "" }: FotoProps) {
   );
 }
 
-const LADO_MAX = 640;
+const LADO_MAX = 800;
 const CALIDAD = 0.82;
 
 /**
- * Reduce la foto a 640 px de lado mayor y la recodifica a JPEG antes de
- * guardarla. Una foto de teléfono pesa 3-5 MB; así queda en 50-80 KB, que es lo
+ * Reduce la foto a 800 px de lado mayor y la recodifica a JPEG antes de
+ * guardarla. Una foto de teléfono pesa 3-5 MB; así queda en 60-90 KB, que es lo
  * que hace viable guardarla junto al resto de la ficha.
+ *
+ * No recorta: la imagen se guarda completa y es la ficha la que decide qué parte
+ * mostrar. Lo que sí llega recortado es lo que viene de la cámara, porque ahí el
+ * entrenador encuadró en vivo.
  */
 export function comprimirImagen(archivo: File): Promise<string> {
   return new Promise((resolver, rechazar) => {
@@ -59,15 +64,25 @@ export function comprimirImagen(archivo: File): Promise<string> {
 interface EntradaFotoProps {
   valor: string | null;
   onCambio: (dataUrl: string | null) => void;
-  alt: string;
+  /** Nombre del jugador: se usa en el texto alternativo y en el visor de cámara. */
+  nombre: string;
+  /** Mensaje de estado que muestra quien la usa, por ejemplo "Foto guardada". */
+  mensaje?: string | null;
 }
 
-export function EntradaFoto({ valor, onCambio, alt }: EntradaFotoProps) {
+/**
+ * Dos caminos separados para la misma foto: tomarla en el momento con la cámara
+ * —del teléfono o del computador, es el mismo visor— o subir un archivo que ya
+ * existe. Antes había un solo botón que en el teléfono forzaba la cámara y no
+ * dejaba llegar a la galería.
+ */
+export function EntradaFoto({ valor, onCambio, nombre, mensaje }: EntradaFotoProps) {
   const input = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
   const [procesando, setProcesando] = useState(false);
+  const [camaraAbierta, setCamaraAbierta] = useState(false);
 
-  async function manejar(archivo: File | undefined) {
+  async function subir(archivo: File | undefined) {
     if (!archivo) return;
     setProcesando(true);
     setError(null);
@@ -81,44 +96,68 @@ export function EntradaFoto({ valor, onCambio, alt }: EntradaFotoProps) {
   }
 
   return (
-    <div>
-      <div className="foto" style={{ maxWidth: 220 }}>
-        {valor ? <img src={valor} alt={alt} /> : <span className="foto__vacia">SIN FOTO</span>}
+    <div className="entrada-foto">
+      <div className="foto">
+        {valor ? (
+          <img src={valor} alt={`Foto de ${nombre}`} />
+        ) : (
+          <span className="foto__vacia">SIN FOTO</span>
+        )}
       </div>
 
-      {/* `capture` abre directamente la cámara en teléfono y tablet. */}
       <input
         ref={input}
         type="file"
         accept="image/*"
-        capture="environment"
         className="sr-only"
         onChange={(e) => {
-          void manejar(e.target.files?.[0]);
+          void subir(e.target.files?.[0]);
           e.target.value = "";
         }}
       />
 
-      <div style={{ display: "flex", gap: 8, marginTop: 10, flexWrap: "wrap" }}>
+      <div className="foto__acciones">
+        <button
+          type="button"
+          className="btn btn--primario btn--sm"
+          onClick={() => setCamaraAbierta(true)}
+          disabled={procesando}
+        >
+          Tomar foto
+        </button>
         <button
           type="button"
           className="btn btn--fantasma btn--sm"
           onClick={() => input.current?.click()}
           disabled={procesando}
         >
-          {procesando ? "Procesando…" : valor ? "Cambiar foto" : "Tomar o subir foto"}
+          {procesando ? "Procesando…" : "Subir archivo"}
         </button>
         {valor && (
           <button
             type="button"
             className="btn btn--fantasma btn--sm"
             onClick={() => onCambio(null)}
+            disabled={procesando}
           >
             Quitar
           </button>
         )}
       </div>
+
+      {mensaje && <p className="foto__mensaje">{mensaje}</p>}
       {error && <p className="campo__error" style={{ marginTop: 6 }}>{error}</p>}
+
+      {camaraAbierta && (
+        <Camara
+          nombre={nombre}
+          onCerrar={() => setCamaraAbierta(false)}
+          onCapturar={(dataUrl) => {
+            onCambio(dataUrl);
+            setCamaraAbierta(false);
+          }}
+        />
+      )}
     </div>
   );
 }

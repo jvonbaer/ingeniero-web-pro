@@ -118,11 +118,12 @@ export function JugadorForm() {
             <EntradaFoto
               valor={form.fotoDataUrl}
               onCambio={(v) => set("fotoDataUrl", v)}
-              alt={`Foto de ${form.nombre || "el jugador"}`}
+              nombre={`${form.nombre} ${form.apellido}`.trim() || "el jugador"}
             />
             <p className="campo__ayuda" style={{ marginTop: 12 }}>
-              Desde el teléfono o la tablet se abre la cámara directamente. La imagen se reduce
-              automáticamente antes de guardarse.
+              <strong>Tomar foto</strong> abre la cámara: la trasera en el teléfono o la tablet, la
+              webcam en el computador. <strong>Subir archivo</strong> busca una foto que ya tenga.
+              En ambos casos la imagen se reduce sola antes de guardarse.
             </p>
           </div>
         </div>

@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useDatos } from "../data/DatosContext";
-import { Foto } from "../components/Foto";
+import { EntradaFoto } from "../components/Foto";
 import { RadarChart, type SerieRadar } from "../components/RadarChart";
 import { BarraCategoria, Delta, NivelTexto, Puntaje, Vacio } from "../components/ui";
 import {
@@ -24,7 +24,8 @@ const COLORES_SERIE = [
 
 export function JugadorFicha() {
   const { id = "" } = useParams();
-  const { jugadores, evaluaciones, rubrica, eliminarEvaluacion } = useDatos();
+  const { jugadores, evaluaciones, rubrica, eliminarEvaluacion, guardarJugador } = useDatos();
+  const [estadoFoto, setEstadoFoto] = useState<string | null>(null);
 
   const jugador = useMemo(() => jugadores.find((j) => j.id === id), [jugadores, id]);
   const finalizadas = useMemo(() => historial(evaluaciones, id), [evaluaciones, id]);
@@ -39,6 +40,22 @@ export function JugadorFicha() {
   );
 
   if (!jugador) return <p className="vacio">No encontramos ese jugador.</p>;
+
+  const ficha = jugador;
+
+  /**
+   * La foto se guarda en el momento, sin pasar por el formulario ni por un botón
+   * de confirmar: el entrenador la toma en la cancha y queda en la ficha.
+   */
+  async function guardarFoto(fotoDataUrl: string | null) {
+    setEstadoFoto("Guardando…");
+    try {
+      await guardarJugador({ ...ficha, fotoDataUrl });
+      setEstadoFoto(fotoDataUrl ? "Foto guardada en la ficha." : "Foto quitada de la ficha.");
+    } catch {
+      setEstadoFoto(null); // el error ya se muestra en la barra superior
+    }
+  }
 
   const actual = resultados[0] ?? null;
   const previo = resultados[1] ?? null;
@@ -91,7 +108,12 @@ export function JugadorFicha() {
         <div style={{ display: "grid", gap: 16 }}>
           <div className="card">
             <div className="card__cuerpo">
-              <Foto jugador={jugador} />
+              <EntradaFoto
+                valor={jugador.fotoDataUrl}
+                onCambio={(v) => void guardarFoto(v)}
+                nombre={nombreCompleto(jugador)}
+                mensaje={estadoFoto}
+              />
               <dl className="datos-ficha">
                 <Dato rotulo="Categoría" valor={jugador.categoria} />
                 <Dato rotulo="Posición" valor={jugador.posicion} />
