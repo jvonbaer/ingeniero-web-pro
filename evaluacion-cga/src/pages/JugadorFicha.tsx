@@ -107,6 +107,13 @@ export function JugadorFicha() {
         </div>
         <div className="page-head__acciones">
           <Link to={`/jugadores/${jugador.id}/editar`} className="btn btn--fantasma">Editar ficha</Link>
+          <Link
+            to={`/hoja/${pautaVigente.id}/${jugador.id}`}
+            className="btn btn--fantasma"
+            title="Imprimir la pauta para evaluarlo a mano en la cancha"
+          >
+            Hoja en papel
+          </Link>
           <Link to={`/jugadores/${jugador.id}/evaluar`} className="btn btn--primario">
             Nueva evaluación
           </Link>

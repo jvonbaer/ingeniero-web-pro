@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useDatos } from "../data/DatosContext";
 import { Campo } from "../components/ui";
 import { Icono, ICONOS_DISPONIBLES } from "../components/Iconos";
@@ -350,6 +351,9 @@ export function Parametros() {
             >
               Eliminar
             </button>
+            <Link to={`/hoja/${pauta.id}`} className="btn btn--fantasma btn--sm">
+              Imprimir hoja
+            </Link>
           </div>
 
           <p className="campo__ayuda" style={{ marginBottom: 16 }}>

@@ -6,6 +6,7 @@ import type { EstadoDatos, Store } from "./store";
 const K_JUGADORES = "jugadores";
 const K_EVALUACIONES = "evaluaciones";
 const K_CONFIG = "configuracion";
+const K_HOJA = (id: string) => `hoja:${id}`;
 /** Clave del formato 1: se sigue leyendo para migrar dispositivos ya en uso. */
 const K_RUBRICA_ANTIGUA = "rubrica";
 
@@ -65,6 +66,14 @@ export const localDriver: Store = {
 
   async guardarConfiguracion(configuracion) {
     await idbSet(K_CONFIG, configuracion);
+  },
+
+  async leerHoja(evaluacionId) {
+    return (await idbGet<string>(K_HOJA(evaluacionId))) ?? null;
+  },
+
+  async guardarHoja(evaluacionId, dataUrl) {
+    await idbSet(K_HOJA(evaluacionId), dataUrl ?? undefined);
   },
 
   async importar(backup: Backup) {

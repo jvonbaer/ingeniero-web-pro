@@ -31,6 +31,25 @@
 
   .informe-marco { overflow: visible; }
 
+  /* La hoja de papel es un documento que fluye: sin sombra ni borde, y con sus
+     propios márgenes, porque @page va con margin 0 para que el informe salga
+     a sangre. */
+  .hoja {
+    max-width: none;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 12mm 14mm;
+  }
+
+  .hoja__casillero,
+  .hoja__valores,
+  .hoja__instruccion {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
   .informe {
     /* En pantalla la hoja se reduce con transform; en papel va a tamaño real. */
     transform: none !important;

@@ -105,6 +105,12 @@ export interface Evaluacion {
   observaciones: string;
   objetivos: string[];
   estado: EstadoEvaluacion;
+  /**
+   * Marca que existe una hoja de papel escaneada para esta evaluación. La imagen
+   * NO viaja acá: se guarda aparte y se lee sólo cuando alguien la abre, porque
+   * si no la lista de evaluaciones cargaría varios megabytes en cada arranque.
+   */
+  tieneHoja?: boolean;
   creadaEn: string;
   actualizadaEn: string;
 }

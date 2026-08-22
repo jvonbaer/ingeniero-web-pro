@@ -105,6 +105,32 @@ export const supabaseDriver: Store = {
     reventar("No se pudieron guardar los parámetros", error);
   },
 
+  async leerHoja(evaluacionId) {
+    const { data, error } = await db()
+      .from("hojas")
+      .select("datos")
+      .eq("evaluacion_id", evaluacionId)
+      .maybeSingle();
+    reventar("No se pudo leer la hoja escaneada", error);
+    return (data?.datos as string | undefined) ?? null;
+  },
+
+  async guardarHoja(evaluacionId, dataUrl) {
+    if (dataUrl === null) {
+      const { error } = await db().from("hojas").delete().eq("evaluacion_id", evaluacionId);
+      reventar("No se pudo quitar la hoja escaneada", error);
+      return;
+    }
+    const { error } = await db()
+      .from("hojas")
+      .upsert({
+        evaluacion_id: evaluacionId,
+        datos: dataUrl,
+        actualizado_en: new Date().toISOString(),
+      });
+    reventar("No se pudo guardar la hoja escaneada", error);
+  },
+
   async importar(backup: Backup) {
     await this.guardarConfiguracion(backup.configuracion);
     for (const j of backup.jugadores) await this.guardarJugador(j);

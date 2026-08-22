@@ -101,14 +101,6 @@ export function JugadorForm() {
           <span className="eyebrow">{editando ? "Editar ficha" : "Nueva ficha"}</span>
           <h1>{editando ? nombreCompleto(original!) : "Nuevo jugador"}</h1>
         </div>
-        <div className="page-head__acciones">
-          <Link to={editando ? `/jugadores/${form.id}` : "/"} className="btn btn--fantasma">
-            Cancelar
-          </Link>
-          <button type="submit" className="btn btn--primario" disabled={guardando}>
-            {guardando ? "Guardando…" : "Guardar ficha"}
-          </button>
-        </div>
       </div>
 
       <div className="grid grid--ficha">
@@ -314,6 +306,23 @@ export function JugadorForm() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Guardar va al pie, que es donde uno termina de escribir. La barra queda
+          fija al borde inferior para que en el teléfono el botón esté a mano sin
+          tener que volver a subir. */}
+      <div className="form-pie no-print">
+        {Object.keys(errores).length > 0 && (
+          <span className="form-pie__error" role="alert">
+            Falta completar algún dato obligatorio.
+          </span>
+        )}
+        <Link to={editando ? `/jugadores/${form.id}` : "/"} className="btn btn--fantasma">
+          Cancelar
+        </Link>
+        <button type="submit" className="btn btn--primario" disabled={guardando}>
+          {guardando ? "Guardando…" : editando ? "Guardar cambios" : "Guardar ficha"}
+        </button>
       </div>
     </form>
   );

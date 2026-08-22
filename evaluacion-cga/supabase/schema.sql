@@ -46,6 +46,16 @@ create table if not exists public.rubrica (
   constraint rubrica_fila_unica check (id = 1)
 );
 
+-- Hojas de papel escaneadas. Van en su propia tabla y no dentro de la
+-- evaluación: la aplicación carga todas las evaluaciones al arrancar y una
+-- imagen de 250 KB por cada una haría la espera insoportable. Se leen de a una,
+-- sólo cuando alguien abre esa evaluación.
+create table if not exists public.hojas (
+  evaluacion_id   text primary key references public.evaluaciones(id) on delete cascade,
+  datos           text not null,
+  actualizado_en  timestamptz not null default now()
+);
+
 create index if not exists evaluaciones_jugador_idx on public.evaluaciones (jugador_id, fecha desc);
 create index if not exists jugadores_categoria_idx  on public.jugadores (categoria) where activo;
 
@@ -62,12 +72,13 @@ create index if not exists jugadores_categoria_idx  on public.jugadores (categor
 alter table public.jugadores    enable row level security;
 alter table public.evaluaciones enable row level security;
 alter table public.rubrica      enable row level security;
+alter table public.hojas        enable row level security;
 
 do $$
 declare
   t text;
 begin
-  foreach t in array array['jugadores', 'evaluaciones', 'rubrica'] loop
+  foreach t in array array['jugadores', 'evaluaciones', 'rubrica', 'hojas'] loop
     execute format('drop policy if exists "cuerpo tecnico lee %1$s" on public.%1$I', t);
     execute format('drop policy if exists "cuerpo tecnico escribe %1$s" on public.%1$I', t);
 

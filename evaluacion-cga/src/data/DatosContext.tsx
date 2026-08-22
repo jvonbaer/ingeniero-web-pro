@@ -22,6 +22,8 @@ interface Contexto extends EstadoDatos {
   guardarEvaluacion: (evaluacion: Evaluacion) => Promise<void>;
   eliminarEvaluacion: (id: string) => Promise<void>;
   guardarConfiguracion: (configuracion: Configuracion) => Promise<void>;
+  leerHoja: (evaluacionId: string) => Promise<string | null>;
+  guardarHoja: (evaluacion: Evaluacion, dataUrl: string | null) => Promise<void>;
   importar: (backup: Backup) => Promise<void>;
   exportar: () => Backup;
   recargar: () => Promise<void>;
@@ -130,6 +132,22 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
     [conError],
   );
 
+  /**
+   * Guarda el escaneo aparte y deja la marca en la evaluación, que es lo único
+   * que necesita la lista para saber que existe sin traerse la imagen.
+   */
+  const guardarHoja = useCallback(
+    async (evaluacion: Evaluacion, dataUrl: string | null) => {
+      await conError(async () => {
+        await store.guardarHoja(evaluacion.id, dataUrl);
+        const actualizada: Evaluacion = { ...evaluacion, tieneHoja: dataUrl !== null };
+        await store.guardarEvaluacion(actualizada);
+        setEvaluaciones((prev) => prev.map((e) => (e.id === actualizada.id ? actualizada : e)));
+      });
+    },
+    [conError],
+  );
+
   const importar = useCallback(
     async (backup: Backup) => {
       await conError(async () => {
@@ -156,6 +174,8 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
       guardarEvaluacion,
       eliminarEvaluacion,
       guardarConfiguracion,
+      leerHoja: (id: string) => store.leerHoja(id),
+      guardarHoja,
       importar,
       exportar: () => construirBackup({ jugadores, evaluaciones, configuracion }),
       recargar,
@@ -163,7 +183,7 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
     [
       jugadores, evaluaciones, configuracion, cargando, error,
       guardarJugador, eliminarJugador, guardarEvaluacion,
-      eliminarEvaluacion, guardarConfiguracion, importar, recargar,
+      eliminarEvaluacion, guardarConfiguracion, guardarHoja, importar, recargar,
     ],
   );
 

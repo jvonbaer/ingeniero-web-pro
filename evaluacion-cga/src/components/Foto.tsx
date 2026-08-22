@@ -37,6 +37,10 @@ const CALIDAD = 0.82;
  * entrenador encuadró en vivo.
  */
 export function comprimirImagen(archivo: File): Promise<string> {
+  return comprimir(archivo, LADO_MAX, CALIDAD);
+}
+
+function comprimir(archivo: File, ladoMax: number, calidad: number): Promise<string> {
   return new Promise((resolver, rechazar) => {
     const lector = new FileReader();
     lector.onerror = () => rechazar(new Error("No se pudo leer la imagen."));
@@ -44,7 +48,7 @@ export function comprimirImagen(archivo: File): Promise<string> {
       const img = new Image();
       img.onerror = () => rechazar(new Error("El archivo no es una imagen válida."));
       img.onload = () => {
-        const escala = Math.min(1, LADO_MAX / Math.max(img.width, img.height));
+        const escala = Math.min(1, ladoMax / Math.max(img.width, img.height));
         const w = Math.round(img.width * escala);
         const h = Math.round(img.height * escala);
         const lienzo = document.createElement("canvas");
@@ -53,12 +57,21 @@ export function comprimirImagen(archivo: File): Promise<string> {
         const ctx = lienzo.getContext("2d");
         if (!ctx) return rechazar(new Error("El navegador no permitió procesar la imagen."));
         ctx.drawImage(img, 0, 0, w, h);
-        resolver(lienzo.toDataURL("image/jpeg", CALIDAD));
+        resolver(lienzo.toDataURL("image/jpeg", calidad));
       };
       img.src = lector.result as string;
     };
     lector.readAsDataURL(archivo);
   });
+}
+
+/**
+ * Un documento necesita más resolución que un retrato: la hoja escaneada tiene
+ * que dejar leer los números escritos a mano. 1600 px de lado mayor deja el
+ * archivo en unos 250 KB y el texto legible.
+ */
+export function comprimirDocumento(archivo: File): Promise<string> {
+  return comprimir(archivo, 1600, 0.72);
 }
 
 interface EntradaFotoProps {
@@ -151,6 +164,110 @@ export function EntradaFoto({ valor, onCambio, nombre, mensaje }: EntradaFotoPro
       {camaraAbierta && (
         <Camara
           nombre={nombre}
+          onCerrar={() => setCamaraAbierta(false)}
+          onCapturar={(dataUrl) => {
+            onCambio(dataUrl);
+            setCamaraAbierta(false);
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+interface EntradaHojaProps {
+  valor: string | null;
+  onCambio: (dataUrl: string | null) => void;
+  ocupado?: boolean;
+}
+
+/**
+ * Adjunta la hoja de papel escaneada o fotografiada.
+ *
+ * No lee los números por sí sola —eso sería reconocimiento de escritura a mano,
+ * que con lápiz sobre una hoja arrugada en la cancha no es confiable—. Los
+ * puntajes se transcriben a mano en la vista compacta; esta imagen queda como
+ * respaldo de lo que se marcó en papel.
+ */
+export function EntradaHoja({ valor, onCambio, ocupado }: EntradaHojaProps) {
+  const input = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [procesando, setProcesando] = useState(false);
+  const [camaraAbierta, setCamaraAbierta] = useState(false);
+
+  async function subir(archivo: File | undefined) {
+    if (!archivo) return;
+    setProcesando(true);
+    setError(null);
+    try {
+      onCambio(await comprimirDocumento(archivo));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo procesar la imagen.");
+    } finally {
+      setProcesando(false);
+    }
+  }
+
+  const trabajando = procesando || ocupado;
+
+  return (
+    <div className="entrada-hoja">
+      {valor ? (
+        <a href={valor} target="_blank" rel="noreferrer" className="entrada-hoja__vista">
+          <img src={valor} alt="Hoja de evaluación escaneada" />
+          <span>Abrir en grande</span>
+        </a>
+      ) : (
+        <p className="entrada-hoja__vacia">
+          Todavía no hay hoja adjunta. Es opcional: sirve como respaldo de lo que se marcó en papel.
+        </p>
+      )}
+
+      <input
+        ref={input}
+        type="file"
+        accept="image/*,application/pdf"
+        className="sr-only"
+        onChange={(e) => {
+          void subir(e.target.files?.[0]);
+          e.target.value = "";
+        }}
+      />
+
+      <div className="foto__acciones">
+        <button
+          type="button"
+          className="btn btn--fantasma btn--sm"
+          onClick={() => setCamaraAbierta(true)}
+          disabled={trabajando}
+        >
+          Fotografiar hoja
+        </button>
+        <button
+          type="button"
+          className="btn btn--fantasma btn--sm"
+          onClick={() => input.current?.click()}
+          disabled={trabajando}
+        >
+          {procesando ? "Procesando…" : "Subir escaneo"}
+        </button>
+        {valor && (
+          <button
+            type="button"
+            className="btn btn--fantasma btn--sm"
+            onClick={() => onCambio(null)}
+            disabled={trabajando}
+          >
+            Quitar
+          </button>
+        )}
+      </div>
+
+      {error && <p className="campo__error" style={{ marginTop: 6 }}>{error}</p>}
+
+      {camaraAbierta && (
+        <Camara
+          nombre="la hoja de evaluación"
           onCerrar={() => setCamaraAbierta(false)}
           onCapturar={(dataUrl) => {
             onCambio(dataUrl);

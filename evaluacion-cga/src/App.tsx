@@ -7,6 +7,7 @@ import { JugadorForm } from "./pages/JugadorForm";
 import { JugadorFicha } from "./pages/JugadorFicha";
 import { Evaluar } from "./pages/Evaluar";
 import { Informe } from "./pages/Informe";
+import { HojaPapel } from "./pages/HojaPapel";
 import { Parametros } from "./pages/Parametros";
 import { Datos } from "./pages/Datos";
 
@@ -74,6 +75,8 @@ export function App() {
             <Route path="/jugadores/:id/evaluar" element={<Evaluar />} />
             <Route path="/evaluaciones/:evaluacionId" element={<Evaluar />} />
             <Route path="/informe/:evaluacionId" element={<Informe />} />
+            <Route path="/hoja/:pautaId" element={<HojaPapel />} />
+            <Route path="/hoja/:pautaId/:jugadorId" element={<HojaPapel />} />
             <Route path="/parametros" element={<Parametros />} />
             <Route path="/datos" element={<Datos />} />
             <Route path="*" element={<p className="vacio">Esta página no existe.</p>} />

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useDatos } from "../data/DatosContext";
 import { Campo, Puntaje } from "../components/ui";
-import { Foto } from "../components/Foto";
+import { EntradaHoja, Foto } from "../components/Foto";
 import { Icono } from "../components/Iconos";
 import {
   calcular,
@@ -48,8 +48,10 @@ function evaluacionVacia(jugadorId: string, pauta: Pauta): Evaluacion {
 export function Evaluar() {
   const { id, evaluacionId } = useParams();
   const navegar = useNavigate();
-  const { jugadores, evaluaciones, configuracion, guardarEvaluacion, guardarConfiguracion } =
-    useDatos();
+  const {
+    jugadores, evaluaciones, configuracion,
+    guardarEvaluacion, guardarConfiguracion, leerHoja, guardarHoja,
+  } = useDatos();
 
   const existente = useMemo(
     () => evaluaciones.find((e) => e.id === evaluacionId),
@@ -75,6 +77,12 @@ export function Evaluar() {
     [configuracion, borrador, jugador],
   );
   const [paso, setPaso] = useState(0);
+  // Vista compacta: todas las categorías en una pantalla. Es lo que sirve para
+  // transcribir una hoja de papel, donde uno ya tiene los números y sólo quiere
+  // pasarlos rápido sin caminar ocho pantallas.
+  const [compacta, setCompacta] = useState(false);
+  const [hoja, setHoja] = useState<string | null>(null);
+  const [guardandoHoja, setGuardandoHoja] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
   const contenedor = useRef<HTMLDivElement>(null);
@@ -91,8 +99,20 @@ export function Evaluar() {
 
   // Cada paso arranca arriba: en tablet, la lista de preguntas es más alta que la pantalla.
   useEffect(() => {
-    contenedor.current?.scrollIntoView({ block: "start", behavior: "smooth" });
-  }, [paso]);
+    if (!compacta) contenedor.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+  }, [paso, compacta]);
+
+  // El escaneo se trae sólo si esta evaluación tiene uno: pesa cientos de kB.
+  useEffect(() => {
+    if (!borrador.tieneHoja) return;
+    let vigente = true;
+    void leerHoja(borrador.id).then((d) => {
+      if (vigente) setHoja(d);
+    });
+    return () => {
+      vigente = false;
+    };
+  }, [borrador.tieneHoja, borrador.id, leerHoja]);
 
   if (!jugador) {
     return <p className="vacio">No encontramos ese jugador.</p>;
@@ -145,6 +165,19 @@ export function Evaluar() {
     }
   }
 
+  async function adjuntarHoja(dataUrl: string | null) {
+    setGuardandoHoja(true);
+    try {
+      await guardarHoja(borrador, dataUrl);
+      setHoja(dataUrl);
+      actualizar({ tieneHoja: dataUrl !== null });
+    } catch {
+      /* el error ya se muestra en la barra superior */
+    } finally {
+      setGuardandoHoja(false);
+    }
+  }
+
   async function avanzar() {
     setAviso(null);
     if (paso < totalPasos - 1) {
@@ -171,6 +204,17 @@ export function Evaluar() {
         </div>
       </div>
 
+      <div className="encuesta__modo no-print">
+        <button
+          type="button"
+          className="btn btn--fantasma btn--sm"
+          onClick={() => setCompacta((c) => !c)}
+        >
+          {compacta ? "Volver a paso a paso" : "Ver todo en una pantalla"}
+        </button>
+      </div>
+
+      {!compacta && (
       <div className="encuesta__progreso" role="tablist" aria-label="Avance de la evaluación">
         {Array.from({ length: totalPasos }, (_, i) => (
           <button
@@ -186,11 +230,19 @@ export function Evaluar() {
           />
         ))}
       </div>
+      )}
 
       {aviso && <div className="aviso aviso--ok">{aviso}</div>}
 
-      <div className="card">
-        {paso === 0 && (
+      {compacta && (
+        <div className="aviso aviso--acento">
+          Todo en una pantalla. Es la vista para <strong>transcribir una hoja de papel</strong>: los
+          puntajes se escriben igual y al final puede adjuntar la foto de la hoja.
+        </div>
+      )}
+
+      <div className={`card ${compacta ? "encuesta__compacta" : ""}`}>
+        {(compacta || paso === 0) && (
           <PasoDatos
             borrador={borrador}
             actualizar={actualizar}
@@ -209,35 +261,57 @@ export function Evaluar() {
           />
         )}
 
-        {paso > 0 && paso <= categorias.length && (
-          <PasoCategoria
-            categoria={categorias[paso - 1]}
-            indice={paso}
-            total={categorias.length}
-            pauta={pauta}
-            borrador={borrador}
-            onResponder={responder}
-          />
-        )}
+        {compacta
+          ? categorias.map((categoria, i) => (
+              <PasoCategoria
+                key={categoria.id}
+                categoria={categoria}
+                indice={i + 1}
+                total={categorias.length}
+                pauta={pauta}
+                borrador={borrador}
+                onResponder={responder}
+              />
+            ))
+          : paso > 0 &&
+            paso <= categorias.length && (
+              <PasoCategoria
+                categoria={categorias[paso - 1]}
+                indice={paso}
+                total={categorias.length}
+                pauta={pauta}
+                borrador={borrador}
+                onResponder={responder}
+              />
+            )}
 
-        {paso === totalPasos - 1 && (
-          <PasoCierre borrador={borrador} actualizar={actualizar} resultado={resultado} />
+        {(compacta || paso === totalPasos - 1) && (
+          <PasoCierre
+            borrador={borrador}
+            actualizar={actualizar}
+            resultado={resultado}
+            hoja={hoja}
+            onHoja={adjuntarHoja}
+            guardandoHoja={guardandoHoja}
+          />
         )}
       </div>
 
       <div className="encuesta__pie no-print">
-        <button
-          type="button"
-          className="btn btn--fantasma"
-          onClick={() => setPaso((p) => Math.max(0, p - 1))}
-          disabled={paso === 0}
-        >
-          Atrás
-        </button>
+        {!compacta && (
+          <button
+            type="button"
+            className="btn btn--fantasma"
+            onClick={() => setPaso((p) => Math.max(0, p - 1))}
+            disabled={paso === 0}
+          >
+            Atrás
+          </button>
+        )}
         <span className="encuesta__contador">
           {Math.round(resultado.completitud * 100)}% respondido
         </span>
-        {paso < totalPasos - 1 ? (
+        {!compacta && paso < totalPasos - 1 ? (
           <button type="button" className="btn btn--primario" onClick={() => void avanzar()} disabled={guardando}>
             Siguiente
           </button>
@@ -509,10 +583,16 @@ function PasoCierre({
   borrador,
   actualizar,
   resultado,
+  hoja,
+  onHoja,
+  guardandoHoja,
 }: {
   borrador: Evaluacion;
   actualizar: (c: Partial<Evaluacion>) => void;
   resultado: ReturnType<typeof calcular>;
+  hoja: string | null;
+  onHoja: (dataUrl: string | null) => Promise<void>;
+  guardandoHoja: boolean;
 }) {
   const objetivos = [...borrador.objetivos];
   while (objetivos.length < 3) objetivos.push("");
@@ -586,6 +666,16 @@ function PasoCierre({
             }}
           />
         ))}
+
+        <div className="campo__label" style={{ margin: "18px 0 2px" }}>
+          Hoja en papel (opcional)
+        </div>
+        <p className="campo__ayuda" style={{ margin: "0 0 6px" }}>
+          Si evaluó con lápiz en la cancha, adjunte la foto o el escaneo de la hoja. Queda guardada
+          junto a la evaluación como respaldo de lo que se marcó a mano. Los puntajes se transcriben
+          arriba: la aplicación no los lee sola de la imagen.
+        </p>
+        <EntradaHoja valor={hoja} onCambio={(d) => void onHoja(d)} ocupado={guardandoHoja} />
       </div>
     </>
   );

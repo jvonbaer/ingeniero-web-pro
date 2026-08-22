@@ -1,0 +1,156 @@
+/* ============================================================
+   HOJA DE EVALUACIÓN EN PAPEL
+   Documento que fluye: si la pauta es larga, ocupa dos hojas
+   antes que salir apretada. Las categorías no se parten entre
+   páginas.
+   ============================================================ */
+.hoja {
+  max-width: 794px; /* ancho de una A4 a 96 dpi */
+  margin: 0 auto;
+  padding: 12mm 14mm;
+  background: var(--bg-panel);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sombra-2);
+  font-family: var(--fuente);
+}
+
+/* --- Cabecera --- */
+.hoja__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 10px;
+  border-bottom: var(--franja) solid var(--cga-rojo); /* franja institucional */
+  margin-bottom: 14px;
+}
+
+.hoja__marca { display: flex; align-items: center; gap: 11px; }
+.hoja__marca-titulo { font-family: var(--fuente-cond); font-size: 20px; font-weight: 800; text-transform: uppercase; line-height: 1; }
+.hoja__marca-lema { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--texto-suave); }
+
+.hoja__titulo { text-align: right; }
+.hoja__titulo h2 { font-size: 25px; line-height: 1; }
+.hoja__titulo p { margin: 3px 0 0; font-family: var(--fuente-cond); font-size: 12px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--texto-suave); }
+
+/* --- Campos que se llenan a mano --- */
+.hoja__datos { display: flex; flex-wrap: wrap; gap: 10px 3%; margin-bottom: 12px; }
+
+.hoja__campo { flex: 1 1 30%; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.hoja__campo-rotulo {
+  font-family: var(--fuente-cond);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
+.hoja__campo-linea {
+  display: block;
+  min-height: 21px;
+  border-bottom: 1px solid var(--carbon-700);
+  font-size: 14px;
+  font-weight: 600;
+  padding-bottom: 1px;
+}
+
+.hoja__instruccion {
+  margin: 0 0 14px;
+  padding: 8px 11px;
+  background: var(--hueso);
+  border-left: var(--franja) solid var(--rama-futbol);
+  border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.hoja__escala-ref { margin: 0 7px; white-space: nowrap; }
+.hoja__escala-ref b { font-family: var(--fuente-cond); font-size: 13px; }
+
+/* --- Categorías --- */
+.hoja__categoria { margin-bottom: 14px; break-inside: avoid; page-break-inside: avoid; }
+
+.hoja__categoria-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  letter-spacing: 0.07em;
+  padding-bottom: 3px;
+  margin-bottom: 6px;
+  border-bottom: 2px solid var(--carbon-700);
+}
+
+.hoja__categoria-desc {
+  margin-left: auto;
+  font-family: var(--fuente);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--texto-suave);
+}
+
+.hoja__tabla { width: 100%; border-collapse: collapse; }
+.hoja__tabla td { padding: 4px 0; border-bottom: 1px dotted var(--borde); vertical-align: middle; }
+.hoja__tabla tr:last-child td { border-bottom: none; }
+
+.hoja__subpunto b { display: block; font-size: 13px; font-weight: 600; line-height: 1.25; }
+.hoja__subpunto span { display: block; font-size: 10.5px; line-height: 1.3; color: var(--texto-suave); }
+
+.hoja__casilleros { width: 190px; white-space: nowrap; text-align: right; }
+
+.hoja__casillero {
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 26px;
+  margin-left: 5px;
+  border: 1.5px solid var(--carbon-700);
+  border-radius: var(--r-sm);
+  font-family: var(--fuente-cond);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--texto-suave);
+}
+
+/* --- Renglones para escribir --- */
+.hoja__renglones { display: grid; gap: 15px; padding-top: 8px; }
+.hoja__renglon { display: block; height: 1px; background: var(--borde); }
+
+/* --- Pie --- */
+.hoja__pie { margin-top: 20px; padding-top: 12px; border-top: var(--franja) solid var(--cga-rojo); }
+
+.hoja__firma { width: 240px; margin-bottom: 12px; }
+.hoja__firma .hoja__campo-linea { min-height: 30px; }
+
+.hoja__valores {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 18px;
+  padding: 6px 10px;
+  background: var(--rama-futbol);
+  color: var(--carbon-900);
+  border-radius: var(--r-sm);
+}
+
+.hoja__valores span {
+  font-family: var(--fuente-cond);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .hoja { padding: 16px 14px; }
+  .hoja__cabecera { flex-direction: column; align-items: flex-start; }
+  .hoja__titulo { text-align: left; }
+  .hoja__casilleros { width: auto; }
+  .hoja__casillero { width: 26px; height: 24px; margin-left: 3px; }
+}

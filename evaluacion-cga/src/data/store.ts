@@ -23,6 +23,9 @@ export interface Store {
   guardarEvaluacion(evaluacion: Evaluacion): Promise<void>;
   eliminarEvaluacion(id: string): Promise<void>;
   guardarConfiguracion(configuracion: Configuracion): Promise<void>;
+  /** Hoja de papel escaneada. Se guarda y se lee aparte de la evaluación. */
+  leerHoja(evaluacionId: string): Promise<string | null>;
+  guardarHoja(evaluacionId: string, dataUrl: string | null): Promise<void>;
   importar(backup: Backup): Promise<void>;
 }
 

@@ -80,6 +80,29 @@ Detalles pensados para el uso real:
 - **"Copiar puntajes anteriores"** parte desde la evaluación previa para corregir sólo lo que cambió, en vez de responder 26 preguntas de cero.
 - El pie muestra el **porcentaje respondido** en todo momento.
 
+### Evaluar en papel, cuando falla todo lo demás
+
+En la cancha se cae el internet, se acaba la batería o la tablet se queda en el auto. Para eso hay
+una hoja imprimible con la pauta completa:
+
+1. **Ficha del jugador → Hoja en papel** imprime la pauta que le corresponde por su categoría, con
+   el nombre y el código ya puestos. Desde **Parámetros → Imprimir hoja** sale la versión en blanco,
+   para fotocopiar.
+2. Se evalúa con lápiz: una **X** en el casillero del 1 al 5 de cada sub-punto.
+3. De vuelta, en **Nueva evaluación** toque **Ver todo en una pantalla**: aparecen todas las
+   categorías juntas y se transcriben los números de corrido, sin recorrer las ocho pantallas.
+4. En el cierre, **adjunte la foto o el escaneo de la hoja**. Queda guardado junto a la evaluación
+   como respaldo de lo que se marcó a mano.
+
+> La aplicación **no lee los números de la imagen**. Eso sería reconocimiento de escritura a mano
+> sobre una hoja arrugada y marcada con lápiz en la cancha, que no es confiable: un 4 leído como 1
+> corrompe el historial del niño sin que nadie se entere. Los puntajes se transcriben a mano —para
+> eso está la vista compacta— y el escaneo queda como el papel de respaldo.
+
+La imagen se guarda **aparte de la evaluación**, y se lee sólo cuando alguien abre esa evaluación.
+Si viajara dentro del registro, la aplicación cargaría varios megabytes en cada arranque, porque al
+abrirse trae todas las evaluaciones de la escuela.
+
 ### Entregar el informe
 
 **Ficha → Informe** (o se abre solo al finalizar). El botón **Imprimir / Guardar PDF** abre el diálogo del navegador; hay que elegir *Guardar como PDF*, orientación **vertical** y activar **Gráficos de fondo**. El resultado es una hoja A4 vertical.
@@ -233,10 +256,11 @@ evaluacion-cga/
 │   │   ├── Iconos.tsx           Iconos monocromos de categoría
 │   │   ├── Foto.tsx             Compresión de imágenes y acciones de foto
 │   │   └── Camara.tsx           Visor de cámara (teléfono y webcam)
-│   ├── pages/                   Jugadores, ficha, encuesta, informe, parámetros
+│   ├── pages/                   Jugadores, ficha, encuesta, informe, hoja en papel, parámetros
 │   ├── styles/
 │   │   ├── tokens.css           Paleta y tipografía CGA (fuente única de color)
 │   │   ├── informe.css          Maqueta A4 vertical del informe
+│   │   ├── hoja.css             Hoja de evaluación para llenar a mano
 │   │   └── print.css            Reglas de impresión
 │   └── fuentes/                 Barlow (la repone `npm install`, no se versiona)
 ├── scripts/preparar-fuentes.mjs Descarga las tipografías al proyecto
