@@ -1,19 +1,19 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Backup, Evaluacion, Jugador } from "../domain/types";
+import { conexion } from "./conexion";
 import { migrarConfiguracion, migrarEvaluaciones } from "./migrar";
 import type { EstadoDatos, Store } from "./store";
 
-const URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
-
-export const nubeConfigurada = Boolean(URL && ANON);
+export const nubeConfigurada = conexion !== null;
 
 let cliente: SupabaseClient | null = null;
 
 export function db(): SupabaseClient {
   if (!cliente) {
-    if (!URL || !ANON) throw new Error("Faltan VITE_SUPABASE_URL y VITE_SUPABASE_ANON_KEY.");
-    cliente = createClient(URL, ANON);
+    if (!conexion) {
+      throw new Error("No hay conexión con la nube. Configúrela en Datos → Conexión con la nube.");
+    }
+    cliente = createClient(conexion.url, conexion.anonKey);
   }
   return cliente;
 }

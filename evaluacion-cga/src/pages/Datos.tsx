@@ -1,6 +1,14 @@
 import { useRef, useState } from "react";
 import { useDatos } from "../data/DatosContext";
+import { Campo } from "../components/ui";
 import { validarBackup } from "../data/store";
+import {
+  borrarConexion,
+  conexion,
+  conexionManual,
+  guardarConexion,
+  validarConexion,
+} from "../data/conexion";
 import { datosDemo } from "../data/seed";
 import {
   calcular,
@@ -211,6 +219,8 @@ export function Datos() {
             </div>
           </div>
 
+          <ConexionNube />
+
           <div className="card">
             <h2 className="card__titulo">Datos de demostración</h2>
             <div className="card__cuerpo">
@@ -226,5 +236,130 @@ export function Datos() {
         </div>
       </div>
     </>
+  );
+}
+
+
+/**
+ * Conexión con Supabase desde la propia aplicación.
+ *
+ * Existe porque la forma más simple de publicar esto es arrastrar la carpeta
+ * compilada a Netlify, y ahí no hay dónde poner variables de entorno. Sin esta
+ * pantalla, pasar a la nube obligaría a instalar Node y recompilar.
+ */
+function ConexionNube() {
+  const [url, setUrl] = useState("");
+  const [clave, setClave] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  function conectar() {
+    const problema = validarConexion(url, clave);
+    if (problema) {
+      setError(problema);
+      return;
+    }
+    guardarConexion(url, clave);
+    // La aplicación elige el almacenamiento al arrancar, así que hay que
+    // recargar para que tome la nube.
+    window.location.reload();
+  }
+
+  function desconectar() {
+    if (!window.confirm("¿Desconectar la nube y volver a guardar en este dispositivo?")) return;
+    borrarConexion();
+    window.location.reload();
+  }
+
+  if (conexion) {
+    return (
+      <div className="card">
+        <h2 className="card__titulo">Conexión con la nube</h2>
+        <div className="card__cuerpo">
+          <dl className="datos-ficha" style={{ marginTop: 0 }}>
+            <div className="dato">
+              <dt>Proyecto</dt>
+              <dd style={{ wordBreak: "break-all" }}>{conexion.url}</dd>
+            </div>
+            <div className="dato">
+              <dt>Clave anónima</dt>
+              <dd>{conexion.anonKey.slice(0, 8)}…{conexion.anonKey.slice(-4)}</dd>
+            </div>
+            <div className="dato">
+              <dt>Configurada desde</dt>
+              <dd>{conexionManual ? "esta pantalla" : "la compilación"}</dd>
+            </div>
+          </dl>
+
+          {conexionManual ? (
+            <>
+              <p className="campo__ayuda" style={{ margin: "12px 0" }}>
+                La conexión vive en este navegador. En cada dispositivo nuevo hay que pegar los
+                mismos dos valores una vez.
+              </p>
+              <button type="button" className="btn btn--fantasma btn--sm" onClick={desconectar}>
+                Desconectar
+              </button>
+            </>
+          ) : (
+            <p className="campo__ayuda" style={{ margin: "12px 0 0" }}>
+              Viene de las variables del momento de compilar. Para cambiarla, ajuste el archivo
+              <code> .env</code> y vuelva a publicar.
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card">
+      <h2 className="card__titulo">Conexión con la nube</h2>
+      <div className="card__cuerpo">
+        <p style={{ marginTop: 0, fontSize: 14 }}>
+          Hoy los datos se guardan sólo en este dispositivo. Para que todos los entrenadores vean lo
+          mismo, pegue los dos valores del proyecto de Supabase: están en{" "}
+          <strong>Project Settings → API</strong>.
+        </p>
+
+        <Campo
+          label="Project URL"
+          ayuda="Se ve así: https://abcdefgh.supabase.co"
+          error={error ?? undefined}
+        >
+          <input
+            className="input"
+            value={url}
+            placeholder="https://abcdefgh.supabase.co"
+            onChange={(e) => setUrl(e.target.value)}
+          />
+        </Campo>
+
+        <Campo
+          label="Clave anónima (anon public)"
+          ayuda="Es el texto largo, no la clave de servicio. Puede ir a la vista: lo que protege los datos son las políticas del esquema, no esconderla."
+        >
+          <input
+            className="input"
+            value={clave}
+            placeholder="eyJhbGciOi…"
+            onChange={(e) => setClave(e.target.value)}
+          />
+        </Campo>
+
+        <button
+          type="button"
+          className="btn btn--primario"
+          onClick={conectar}
+          disabled={!url.trim() || !clave.trim()}
+        >
+          Conectar con la nube
+        </button>
+
+        <p className="campo__ayuda" style={{ marginTop: 12 }}>
+          Antes de conectar, descargue un respaldo: al pasar a la nube la aplicación muestra lo que
+          haya allá, y lo de este dispositivo se sube con <strong>Cargar respaldo</strong>.
+        </p>
+      </div>
+    </div>
   );
 }

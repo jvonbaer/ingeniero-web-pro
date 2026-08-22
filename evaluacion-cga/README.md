@@ -211,11 +211,13 @@ El PDF lo genera el navegador, así que no hay ningún costo ni servicio asociad
 ## 6. Modo nube con Supabase
 
 1. Cree un proyecto gratuito en [supabase.com](https://supabase.com).
-2. Abra **SQL Editor**, pegue el contenido de [`supabase/schema.sql`](supabase/schema.sql) y ejecútelo. Crea las tablas, activa la seguridad por fila y agrega una vista de consulta.
-3. En **Authentication → Users → Add user**, cree una cuenta por cada entrenador (correo y clave). No hay registro abierto: las cuentas las crea el club.
-4. En **Project Settings → API**, copie `Project URL` y la clave `anon`.
-5. Copie `.env.example` como `.env` y complete los dos valores. Si publica en Netlify o Vercel, cárguelos como variables de entorno del sitio.
-6. Vuelva a compilar o desplegar. La aplicación pedirá correo y clave al entrar, y la etiqueta de la barra superior pasará de *Este dispositivo* a **Nube compartida**.
+2. **SQL Editor → New query**: pegue el contenido de [`supabase/schema.sql`](supabase/schema.sql) y ejecútelo. Crea las tablas, activa la seguridad por fila y agrega una vista de consulta. Compruébelo en **Table Editor**: deben aparecer `jugadores`, `evaluaciones`, `rubrica` y `hojas`.
+3. **Authentication → Users → Add user**: una cuenta por entrenador, con *Auto Confirm User* activado. No hay registro abierto; las cuentas las crea el club.
+4. **Project Settings → API**: copie el `Project URL` y la clave `anon public`. La `service_role` no se usa y no debe salir del servidor.
+5. Conecte la aplicación por cualquiera de los dos caminos:
+   - **Desde la aplicación** (recomendado si publicó arrastrando la carpeta a Netlify): entre a **Datos → Conexión con la nube**, pegue los dos valores y conecte. No hay que recompilar. La conexión queda guardada en ese navegador, así que se repite una vez por dispositivo.
+   - **En el build**: copie `.env.example` como `.env` con esos dos valores, o cárguelos en Netlify como variables de entorno, y vuelva a publicar.
+6. Al entrar, la aplicación pide correo y clave, y la etiqueta de la barra superior cambia de *Este dispositivo* a **Nube compartida**.
 
 Para pasar los datos que ya tenía en una tablet: **Datos → Descargar respaldo** en modo local, y **Datos → Cargar respaldo** una vez conectado a la nube.
 
