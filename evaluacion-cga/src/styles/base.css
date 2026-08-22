@@ -103,7 +103,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   align-items: center;
 }
 
-.topbar__link:hover { background: var(--carbon-500); color: #fff; }
+.topbar__link:hover { background: var(--carbon-500); color: var(--cga-blanco); }
 
 .topbar__link[aria-current="page"] {
   background: var(--rama-futbol);

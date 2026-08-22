@@ -9,7 +9,7 @@
   }
 
   html, body {
-    background: #fff;
+    background: var(--cga-blanco);
     margin: 0;
     padding: 0;
   }

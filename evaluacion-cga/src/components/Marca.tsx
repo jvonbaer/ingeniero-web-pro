@@ -2,13 +2,13 @@
  * Marca circular del club.
  *
  * Es un sustituto: el escudo oficial del CGA no viene con este repositorio. Para
- * usar el real, deje el archivo en `public/escudo-cga.svg` (o .png) — el
+ * usar el real, deje el archivo en `public/brand/escudo-cga.svg` (o .png) — el
  * componente lo toma automáticamente y sólo cae en el dibujo de abajo si no lo
  * encuentra. Ver README, sección "Poner el escudo oficial".
  */
 import { useEffect, useState } from "react";
 
-const RUTA_ESCUDO = `${import.meta.env.BASE_URL}escudo-cga.svg`;
+const RUTA_ESCUDO = `${import.meta.env.BASE_URL}brand/escudo-cga.svg`;
 
 // La comprobación se hace una vez por carga y el resultado se comparte: en el
 // informe hay varios escudos y no tiene sentido que cada uno pida el archivo.
@@ -55,21 +55,21 @@ export function Escudo({ tamano = 40 }: { tamano?: number }) {
       role="img"
       aria-label="Club Gimnástico Alemán"
     >
-      <circle cx="50" cy="50" r="47" fill="#1C1C1C" stroke="#C8102E" strokeWidth="5" />
-      <circle cx="50" cy="44" r="20" fill="none" stroke="#EAAA00" strokeWidth="3.5" />
+      <circle cx="50" cy="50" r="47" fill="var(--carbon-700)" stroke="var(--cga-rojo)" strokeWidth="5" />
+      <circle cx="50" cy="44" r="20" fill="none" stroke="var(--rama-futbol)" strokeWidth="3.5" />
       <path
         d="M50 30 L61 38 L57 51 L43 51 L39 38 Z"
-        fill="#EAAA00"
+        fill="var(--rama-futbol)"
       />
       <text
         x="50"
         y="79"
         textAnchor="middle"
-        fontFamily="Barlow Condensed, sans-serif"
+        fontFamily="var(--fuente-cond)"
         fontSize="20"
         fontWeight="800"
         letterSpacing="2"
-        fill="#FFFFFF"
+        fill="var(--cga-blanco)"
       >
         CGA
       </text>
@@ -86,19 +86,19 @@ export function MarcaDeAgua() {
   return (
     <div className="marca-agua" aria-hidden="true">
       <svg viewBox="0 0 100 100" width="100%" height="100%">
-        <circle cx="50" cy="50" r="46" fill="none" stroke="#1C1C1C" strokeWidth="6" />
-        <circle cx="50" cy="50" r="33" fill="none" stroke="#1C1C1C" strokeWidth="2.5" />
-        <circle cx="50" cy="42" r="17" fill="none" stroke="#1C1C1C" strokeWidth="3" />
-        <path d="M50 29 L60 36 L56 48 L44 48 L40 36 Z" fill="#1C1C1C" />
+        <circle cx="50" cy="50" r="46" fill="none" stroke="var(--carbon-700)" strokeWidth="6" />
+        <circle cx="50" cy="50" r="33" fill="none" stroke="var(--carbon-700)" strokeWidth="2.5" />
+        <circle cx="50" cy="42" r="17" fill="none" stroke="var(--carbon-700)" strokeWidth="3" />
+        <path d="M50 29 L60 36 L56 48 L44 48 L40 36 Z" fill="var(--carbon-700)" />
         <text
           x="50"
           y="76"
           textAnchor="middle"
-          fontFamily="Barlow Condensed, sans-serif"
+          fontFamily="var(--fuente-cond)"
           fontSize="18"
           fontWeight="800"
           letterSpacing="3"
-          fill="#1C1C1C"
+          fill="var(--carbon-700)"
         >
           CGA
         </text>

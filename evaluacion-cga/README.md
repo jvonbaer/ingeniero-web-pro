@@ -202,7 +202,9 @@ Para pasar los datos que ya tenía en una tablet: **Datos → Descargar respaldo
 
 El repositorio **no incluye** el escudo del CGA. Mientras no esté, la aplicación dibuja una marca circular de reemplazo.
 
-Para usar el real, deje el archivo en `public/escudo-cga.svg` (también sirve `.png` cambiando la ruta en `src/components/Marca.tsx`). La aplicación lo detecta sola, sin tocar ninguna otra cosa.
+Para usar el real, deje el archivo en `public/brand/escudo-cga.svg` (también sirve `.png` cambiando la ruta en `src/components/Marca.tsx`). La aplicación lo detecta sola, sin tocar ninguna otra cosa.
+
+En `public/brand/` vive todo lo de marca que es un archivo suelto: hoy, el favicon y el escudo cuando lo entregue.
 
 La marca de agua circular de los informes está en el mismo archivo, en el componente `MarcaDeAgua`.
 
@@ -233,7 +235,7 @@ evaluacion-cga/
 │   │   └── Camara.tsx           Visor de cámara (teléfono y webcam)
 │   ├── pages/                   Jugadores, ficha, encuesta, informe, parámetros
 │   ├── styles/
-│   │   ├── tokens.css           Paleta y tipografía CGA
+│   │   ├── tokens.css           Paleta y tipografía CGA (fuente única de color)
 │   │   ├── informe.css          Maqueta A4 vertical del informe
 │   │   └── print.css            Reglas de impresión
 │   └── fuentes/                 Barlow (la repone `npm install`, no se versiona)

@@ -142,14 +142,14 @@ export function RadarChart({
             key={nivel}
             points={mallaAnillo(nivel)}
             fill="none"
-            stroke="#dedbd6"
+            stroke="var(--borde)"
             strokeWidth={nivel === 100 ? 1.4 : 1}
           />
         ))}
         {ejes.map((eje, i) => {
           const p = punto(cx, cy, radio, i, n);
           return (
-            <line key={eje.id} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="#dedbd6" strokeWidth="1" />
+            <line key={eje.id} x1={cx} y1={cy} x2={p.x} y2={p.y} stroke="var(--borde)" strokeWidth="1" />
           );
         })}
         {ANILLOS.map((nivel) => (
@@ -158,7 +158,7 @@ export function RadarChart({
             x={cx + 5}
             y={cy - escala(nivel) + 4}
             className="radar__anillo-texto"
-            stroke="#fff"
+            stroke="var(--cga-blanco)"
             strokeWidth="2.5"
             paintOrder="stroke"
           >
@@ -191,7 +191,7 @@ export function RadarChart({
               cy={p.y}
               r="4.5"
               fill={destacada.color}
-              stroke="#fff"
+              stroke="var(--cga-blanco)"
               strokeWidth="1.6"
             />
           );

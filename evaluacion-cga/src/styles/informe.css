@@ -57,7 +57,7 @@
   display: grid;
   grid-template-rows: 50px 1fr;
   background: var(--carbon-700);
-  color: #fff;
+  color: var(--cga-blanco);
   border-bottom: var(--franja) solid var(--cga-rojo); /* franja institucional */
   padding: 0 20px;
 }
@@ -174,7 +174,7 @@
 /* --- Panel de puntaje --- */
 .informe__panel-oscuro {
   background: var(--carbon-700);
-  color: #fff;
+  color: var(--cga-blanco);
   border-radius: var(--r-md);
   padding: 12px 14px;
   display: flex;
@@ -307,7 +307,7 @@
 }
 
 .informe__caja {
-  background: #fff;
+  background: var(--cga-blanco);
   border: 1px solid var(--borde);
   border-left: var(--franja) solid var(--cga-rojo);
   border-radius: 0 var(--r-sm) var(--r-sm) 0;
@@ -366,4 +366,4 @@
   text-transform: uppercase;
 }
 
-.informe__valores span + span { border-left: 1px solid rgba(28, 28, 28, 0.35); padding-left: 22px; }
+.informe__valores span + span { border-left: 1px solid var(--divisor-sobre-acento); padding-left: 22px; }

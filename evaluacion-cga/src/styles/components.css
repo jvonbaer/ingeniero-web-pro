@@ -65,8 +65,8 @@
 .btn:active { transform: translateY(1px); }
 .btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn--primario { background: var(--rama-futbol); color: var(--carbon-900); }
-.btn--primario:hover:not(:disabled) { background: #ffbe12; }
-.btn--peligro { background: var(--cga-rojo); color: #fff; }
+.btn--primario:hover:not(:disabled) { background: var(--acento-hover); }
+.btn--peligro { background: var(--cga-rojo); color: var(--cga-blanco); }
 .btn--fantasma { background: transparent; color: var(--texto); border-color: var(--borde); }
 .btn--fantasma:hover:not(:disabled) { border-color: var(--carbon-700); }
 .btn--bloque { width: 100%; }
@@ -94,7 +94,7 @@
   padding: 10px 13px;
   border: 1.5px solid var(--borde);
   border-radius: var(--r-md);
-  background: #fff;
+  background: var(--cga-blanco);
   font-size: 16px; /* 16px evita el zoom automático de iOS */
 }
 
@@ -126,7 +126,7 @@
   padding: 12px 14px;
   border: 1px solid var(--borde);
   border-radius: var(--r-lg);
-  background: #fff;
+  background: var(--cga-blanco);
   text-decoration: none;
   box-shadow: var(--sombra-1);
   transition: border-color 0.12s ease, transform 0.12s ease;
@@ -183,8 +183,8 @@
 }
 
 .chip--acento { background: var(--rama-futbol); border-color: var(--rama-futbol); color: var(--carbon-900); }
-.chip--rojo { background: var(--cga-rojo); border-color: var(--cga-rojo); color: #fff; }
-.chip--oscuro { background: var(--carbon-700); border-color: var(--carbon-700); color: #fff; }
+.chip--rojo { background: var(--cga-rojo); border-color: var(--cga-rojo); color: var(--cga-blanco); }
+.chip--oscuro { background: var(--carbon-700); border-color: var(--carbon-700); color: var(--cga-blanco); }
 
 .nivel { font-family: var(--fuente-cond); font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
 .nivel--inicial { color: var(--nivel-inicial); }
@@ -192,13 +192,13 @@
 .nivel--intermedio { color: var(--nivel-intermedio); }
 .nivel--avanzado { color: var(--nivel-avanzado); }
 .nivel--excelente { color: var(--nivel-excelente); }
-.card--oscura .nivel--excelente, .informe__panel-oscuro .nivel--excelente { color: #fff; }
+.card--oscura .nivel--excelente, .informe__panel-oscuro .nivel--excelente { color: var(--cga-blanco); }
 
 .puntaje { font-family: var(--fuente-cond); font-weight: 800; line-height: 0.9; }
 .puntaje small { font-size: 0.46em; font-weight: 600; color: var(--texto-suave); }
 
 .delta { font-family: var(--fuente-cond); font-weight: 700; font-size: 13px; letter-spacing: 0.05em; }
-.delta--sube { color: #2f7d32; }
+.delta--sube { color: var(--exito); }
 .delta--baja { color: var(--cga-rojo); }
 .delta--igual { color: var(--texto-suave); }
 
@@ -236,7 +236,7 @@
 
 .encuesta__cabecera {
   background: var(--carbon-700);
-  color: #fff;
+  color: var(--cga-blanco);
   border-radius: var(--r-lg) var(--r-lg) 0 0;
   padding: 16px 18px;
   border-bottom: var(--franja) solid var(--cga-rojo);
@@ -256,7 +256,7 @@
   min-height: 62px;
   border: 1.5px solid var(--borde);
   border-radius: var(--r-md);
-  background: #fff;
+  background: var(--cga-blanco);
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -304,7 +304,7 @@
   padding: 12px 15px;
   border-radius: var(--r-md);
   border-left: var(--franja) solid var(--cga-rojo);
-  background: #fff;
+  background: var(--cga-blanco);
   border-top: 1px solid var(--borde);
   border-right: 1px solid var(--borde);
   border-bottom: 1px solid var(--borde);
@@ -312,7 +312,7 @@
   margin-bottom: 16px;
 }
 
-.aviso--ok { border-left-color: #2f7d32; }
+.aviso--ok { border-left-color: var(--exito); }
 .aviso--acento { border-left-color: var(--rama-futbol); }
 
 .lista-limpia { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
@@ -381,7 +381,7 @@
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgba(16, 16, 16, 0.74);
+  background: var(--velo);
   backdrop-filter: blur(3px);
 }
 
@@ -436,8 +436,8 @@
   margin: 0;
   padding: 10px 13px;
   border-radius: var(--r-sm);
-  background: rgba(28, 28, 28, 0.88);
-  color: #fff;
+  background: var(--panel-flotante);
+  color: var(--cga-blanco);
   font-size: 13px;
   line-height: 1.4;
 }
@@ -451,7 +451,7 @@
 
 /* ---------- Acciones de la foto ---------- */
 .foto__acciones { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
-.foto__mensaje { margin: 9px 0 0; font-size: 12.5px; font-weight: 600; color: #2f7d32; }
+.foto__mensaje { margin: 9px 0 0; font-size: 12.5px; font-weight: 600; color: var(--exito); }
 
 /* La foto llena el ancho de su tarjeta, con un tope para que no se agrande de
    más en pantallas anchas. */
@@ -465,7 +465,7 @@
   padding: 9px 13px;
   border: 1px solid var(--borde);
   border-radius: var(--r-md);
-  background: #fff;
+  background: var(--cga-blanco);
 }
 
 .fila-simple__texto { flex: 1 1 auto; font-weight: 600; }
