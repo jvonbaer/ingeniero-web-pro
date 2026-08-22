@@ -456,3 +456,47 @@
 /* La foto llena el ancho de su tarjeta, con un tope para que no se agrande de
    más en pantallas anchas. */
 .entrada-foto { max-width: 300px; }
+
+/* ---------- Parámetros: listas y asignaciones ---------- */
+.fila-simple {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 13px;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-md);
+  background: #fff;
+}
+
+.fila-simple__texto { flex: 1 1 auto; font-weight: 600; }
+
+.asignaciones {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+  gap: 11px;
+  margin-bottom: 16px;
+}
+
+.asignacion { display: flex; flex-direction: column; gap: 5px; }
+
+.asignacion__categoria {
+  font-family: var(--fuente-cond);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.subpunto {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  gap: 10px;
+  align-items: start;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--borde);
+}
+
+@media (max-width: 720px) {
+  .subpunto { grid-template-columns: minmax(0, 1fr); }
+}

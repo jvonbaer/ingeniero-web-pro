@@ -14,6 +14,8 @@ import {
   historial,
   hoyISO,
   nombreCompleto,
+  pautaDeCategoria,
+  pautaDeEvaluacion,
 } from "../domain/scoring";
 
 const COLORES_SERIE = [
@@ -24,7 +26,7 @@ const COLORES_SERIE = [
 
 export function JugadorFicha() {
   const { id = "" } = useParams();
-  const { jugadores, evaluaciones, rubrica, eliminarEvaluacion, guardarJugador } = useDatos();
+  const { jugadores, evaluaciones, configuracion, eliminarEvaluacion, guardarJugador } = useDatos();
   const [estadoFoto, setEstadoFoto] = useState<string | null>(null);
 
   const jugador = useMemo(() => jugadores.find((j) => j.id === id), [jugadores, id]);
@@ -34,9 +36,27 @@ export function JugadorFicha() {
     [evaluaciones, id],
   );
 
+  /**
+   * El historial se lee con la pauta de la evaluación más reciente: es la vara
+   * con la que se está midiendo hoy al jugador. Las evaluaciones anteriores se
+   * vuelven a medir contra ella, así la tela de araña compara manzanas con
+   * manzanas aunque el niño haya cambiado de categoría por el camino.
+   */
+  const pautaVigente = useMemo(() => {
+    const ultima = finalizadas[0];
+    return ultima
+      ? pautaDeEvaluacion(configuracion, ultima, jugador)
+      : pautaDeCategoria(configuracion, jugador?.categoria ?? "");
+  }, [configuracion, finalizadas, jugador]);
+
   const resultados = useMemo(
-    () => finalizadas.map((e) => calcular(e, rubrica)),
-    [finalizadas, rubrica],
+    () => finalizadas.map((e) => calcular(e, pautaVigente)),
+    [finalizadas, pautaVigente],
+  );
+
+  const conOtraPauta = useMemo(
+    () => finalizadas.filter((e) => e.pautaId !== pautaVigente.id).length,
+    [finalizadas, pautaVigente],
   );
 
   if (!jugador) return <p className="vacio">No encontramos ese jugador.</p>;
@@ -60,7 +80,7 @@ export function JugadorFicha() {
   const actual = resultados[0] ?? null;
   const previo = resultados[1] ?? null;
 
-  const ejes = rubrica.categorias.map((c) => ({
+  const ejes = pautaVigente.categorias.map((c) => ({
     id: c.id,
     nombre: c.nombre,
     icono: c.icono,
@@ -175,9 +195,23 @@ export function JugadorFicha() {
           ) : (
             <>
               <div className="card">
-                <h2 className="card__titulo">Comparativo de evaluaciones</h2>
+                <h2 className="card__titulo">
+                  Comparativo de evaluaciones
+                  <span className="chip chip--acento" style={{ marginLeft: "auto" }}>
+                    Pauta {pautaVigente.nombre}
+                  </span>
+                </h2>
                 <div className="card__cuerpo">
                   <RadarChart ejes={ejes} series={series} ancho={700} alto={560} />
+                  {conOtraPauta > 0 && (
+                    <p className="campo__ayuda" style={{ marginTop: 4 }}>
+                      {conOtraPauta === 1
+                        ? "Una evaluación anterior se hizo con otra pauta"
+                        : `${conOtraPauta} evaluaciones anteriores se hicieron con otra pauta`}
+                      . Se vuelven a medir con la pauta actual, así que los sub-puntos que ya no
+                      existen no cuentan y los que se agregaron aparecen vacíos.
+                    </p>
+                  )}
                 </div>
               </div>
 

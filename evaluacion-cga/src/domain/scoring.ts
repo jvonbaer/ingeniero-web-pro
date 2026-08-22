@@ -1,11 +1,12 @@
 import type {
   CategoriaRubrica,
+  Configuracion,
   Evaluacion,
   Jugador,
   Nivel,
+  Pauta,
   ResultadoCategoria,
   ResultadoEvaluacion,
-  Rubrica,
 } from "./types";
 
 /** Escala de niveles. El corte se lee de mayor a menor. */
@@ -62,17 +63,19 @@ export function puntajeCategoria(
 }
 
 /**
- * Resultado completo de una evaluación contra la rúbrica vigente.
+ * Resultado completo de una evaluación medida contra una pauta.
  *
- * Los indicadores que la evaluación trae pero que ya no existen en la rúbrica se
+ * Los sub-puntos que la evaluación trae pero que no existen en la pauta se
  * ignoran; los que existen y no fueron respondidos no penalizan. De ahí que una
- * evaluación de hace un año siga siendo comparable con la de hoy.
+ * evaluación de hace un año —o levantada con otra pauta— siga siendo comparable
+ * con la de hoy: se la vuelve a medir contra la pauta con la que se está
+ * mirando, y cada eje se promedia con lo que sí tiene.
  */
 export function calcular(
   evaluacion: Evaluacion,
-  rubrica: Rubrica,
+  pauta: Pauta,
 ): ResultadoEvaluacion {
-  const categorias: ResultadoCategoria[] = rubrica.categorias.map((cat) => {
+  const categorias: ResultadoCategoria[] = pauta.categorias.map((cat) => {
     const { puntaje, respondidos, total } = puntajeCategoria(evaluacion, cat);
     return {
       categoriaId: cat.id,
@@ -88,7 +91,7 @@ export function calcular(
 
   let sumaPonderada = 0;
   let sumaPesos = 0;
-  for (const cat of rubrica.categorias) {
+  for (const cat of pauta.categorias) {
     const res = categorias.find((c) => c.categoriaId === cat.id);
     if (res && res.puntaje !== null) {
       const peso = cat.peso > 0 ? cat.peso : 1;
@@ -109,6 +112,48 @@ export function calcular(
     nivel: nivelDe(general),
     completitud: totalPreguntas === 0 ? 0 : totalRespondidas / totalPreguntas,
   };
+}
+
+/* ---------- Resolución de pautas ---------- */
+
+/**
+ * Pauta que le corresponde a una categoría de edad. Esto es lo que hace
+ * automática la selección: la aplicación no le pregunta al entrenador qué pauta
+ * usar, la deduce de la categoría del jugador.
+ */
+export function pautaDeCategoria(configuracion: Configuracion, categoria: string): Pauta {
+  const id = configuracion.asignaciones[categoria] ?? configuracion.pautaPorDefecto;
+  return (
+    configuracion.pautas.find((p) => p.id === id) ??
+    configuracion.pautas.find((p) => p.id === configuracion.pautaPorDefecto) ??
+    configuracion.pautas[0]
+  );
+}
+
+/**
+ * Pauta con la que se debe leer una evaluación ya registrada: la que quedó
+ * guardada en ella. Si esa pauta se eliminó, se cae a la de la categoría actual
+ * del jugador, que es lo más parecido que hay.
+ */
+export function pautaDeEvaluacion(
+  configuracion: Configuracion,
+  evaluacion: Evaluacion,
+  jugador?: Jugador,
+): Pauta {
+  const propia = configuracion.pautas.find((p) => p.id === evaluacion.pautaId);
+  if (propia) return propia;
+  return pautaDeCategoria(configuracion, jugador?.categoria ?? "");
+}
+
+export function pautaPorId(configuracion: Configuracion, id: string): Pauta | undefined {
+  return configuracion.pautas.find((p) => p.id === id);
+}
+
+/** Categorías de edad que hoy apuntan a una pauta. */
+export function categoriasDePauta(configuracion: Configuracion, pautaId: string): string[] {
+  return Object.entries(configuracion.asignaciones)
+    .filter(([, id]) => id === pautaId)
+    .map(([categoria]) => categoria);
 }
 
 /** Evaluaciones de un jugador, de la más reciente a la más antigua. */

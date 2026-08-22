@@ -93,7 +93,20 @@ Si la ficha tiene el correo del apoderado, el botón **Escribir al apoderado** a
 
 ### Ajustar qué se evalúa
 
-**Parámetros**. Ahí se agregan, renombran o desactivan categorías y sub-puntos, se cambian los pesos y se editan las etiquetas de la escala. Cada categoría es un eje del gráfico de tela de araña.
+**Parámetros** tiene tres partes:
+
+**Cuerpo técnico.** El listado de evaluadores que aparece al empezar una evaluación. Se elige de una lista en vez de escribir el nombre, porque escribirlo a mano termina con «Andrés», «andres mercado» y «A. Mercado» conviviendo en la misma base. Si aparece alguien que no está, se agrega desde la propia evaluación y queda disponible para todos.
+
+**Qué pauta usa cada categoría.** Una tabla que asigna una pauta a cada categoría de edad. Al abrir una evaluación, la aplicación mira la categoría del jugador y levanta la pauta asignada: el entrenador no la elige ni puede equivocarse.
+
+**Contenido de las pautas.** Ahí se crean, duplican y editan las pautas: categorías, sub-puntos, pesos y etiquetas de la escala. Vienen dos de fábrica, pensadas como punto de partida para editar:
+
+| Pauta | Categorías | Qué mira |
+|---|---|---|
+| **Formativa** | SUB-6, SUB-8, SUB-10 | 18 sub-puntos. Menos peso táctico y más social y de hábitos: a esa edad importa más que el niño quiera venir y se lleve bien con el grupo que dónde se para en una salida desde el fondo. |
+| **Competitiva** | SUB-12 a SUB-18 | 26 sub-puntos. Rúbrica completa, con el peso en técnica y táctica. |
+
+> Las dos pautas comparten los mismos seis ejes y los mismos identificadores de sub-punto a propósito. Cuando un niño pasa de SUB-10 a SUB-12 y cambia de pauta, lo que ya tenía medido se sigue pudiendo comparar en vez de partir de cero. Si crea una pauta nueva, conviene mantener esa convención.
 
 ### Respaldos
 
@@ -107,7 +120,7 @@ Si la ficha tiene el correo del apoderado, el botón **Escribir al apoderado** a
 
 1. Cada sub-punto se responde de 1 a 5 y se convierte a escala 100: `valor ÷ 5 × 100`. Un 4 son 80 puntos; un 5, 100.
 2. El **puntaje de la categoría** es el promedio de sus sub-puntos **respondidos**. Los que quedaron en blanco no cuentan, ni a favor ni en contra.
-3. El **puntaje general** es el promedio de las categorías, ponderado por el peso de cada una. En la rúbrica base, Técnica y Táctico pesan 1,25 y las demás 1.
+3. El **puntaje general** es el promedio de las categorías, ponderado por el peso de cada una. En la pauta competitiva, Técnica y Táctico pesan 1,25 y las demás 1; en la formativa el peso se corre hacia Social y Disciplina.
 4. El **nivel** sale del puntaje:
 
 | Puntaje | Nivel |
@@ -130,8 +143,11 @@ Es la parte delicada de un sistema que se usa durante años: la rúbrica va a ca
 - Al **agregar** un sub-punto, las evaluaciones antiguas simplemente no lo tienen: su categoría se sigue promediando con los que sí respondieron.
 - Al **desactivar** uno, deja de contar hacia adelante y las evaluaciones viejas conservan su puntaje tal como se calculó.
 - Al **agregar una categoría**, aparece un eje nuevo en la tela de araña; las evaluaciones anteriores lo muestran vacío, sin inventar un valor.
+- Al **cambiar de pauta** —porque el niño subió de categoría— el historial se vuelve a medir contra la pauta de la evaluación más reciente, que es la vara con la que se lo está mirando hoy. La ficha avisa cuántas evaluaciones anteriores venían de otra pauta.
 
-En la práctica: se pueden afinar los parámetros temporada a temporada sin perder la comparación con lo ya registrado.
+En la práctica: se pueden afinar los parámetros temporada a temporada, y separarlos por categoría, sin perder la comparación con lo ya registrado.
+
+Los respaldos del formato antiguo —cuando había una sola rúbrica para toda la escuela— se cargan igual: la aplicación los convierte al vuelo, dejando esa rúbrica como una pauta llamada «General» asignada a todas las categorías, que es exactamente el comportamiento que tenían.
 
 ---
 
@@ -197,7 +213,7 @@ La marca de agua circular de los informes está en el mismo archivo, en el compo
 ```
 evaluacion-cga/
 ├── src/
-│   ├── config/rubrica.ts        Categorías y sub-puntos de la rúbrica base
+│   ├── config/pautas.ts         Pautas de fábrica, asignaciones y cuerpo técnico
 │   ├── domain/
 │   │   ├── types.ts             Modelo de datos
 │   │   └── scoring.ts           Cálculo de puntajes, niveles y códigos
@@ -207,6 +223,7 @@ evaluacion-cga/
 │   │   ├── supabaseDriver.ts    Guardado en la nube
 │   │   ├── sesion.tsx           Control de acceso del modo nube
 │   │   ├── DatosContext.tsx     Estado de la aplicación
+│   │   ├── migrar.ts            Conversión de respaldos del formato 1 al 2
 │   │   └── seed.ts              Datos de demostración
 │   ├── components/
 │   │   ├── RadarChart.tsx       Tela de araña en SVG

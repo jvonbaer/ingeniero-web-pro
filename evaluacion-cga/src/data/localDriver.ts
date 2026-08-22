@@ -1,22 +1,27 @@
-import { RUBRICA_BASE } from "../config/rubrica";
-import type { Backup, Evaluacion, Jugador, Rubrica } from "../domain/types";
+import type { Backup, Evaluacion, Jugador } from "../domain/types";
+import { migrarConfiguracion, migrarEvaluaciones } from "./migrar";
 import { idbGet, idbSet } from "./idb";
 import type { EstadoDatos, Store } from "./store";
 
 const K_JUGADORES = "jugadores";
 const K_EVALUACIONES = "evaluaciones";
-const K_RUBRICA = "rubrica";
+const K_CONFIG = "configuracion";
+/** Clave del formato 1: se sigue leyendo para migrar dispositivos ya en uso. */
+const K_RUBRICA_ANTIGUA = "rubrica";
 
 async function leerEstado(): Promise<EstadoDatos> {
-  const [jugadores, evaluaciones, rubrica] = await Promise.all([
+  const [jugadores, evaluaciones, config, rubricaAntigua] = await Promise.all([
     idbGet<Jugador[]>(K_JUGADORES),
     idbGet<Evaluacion[]>(K_EVALUACIONES),
-    idbGet<Rubrica>(K_RUBRICA),
+    idbGet<unknown>(K_CONFIG),
+    idbGet<unknown>(K_RUBRICA_ANTIGUA),
   ]);
+
+  const configuracion = migrarConfiguracion(config ?? rubricaAntigua);
   return {
     jugadores: jugadores ?? [],
-    evaluaciones: evaluaciones ?? [],
-    rubrica: rubrica ?? RUBRICA_BASE,
+    evaluaciones: migrarEvaluaciones(evaluaciones ?? [], configuracion),
+    configuracion,
   };
 }
 
@@ -58,15 +63,15 @@ export const localDriver: Store = {
     await idbSet(K_EVALUACIONES, lista);
   },
 
-  async guardarRubrica(rubrica) {
-    await idbSet(K_RUBRICA, rubrica);
+  async guardarConfiguracion(configuracion) {
+    await idbSet(K_CONFIG, configuracion);
   },
 
   async importar(backup: Backup) {
     await Promise.all([
       idbSet(K_JUGADORES, backup.jugadores),
       idbSet(K_EVALUACIONES, backup.evaluaciones),
-      idbSet(K_RUBRICA, backup.rubrica),
+      idbSet(K_CONFIG, backup.configuracion),
     ]);
   },
 };

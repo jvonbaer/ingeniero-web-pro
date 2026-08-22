@@ -1,11 +1,12 @@
-import type { Backup, Evaluacion, Jugador, Rubrica } from "../domain/types";
+import type { Backup, Configuracion, Evaluacion, Jugador } from "../domain/types";
+import { migrarConfiguracion, migrarEvaluaciones } from "./migrar";
 
 export type ModoAlmacenamiento = "local" | "nube";
 
 export interface EstadoDatos {
   jugadores: Jugador[];
   evaluaciones: Evaluacion[];
-  rubrica: Rubrica;
+  configuracion: Configuracion;
 }
 
 /**
@@ -21,28 +22,45 @@ export interface Store {
   eliminarJugador(id: string): Promise<void>;
   guardarEvaluacion(evaluacion: Evaluacion): Promise<void>;
   eliminarEvaluacion(id: string): Promise<void>;
-  guardarRubrica(rubrica: Rubrica): Promise<void>;
+  guardarConfiguracion(configuracion: Configuracion): Promise<void>;
   importar(backup: Backup): Promise<void>;
 }
 
 export function construirBackup(estado: EstadoDatos): Backup {
   return {
     formato: "cga-evaluacion-futbol",
-    version: 1,
+    version: 2,
     exportadoEn: new Date().toISOString(),
     jugadores: estado.jugadores,
     evaluaciones: estado.evaluaciones,
-    rubrica: estado.rubrica,
+    configuracion: estado.configuracion,
   };
 }
 
+/**
+ * Acepta respaldos de las dos versiones del formato. Los de la versión 1 traen
+ * una sola rúbrica; se convierten a la estructura de pautas al vuelo, así un
+ * archivo bajado hace meses se sigue pudiendo cargar.
+ */
 export function validarBackup(dato: unknown): Backup {
-  const b = dato as Partial<Backup>;
+  const b = dato as (Partial<Backup> & { rubrica?: unknown }) | undefined;
   if (!b || b.formato !== "cga-evaluacion-futbol") {
     throw new Error("El archivo no es un respaldo válido de la escuela.");
   }
-  if (!Array.isArray(b.jugadores) || !Array.isArray(b.evaluaciones) || !b.rubrica) {
+  if (!Array.isArray(b.jugadores) || !Array.isArray(b.evaluaciones)) {
     throw new Error("El respaldo está incompleto o dañado.");
   }
-  return b as Backup;
+  if (!b.configuracion && !b.rubrica) {
+    throw new Error("El respaldo no trae los parámetros de evaluación.");
+  }
+
+  const configuracion = migrarConfiguracion(b.configuracion ?? b.rubrica);
+  return {
+    formato: "cga-evaluacion-futbol",
+    version: 2,
+    exportadoEn: b.exportadoEn ?? new Date().toISOString(),
+    jugadores: b.jugadores,
+    evaluaciones: migrarEvaluaciones(b.evaluaciones, configuracion),
+    configuracion,
+  };
 }

@@ -2,7 +2,13 @@ import { useRef, useState } from "react";
 import { useDatos } from "../data/DatosContext";
 import { validarBackup } from "../data/store";
 import { datosDemo } from "../data/seed";
-import { calcular, fechaCorta, historial, nombreCompleto } from "../domain/scoring";
+import {
+  calcular,
+  fechaCorta,
+  historial,
+  nombreCompleto,
+  pautaDeEvaluacion,
+} from "../domain/scoring";
 
 function descargar(nombre: string, contenido: string, tipo: string) {
   const url = URL.createObjectURL(new Blob([contenido], { type: tipo }));
@@ -17,7 +23,7 @@ const HOY = () => new Date().toISOString().slice(0, 10);
 
 export function Datos() {
   const {
-    jugadores, evaluaciones, rubrica, modo, etiquetaModo, exportar, importar, recargar,
+    jugadores, evaluaciones, configuracion, modo, etiquetaModo, exportar, importar, recargar,
   } = useDatos();
   const archivo = useRef<HTMLInputElement>(null);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -34,9 +40,18 @@ export function Datos() {
 
   /** Planilla plana, una fila por evaluación, para abrir en Excel o Sheets. */
   function exportarPlanilla() {
+    // Las columnas salen de la unión de los ejes de todas las pautas: así una
+    // escuela con pautas distintas por categoría igual obtiene una sola tabla.
+    const ejes = new Map<string, string>();
+    for (const pauta of configuracion.pautas) {
+      for (const categoria of pauta.categorias) {
+        if (!ejes.has(categoria.id)) ejes.set(categoria.id, categoria.nombre.toLowerCase());
+      }
+    }
+
     const columnas = [
-      "codigo", "nombre", "categoria", "posicion", "fecha", "temporada", "entrenador",
-      ...rubrica.categorias.map((c) => c.nombre.toLowerCase()),
+      "codigo", "nombre", "categoria", "posicion", "fecha", "temporada", "entrenador", "pauta",
+      ...ejes.values(),
       "general", "nivel", "observaciones",
     ];
 
@@ -45,7 +60,8 @@ export function Datos() {
       .sort((a, b) => (a.fecha < b.fecha ? 1 : -1))
       .map((evaluacion) => {
         const jugador = jugadores.find((j) => j.id === evaluacion.jugadorId);
-        const r = calcular(evaluacion, rubrica);
+        const pauta = pautaDeEvaluacion(configuracion, evaluacion, jugador);
+        const r = calcular(evaluacion, pauta);
         return [
           jugador?.codigo ?? "",
           jugador ? nombreCompleto(jugador) : "",
@@ -54,8 +70,9 @@ export function Datos() {
           evaluacion.fecha,
           evaluacion.temporada,
           evaluacion.entrenador,
-          ...rubrica.categorias.map(
-            (c) => r.categorias.find((x) => x.categoriaId === c.id)?.puntaje ?? "",
+          pauta.nombre,
+          ...[...ejes.keys()].map(
+            (id) => r.categorias.find((x) => x.categoriaId === id)?.puntaje ?? "",
           ),
           r.general ?? "",
           r.nivel?.etiqueta ?? "",
@@ -141,7 +158,9 @@ export function Datos() {
               <div className="dato"><dt>Con al menos una evaluación</dt><dd>{conEvaluacion}</dd></div>
               <div className="dato"><dt>Evaluaciones finalizadas</dt><dd>{evaluaciones.filter((e) => e.estado === "finalizada").length}</dd></div>
               <div className="dato"><dt>Borradores pendientes</dt><dd>{evaluaciones.filter((e) => e.estado === "borrador").length}</dd></div>
-              <div className="dato"><dt>Versión de la rúbrica</dt><dd>v{rubrica.version} · {fechaCorta(rubrica.actualizadaEn.slice(0, 10))}</dd></div>
+              <div className="dato"><dt>Pautas de evaluación</dt><dd>{configuracion.pautas.length}</dd></div>
+              <div className="dato"><dt>Evaluadores</dt><dd>{configuracion.entrenadores.length}</dd></div>
+              <div className="dato"><dt>Última actualización</dt><dd>{fechaCorta(configuracion.actualizadaEn.slice(0, 10))}</dd></div>
             </dl>
           </div>
         </div>

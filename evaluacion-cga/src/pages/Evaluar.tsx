@@ -6,14 +6,17 @@ import { Foto } from "../components/Foto";
 import { Icono } from "../components/Iconos";
 import {
   calcular,
+  categoriasDePauta,
   historial,
   hoyISO,
   indicadoresActivos,
   nombreCompleto,
   nuevoId,
+  pautaDeCategoria,
+  pautaDeEvaluacion,
   temporadaDe,
 } from "../domain/scoring";
-import type { Evaluacion, Jugador, Rubrica } from "../domain/types";
+import type { Configuracion, Evaluacion, Jugador, Pauta } from "../domain/types";
 
 // Topes de largo. El informe A4 reserva un espacio fijo para estos dos textos y
 // estos números son lo que cabe medido: seis líneas para las observaciones y dos
@@ -22,7 +25,7 @@ import type { Evaluacion, Jugador, Rubrica } from "../domain/types";
 const MAX_OBSERVACIONES = 380;
 const MAX_OBJETIVO = 68;
 
-function evaluacionVacia(jugadorId: string, rubrica: Rubrica): Evaluacion {
+function evaluacionVacia(jugadorId: string, pauta: Pauta): Evaluacion {
   const fecha = hoyISO();
   return {
     id: nuevoId("ev"),
@@ -30,8 +33,9 @@ function evaluacionVacia(jugadorId: string, rubrica: Rubrica): Evaluacion {
     fecha,
     temporada: temporadaDe(fecha),
     entrenador: localStorage.getItem("cga.entrenador") ?? "",
-    rubricaVersion: rubrica.version,
-    escalaMax: rubrica.escalaMax,
+    pautaId: pauta.id,
+    pautaVersion: pauta.version,
+    escalaMax: pauta.escalaMax,
     puntajes: {},
     observaciones: "",
     objetivos: ["", "", ""],
@@ -44,7 +48,8 @@ function evaluacionVacia(jugadorId: string, rubrica: Rubrica): Evaluacion {
 export function Evaluar() {
   const { id, evaluacionId } = useParams();
   const navegar = useNavigate();
-  const { jugadores, evaluaciones, rubrica, guardarEvaluacion } = useDatos();
+  const { jugadores, evaluaciones, configuracion, guardarEvaluacion, guardarConfiguracion } =
+    useDatos();
 
   const existente = useMemo(
     () => evaluaciones.find((e) => e.id === evaluacionId),
@@ -56,8 +61,18 @@ export function Evaluar() {
     [jugadores, jugadorId],
   );
 
+  // La pauta no se elige: sale de la categoría del jugador. Un borrador que ya
+  // existe conserva la suya, para que cambiar de categoría a mitad de camino no
+  // le cambie las preguntas por debajo.
   const [borrador, setBorrador] = useState<Evaluacion>(
-    () => existente ?? evaluacionVacia(jugadorId, rubrica),
+    () =>
+      existente ??
+      evaluacionVacia(jugadorId, pautaDeCategoria(configuracion, jugador?.categoria ?? "")),
+  );
+
+  const pauta = useMemo(
+    () => pautaDeEvaluacion(configuracion, borrador, jugador),
+    [configuracion, borrador, jugador],
   );
   const [paso, setPaso] = useState(0);
   const [guardando, setGuardando] = useState(false);
@@ -65,8 +80,8 @@ export function Evaluar() {
   const contenedor = useRef<HTMLDivElement>(null);
 
   const categorias = useMemo(
-    () => rubrica.categorias.filter((c) => indicadoresActivos(c).length > 0),
-    [rubrica],
+    () => pauta.categorias.filter((c) => indicadoresActivos(c).length > 0),
+    [pauta],
   );
 
   const anterior = useMemo(() => {
@@ -84,7 +99,7 @@ export function Evaluar() {
   }
 
   const totalPasos = categorias.length + 2; // datos + categorías + cierre
-  const resultado = calcular(borrador, rubrica);
+  const resultado = calcular(borrador, pauta);
 
   function actualizar(cambios: Partial<Evaluacion>) {
     setBorrador((b) => ({ ...b, ...cambios, actualizadaEn: new Date().toISOString() }));
@@ -182,6 +197,15 @@ export function Evaluar() {
             anterior={anterior}
             onCopiar={copiarAnterior}
             jugador={jugador}
+            pauta={pauta}
+            configuracion={configuracion}
+            onAgregarEntrenador={(nombre) =>
+              guardarConfiguracion({
+                ...configuracion,
+                entrenadores: [...configuracion.entrenadores, nombre],
+                actualizadaEn: hoyISO(),
+              })
+            }
           />
         )}
 
@@ -190,7 +214,7 @@ export function Evaluar() {
             categoria={categorias[paso - 1]}
             indice={paso}
             total={categorias.length}
-            rubrica={rubrica}
+            pauta={pauta}
             borrador={borrador}
             onResponder={responder}
           />
@@ -249,13 +273,22 @@ function PasoDatos({
   anterior,
   onCopiar,
   jugador,
+  pauta,
+  configuracion,
+  onAgregarEntrenador,
 }: {
   borrador: Evaluacion;
   actualizar: (c: Partial<Evaluacion>) => void;
   anterior: Evaluacion | null;
   onCopiar: () => void;
   jugador: Jugador;
+  pauta: Pauta;
+  configuracion: Configuracion;
+  onAgregarEntrenador: (nombre: string) => Promise<void>;
 }) {
+  const cubiertas = categoriasDePauta(configuracion, pauta.id);
+  const preguntas = pauta.categorias.reduce((a, c) => a + indicadoresActivos(c).length, 0);
+
   return (
     <>
       <div className="encuesta__cabecera">
@@ -263,6 +296,13 @@ function PasoDatos({
         <p>{jugador.categoria} · {jugador.posicion} · Pie {jugador.pieHabil.toLowerCase()}</p>
       </div>
       <div className="card__cuerpo">
+        <div className="aviso aviso--acento" style={{ marginTop: 0 }}>
+          <strong>Pauta {pauta.nombre}.</strong> {pauta.descripcion} Se eligió sola por la categoría{" "}
+          <strong>{jugador.categoria}</strong>
+          {cubiertas.length > 1 && `, que la comparte con ${cubiertas.filter((c) => c !== jugador.categoria).join(", ")}`}
+          . Son {preguntas} sub-puntos repartidos en {pauta.categorias.length} categorías.
+        </div>
+
         <div className="grid grid--2">
           <Campo label="Fecha de evaluación">
             <input
@@ -282,14 +322,13 @@ function PasoDatos({
             />
           </Campo>
         </div>
-        <Campo label="Entrenador que evalúa">
-          <input
-            className="input"
-            value={borrador.entrenador}
-            onChange={(e) => actualizar({ entrenador: e.target.value })}
-            placeholder="Nombre y apellido"
-          />
-        </Campo>
+
+        <SelectorEvaluador
+          valor={borrador.entrenador}
+          entrenadores={configuracion.entrenadores}
+          onCambio={(entrenador) => actualizar({ entrenador })}
+          onAgregar={onAgregarEntrenador}
+        />
 
         {anterior && (
           <div className="aviso aviso--acento">
@@ -311,18 +350,18 @@ function PasoCategoria({
   categoria,
   indice,
   total,
-  rubrica,
+  pauta,
   borrador,
   onResponder,
 }: {
-  categoria: Rubrica["categorias"][number];
+  categoria: Pauta["categorias"][number];
   indice: number;
   total: number;
-  rubrica: Rubrica;
+  pauta: Pauta;
   borrador: Evaluacion;
   onResponder: (indicadorId: string, valor: number) => void;
 }) {
-  const opciones = Array.from({ length: rubrica.escalaMax }, (_, i) => i + 1);
+  const opciones = Array.from({ length: pauta.escalaMax }, (_, i) => i + 1);
 
   return (
     <>
@@ -348,19 +387,121 @@ function PasoCategoria({
                 type="button"
                 className="escala__opcion"
                 aria-pressed={borrador.puntajes[indicador.id] === valor}
-                aria-label={`${indicador.nombre}: ${valor} de ${rubrica.escalaMax}, ${
-                  rubrica.etiquetasEscala[valor - 1] ?? ""
+                aria-label={`${indicador.nombre}: ${valor} de ${pauta.escalaMax}, ${
+                  pauta.etiquetasEscala[valor - 1] ?? ""
                 }`}
                 onClick={() => onResponder(indicador.id, valor)}
               >
                 <b>{valor}</b>
-                <span>{rubrica.etiquetasEscala[valor - 1] ?? ""}</span>
+                <span>{pauta.etiquetasEscala[valor - 1] ?? ""}</span>
               </button>
             ))}
           </div>
         </fieldset>
       ))}
     </>
+  );
+}
+
+const OTRO = "__otro__";
+
+/**
+ * Quién evalúa se elige de un listado, no se escribe. Escribirlo a mano en cada
+ * evaluación termina en "Andrés", "andres mercado" y "A. Mercado" conviviendo en
+ * la misma base, y después los informes y la planilla no cuadran. Si aparece
+ * alguien que no está, se agrega al listado del club y queda disponible para
+ * todos de ahí en adelante.
+ */
+function SelectorEvaluador({
+  valor,
+  entrenadores,
+  onCambio,
+  onAgregar,
+}: {
+  valor: string;
+  entrenadores: string[];
+  onCambio: (nombre: string) => void;
+  onAgregar: (nombre: string) => Promise<void>;
+}) {
+  const desconocido = valor !== "" && !entrenadores.includes(valor);
+  const [modoOtro, setModoOtro] = useState(false);
+  const [nuevo, setNuevo] = useState("");
+  const [guardando, setGuardando] = useState(false);
+  const [aviso, setAviso] = useState<string | null>(null);
+
+  async function agregar() {
+    const limpio = nuevo.trim();
+    if (!limpio) return;
+    setGuardando(true);
+    try {
+      if (!entrenadores.includes(limpio)) await onAgregar(limpio);
+      onCambio(limpio);
+      setModoOtro(false);
+      setNuevo("");
+      setAviso(`${limpio} quedó agregado al cuerpo técnico.`);
+    } catch {
+      /* el error ya se muestra en la barra superior */
+    } finally {
+      setGuardando(false);
+    }
+  }
+
+  if (modoOtro) {
+    return (
+      <Campo
+        label="Nombre del evaluador"
+        ayuda="Se agrega al listado del club y queda disponible para las próximas evaluaciones."
+      >
+        <input
+          className="input"
+          value={nuevo}
+          onChange={(e) => setNuevo(e.target.value)}
+          placeholder="Nombre y apellido"
+          autoFocus
+        />
+        <span style={{ display: "flex", gap: 8, marginTop: 8 }}>
+          <button
+            type="button"
+            className="btn btn--primario btn--sm"
+            onClick={() => void agregar()}
+            disabled={guardando || !nuevo.trim()}
+          >
+            {guardando ? "Agregando…" : "Agregar al listado"}
+          </button>
+          <button
+            type="button"
+            className="btn btn--fantasma btn--sm"
+            onClick={() => {
+              setModoOtro(false);
+              setNuevo("");
+            }}
+          >
+            Cancelar
+          </button>
+        </span>
+      </Campo>
+    );
+  }
+
+  return (
+    <Campo label="Entrenador que evalúa" ayuda={aviso ?? undefined}>
+      <select
+        className="select"
+        value={valor}
+        onChange={(e) => {
+          if (e.target.value === OTRO) setModoOtro(true);
+          else onCambio(e.target.value);
+        }}
+      >
+        <option value="">— Seleccione —</option>
+        {entrenadores.map((nombre) => (
+          <option key={nombre} value={nombre}>{nombre}</option>
+        ))}
+        {/* Un nombre heredado de antes del listado no se pierde del selector. */}
+        {desconocido && <option value={valor}>{valor}</option>}
+        <option value={OTRO}>Otro evaluador…</option>
+      </select>
+    </Campo>
   );
 }
 

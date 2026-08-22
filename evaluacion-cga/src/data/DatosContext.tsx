@@ -7,8 +7,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { RUBRICA_BASE } from "../config/rubrica";
-import type { Backup, Evaluacion, Jugador, Rubrica } from "../domain/types";
+import { CONFIGURACION_BASE } from "../config/pautas";
+import type { Backup, Configuracion, Evaluacion, Jugador } from "../domain/types";
 import { store } from "./index";
 import { construirBackup, type EstadoDatos } from "./store";
 
@@ -21,7 +21,7 @@ interface Contexto extends EstadoDatos {
   eliminarJugador: (id: string) => Promise<void>;
   guardarEvaluacion: (evaluacion: Evaluacion) => Promise<void>;
   eliminarEvaluacion: (id: string) => Promise<void>;
-  guardarRubrica: (rubrica: Rubrica) => Promise<void>;
+  guardarConfiguracion: (configuracion: Configuracion) => Promise<void>;
   importar: (backup: Backup) => Promise<void>;
   exportar: () => Backup;
   recargar: () => Promise<void>;
@@ -32,7 +32,7 @@ const Ctx = createContext<Contexto | null>(null);
 export function ProveedorDatos({ children }: { children: ReactNode }) {
   const [jugadores, setJugadores] = useState<Jugador[]>([]);
   const [evaluaciones, setEvaluaciones] = useState<Evaluacion[]>([]);
-  const [rubrica, setRubrica] = useState<Rubrica>(RUBRICA_BASE);
+  const [configuracion, setConfiguracion] = useState<Configuracion>(CONFIGURACION_BASE);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,7 +42,7 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
       const estado = await store.cargar();
       setJugadores(estado.jugadores);
       setEvaluaciones(estado.evaluaciones);
-      setRubrica(estado.rubrica);
+      setConfiguracion(estado.configuracion);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "No se pudieron cargar los datos.");
@@ -120,11 +120,11 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
     [conError],
   );
 
-  const guardarRubrica = useCallback(
-    async (nueva: Rubrica) => {
+  const guardarConfiguracion = useCallback(
+    async (nueva: Configuracion) => {
       await conError(async () => {
-        await store.guardarRubrica(nueva);
-        setRubrica(nueva);
+        await store.guardarConfiguracion(nueva);
+        setConfiguracion(nueva);
       });
     },
     [conError],
@@ -136,7 +136,7 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
         await store.importar(backup);
         setJugadores(backup.jugadores);
         setEvaluaciones(backup.evaluaciones);
-        setRubrica(backup.rubrica);
+        setConfiguracion(backup.configuracion);
       });
     },
     [conError],
@@ -146,7 +146,7 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
     () => ({
       jugadores,
       evaluaciones,
-      rubrica,
+      configuracion,
       cargando,
       error,
       modo: store.modo,
@@ -155,15 +155,15 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
       eliminarJugador,
       guardarEvaluacion,
       eliminarEvaluacion,
-      guardarRubrica,
+      guardarConfiguracion,
       importar,
-      exportar: () => construirBackup({ jugadores, evaluaciones, rubrica }),
+      exportar: () => construirBackup({ jugadores, evaluaciones, configuracion }),
       recargar,
     }),
     [
-      jugadores, evaluaciones, rubrica, cargando, error,
+      jugadores, evaluaciones, configuracion, cargando, error,
       guardarJugador, eliminarJugador, guardarEvaluacion,
-      eliminarEvaluacion, guardarRubrica, importar, recargar,
+      eliminarEvaluacion, guardarConfiguracion, importar, recargar,
     ],
   );
 

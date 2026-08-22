@@ -3,11 +3,17 @@ import { Link } from "react-router-dom";
 import { useDatos } from "../data/DatosContext";
 import { Foto } from "../components/Foto";
 import { NivelTexto, Puntaje, Vacio } from "../components/ui";
-import { calcular, fechaCorta, historial, nombreCompleto } from "../domain/scoring";
+import {
+  calcular,
+  fechaCorta,
+  historial,
+  nombreCompleto,
+  pautaDeEvaluacion,
+} from "../domain/scoring";
 import type { Jugador } from "../domain/types";
 
 export function Jugadores() {
-  const { jugadores, evaluaciones, rubrica } = useDatos();
+  const { jugadores, evaluaciones, configuracion } = useDatos();
   const [busqueda, setBusqueda] = useState("");
   const [categoria, setCategoria] = useState("");
   const [verInactivos, setVerInactivos] = useState(false);
@@ -23,13 +29,15 @@ export function Jugadores() {
       const previas = historial(evaluaciones, jugador.id);
       const ultima = previas[0];
       mapa.set(jugador.id, {
-        general: ultima ? calcular(ultima, rubrica).general : null,
+        general: ultima
+          ? calcular(ultima, pautaDeEvaluacion(configuracion, ultima, jugador)).general
+          : null,
         fecha: ultima?.fecha ?? "",
         total: previas.length,
       });
     }
     return mapa;
-  }, [jugadores, evaluaciones, rubrica]);
+  }, [jugadores, evaluaciones, configuracion]);
 
   const visibles = useMemo(() => {
     const texto = busqueda.trim().toLowerCase();

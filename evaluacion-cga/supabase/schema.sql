@@ -35,7 +35,10 @@ create table if not exists public.evaluaciones (
   actualizado_en  timestamptz not null default now()
 );
 
--- Una sola fila (id = 1) con la rúbrica vigente.
+-- Una sola fila (id = 1) con la configuración de la escuela: las pautas de
+-- evaluación, qué pauta usa cada categoría de edad, y el cuerpo técnico.
+-- (La tabla conserva el nombre `rubrica` de la primera versión para no obligar
+-- a migrar las instalaciones que ya existen.)
 create table if not exists public.rubrica (
   id              integer primary key default 1,
   datos           jsonb not null,
@@ -82,45 +85,60 @@ end $$;
 
 -- ---------------------------------------------------------------------------
 -- Vista de consulta: una fila por sub-punto respondido.
--- Sirve para análisis en SQL, tableros externos o exportaciones, sin tener que
--- entender la estructura del jsonb.
+--
+-- Cada evaluación se cruza con la pauta con la que fue levantada, así una
+-- escuela con pautas distintas por categoría igual obtiene una sola tabla
+-- plana. Sirve para análisis en SQL, tableros externos o exportaciones, sin
+-- tener que entender la estructura del jsonb.
 -- ---------------------------------------------------------------------------
 
 -- security_invoker: sin esto la vista se ejecutaría con los permisos de su
--- dueño y se saltaría el RLS de las tablas de abajo.
+-- dueño y se saltaría el RLS de las tablas de arriba.
 create or replace view public.v_puntajes
 with (security_invoker = true) as
+with pautas as (
+  select
+    pauta.valor ->> 'id'                  as pauta_id,
+    pauta.valor ->> 'nombre'              as pauta_nombre,
+    (pauta.valor ->> 'version')::int      as pauta_version,
+    cat.valor                             as categoria
+  from public.rubrica r
+  cross join lateral jsonb_array_elements(r.datos -> 'pautas') as pauta(valor)
+  cross join lateral jsonb_array_elements(pauta.valor -> 'categorias') as cat(valor)
+  where r.id = 1
+)
 select
-  j.codigo                                    as jugador_codigo,
-  j.datos ->> 'nombre'   || ' ' ||
-  j.datos ->> 'apellido'                      as jugador,
+  j.codigo                                              as jugador_codigo,
+  (j.datos ->> 'nombre') || ' ' || (j.datos ->> 'apellido') as jugador,
   j.categoria,
-  j.datos ->> 'posicion'                      as posicion,
-  e.id                                        as evaluacion_id,
+  j.datos ->> 'posicion'                                as posicion,
+  e.id                                                  as evaluacion_id,
   e.fecha,
-  e.datos ->> 'temporada'                     as temporada,
-  e.datos ->> 'entrenador'                    as entrenador,
-  (e.datos ->> 'rubricaVersion')::int         as rubrica_version,
-  cat.valor ->> 'id'                          as categoria_evaluacion,
-  ind.valor ->> 'id'                          as indicador,
-  ind.valor ->> 'nombre'                      as indicador_nombre,
+  e.datos ->> 'temporada'                               as temporada,
+  e.datos ->> 'entrenador'                              as entrenador,
+  p.pauta_nombre                                        as pauta,
+  (e.datos ->> 'pautaVersion')::int                     as pauta_version,
+  p.categoria ->> 'id'                                  as categoria_evaluacion,
+  ind.valor ->> 'id'                                    as indicador,
+  ind.valor ->> 'nombre'                                as indicador_nombre,
   (e.datos -> 'puntajes' ->> (ind.valor ->> 'id'))::int as valor,
-  (e.datos ->> 'escalaMax')::int              as escala_max,
+  (e.datos ->> 'escalaMax')::int                        as escala_max,
   round(
     (e.datos -> 'puntajes' ->> (ind.valor ->> 'id'))::numeric
     / nullif((e.datos ->> 'escalaMax')::numeric, 0) * 100
-  )                                           as puntaje_100
+  )                                                     as puntaje_100
 from public.evaluaciones e
 join public.jugadores j on j.id = e.jugador_id
-cross join lateral jsonb_array_elements((select r.datos -> 'categorias' from public.rubrica r where r.id = 1)) as cat(valor)
-cross join lateral jsonb_array_elements(cat.valor -> 'indicadores') as ind(valor)
+join pautas p on p.pauta_id = e.datos ->> 'pautaId'
+cross join lateral jsonb_array_elements(p.categoria -> 'indicadores') as ind(valor)
 where e.estado = 'finalizada'
   and e.datos -> 'puntajes' ? (ind.valor ->> 'id');
 
 -- ---------------------------------------------------------------------------
 -- Comprobación rápida (opcional)
 -- ---------------------------------------------------------------------------
--- select jugador, fecha, categoria_evaluacion, round(avg(puntaje_100)) as puntaje
+-- select jugador, categoria, pauta, fecha, categoria_evaluacion,
+--        round(avg(puntaje_100)) as puntaje
 -- from public.v_puntajes
--- group by jugador, fecha, categoria_evaluacion
+-- group by jugador, categoria, pauta, fecha, categoria_evaluacion
 -- order by fecha desc, jugador;

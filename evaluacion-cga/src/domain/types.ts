@@ -51,11 +51,17 @@ export interface CategoriaRubrica {
 }
 
 /**
- * Conjunto de parámetros de evaluación. Se versiona: cada evaluación guarda la
- * versión con la que se levantó, de modo que agregar o retirar indicadores nunca
- * invalida el historial ya registrado.
+ * Una pauta de evaluación completa. La escuela puede tener varias —una por grupo
+ * de edad, por ejemplo— y cada categoría apunta a la que le corresponde.
+ *
+ * Se versiona: cada evaluación guarda la pauta y la versión con la que se
+ * levantó, de modo que agregar o retirar indicadores nunca invalida el historial
+ * ya registrado.
  */
-export interface Rubrica {
+export interface Pauta {
+  id: string;
+  nombre: string;
+  descripcion: string;
   version: number;
   actualizadaEn: string;
   /** Valor máximo de la escala por indicador (1..escalaMax). */
@@ -64,13 +70,35 @@ export interface Rubrica {
   categorias: CategoriaRubrica[];
 }
 
+/**
+ * Configuración de la escuela: las pautas disponibles, qué pauta usa cada
+ * categoría de edad, y el listado de evaluadores.
+ *
+ * `asignaciones` es lo que hace automática la selección: al abrir una evaluación
+ * la aplicación mira la categoría del jugador y levanta la pauta asignada, sin
+ * que el entrenador tenga que elegirla.
+ */
+export interface Configuracion {
+  /** Versión del formato de configuración, para migrar respaldos antiguos. */
+  formato: 2;
+  pautas: Pauta[];
+  /** categoría de edad → id de pauta. */
+  asignaciones: Record<string, string>;
+  /** Pauta que se usa cuando una categoría no tiene asignación propia. */
+  pautaPorDefecto: string;
+  entrenadores: string[];
+  actualizadaEn: string;
+}
+
 export interface Evaluacion {
   id: string;
   jugadorId: string;
   fecha: string; // ISO yyyy-mm-dd
   temporada: string;
   entrenador: string;
-  rubricaVersion: number;
+  /** Pauta con la que se levantó esta evaluación. */
+  pautaId: string;
+  pautaVersion: number;
   escalaMax: number;
   /** indicadorId → valor entero en 1..escalaMax. Los no respondidos se omiten. */
   puntajes: Record<string, number>;
@@ -83,11 +111,11 @@ export interface Evaluacion {
 
 export interface Backup {
   formato: "cga-evaluacion-futbol";
-  version: 1;
+  version: 2;
   exportadoEn: string;
   jugadores: Jugador[];
   evaluaciones: Evaluacion[];
-  rubrica: Rubrica;
+  configuracion: Configuracion;
 }
 
 /* ---------- Resultados calculados ---------- */

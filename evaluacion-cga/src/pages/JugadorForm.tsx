@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { CATEGORIAS_EDAD, POSICIONES } from "../config/rubrica";
+import { CATEGORIAS_EDAD, POSICIONES } from "../config/pautas";
 import { useDatos } from "../data/DatosContext";
 import { EntradaFoto } from "../components/Foto";
 import { Campo } from "../components/ui";

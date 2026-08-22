@@ -1,6 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { RUBRICA_BASE } from "../config/rubrica";
-import type { Backup, Evaluacion, Jugador, Rubrica } from "../domain/types";
+import type { Backup, Evaluacion, Jugador } from "../domain/types";
+import { migrarConfiguracion, migrarEvaluaciones } from "./migrar";
 import type { EstadoDatos, Store } from "./store";
 
 const URL = import.meta.env.VITE_SUPABASE_URL as string | undefined;
@@ -45,12 +45,18 @@ export const supabaseDriver: Store = {
 
     reventar("No se pudieron leer los jugadores", rj.error);
     reventar("No se pudieron leer las evaluaciones", re.error);
-    reventar("No se pudo leer la rúbrica", rr.error);
+    reventar("No se pudieron leer los parámetros", rr.error);
 
+    // La fila 1 de `rubrica` guarda la configuración completa. Si viene en el
+    // formato antiguo —una sola rúbrica— se migra al leerla.
+    const configuracion = migrarConfiguracion(rr.data?.datos);
     return {
       jugadores: (rj.data ?? []).map((f) => f.datos as Jugador),
-      evaluaciones: (re.data ?? []).map((f) => f.datos as Evaluacion),
-      rubrica: (rr.data?.datos as Rubrica) ?? RUBRICA_BASE,
+      evaluaciones: migrarEvaluaciones(
+        (re.data ?? []).map((f) => f.datos as Evaluacion),
+        configuracion,
+      ),
+      configuracion,
     };
   },
 
@@ -92,15 +98,15 @@ export const supabaseDriver: Store = {
     reventar("No se pudo eliminar la evaluación", error);
   },
 
-  async guardarRubrica(rubrica) {
+  async guardarConfiguracion(configuracion) {
     const { error } = await db()
       .from("rubrica")
-      .upsert({ id: 1, datos: rubrica, actualizado_en: new Date().toISOString() });
+      .upsert({ id: 1, datos: configuracion, actualizado_en: new Date().toISOString() });
     reventar("No se pudieron guardar los parámetros", error);
   },
 
   async importar(backup: Backup) {
-    await this.guardarRubrica(backup.rubrica);
+    await this.guardarConfiguracion(backup.configuracion);
     for (const j of backup.jugadores) await this.guardarJugador(j);
     for (const e of backup.evaluaciones) await this.guardarEvaluacion(e);
   },

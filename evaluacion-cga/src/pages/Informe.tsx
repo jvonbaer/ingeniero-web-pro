@@ -14,6 +14,7 @@ import {
   fechaLarga,
   historial,
   nombreCompleto,
+  pautaDeEvaluacion,
 } from "../domain/scoring";
 
 const COLORES_SERIE = ["var(--serie-1)", "var(--serie-2)", "var(--serie-3)"];
@@ -22,7 +23,7 @@ const ANCHO_HOJA = 794; // A4 vertical a 96 dpi (794 × 1123)
 
 export function Informe() {
   const { evaluacionId = "" } = useParams();
-  const { jugadores, evaluaciones, rubrica } = useDatos();
+  const { jugadores, evaluaciones, configuracion } = useDatos();
   const marco = useRef<HTMLDivElement>(null);
   const [escala, setEscala] = useState(1);
 
@@ -55,15 +56,18 @@ export function Informe() {
     return <p className="vacio">No encontramos esa evaluación.</p>;
   }
 
-  const actual = calcular(evaluacion, rubrica);
+  // El informe se lee con la pauta de esta evaluación. Las anteriores se vuelven
+  // a medir contra ella para que la comparación tenga los mismos ejes.
+  const pauta = pautaDeEvaluacion(configuracion, evaluacion, jugador);
+  const actual = calcular(evaluacion, pauta);
   const comparadas = [
     evaluacion,
     ...previas.filter((e) => e.id !== evaluacion.id && e.fecha <= evaluacion.fecha),
   ].slice(0, 3);
-  const resultados = comparadas.map((e) => calcular(e, rubrica));
+  const resultados = comparadas.map((e) => calcular(e, pauta));
   const previo = resultados[1] ?? null;
 
-  const ejes = rubrica.categorias.map((c) => ({
+  const ejes = pauta.categorias.map((c) => ({
     id: c.id,
     nombre: c.nombre,
     icono: c.icono,
@@ -188,7 +192,7 @@ export function Informe() {
                   />
                   <DatoInforme rotulo="En la escuela desde" valor={fechaCorta(jugador.ingreso)} />
                   <DatoInforme rotulo="Entrenador" valor={evaluacion.entrenador || "—"} />
-                  <DatoInforme rotulo="Temporada" valor={evaluacion.temporada} />
+                  <DatoInforme rotulo="Pauta" valor={pauta.nombre} />
                 </dl>
               </div>
 
