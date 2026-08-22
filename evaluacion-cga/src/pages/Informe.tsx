@@ -139,7 +139,7 @@ export function Informe() {
           <header className="informe__header">
             <div className="informe__header-fila">
               <div className="informe__marca">
-                <Escudo tamano={44} />
+                <Escudo tamano={44} variante="blanco" />
                 <div>
                   <div className="informe__marca-titulo">Escuela de Fútbol</div>
                   <div className="informe__marca-lema">

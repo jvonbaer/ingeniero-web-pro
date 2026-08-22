@@ -221,17 +221,29 @@ Para pasar los datos que ya tenía en una tablet: **Datos → Descargar respaldo
 
 ---
 
-## 7. Poner el escudo oficial
+## 7. El escudo
 
-El repositorio **no incluye** el escudo del CGA. Mientras no esté, la aplicación dibuja una marca circular de reemplazo.
+El escudo del club —la cruz de las cuatro F, el *Turnerkreuz* de los clubes de gimnasia alemanes,
+dentro del anillo— está **dibujado como SVG en `src/components/Marca.tsx`**, no incrustado como
+imagen. Eso permite pintarlo en tres variantes según el fondo, y que se imprima como vector:
 
-Para usar el real, deje el archivo en `public/brand/escudo-cga.svg` (también sirve `.png` cambiando la ruta en `src/components/Marca.tsx`). La aplicación lo detecta sola, sin tocar ninguna otra cosa.
+| Variante | Dónde se usa |
+|---|---|
+| `color` | Anillo en Gris Círculo, cruz en Rojo CGA. Fondos claros: hoja en papel, pantalla de acceso |
+| `blanco` | Barra superior e informe, que van sobre Negro Carbón |
+| `negro` | Marca de agua, y disponible para fotocopias |
 
-En `public/brand/` vive todo lo de marca que es un archivo suelto: hoy, el favicon y el escudo cuando lo entregue.
-
-La marca de agua circular de los informes está en el mismo archivo, en el componente `MarcaDeAgua`.
-
----
+> **La geometría está reconstruida a ojo desde el logotipo del club, no es el archivo oficial.** Es
+> fiel en estructura y proporciones, pero si el club tiene el vectorial original conviene usar ese.
+> Basta dejarlo en `public/brand/` con el nombre de la variante y la aplicación lo prefiere sin
+> tocar nada más:
+>
+> - `escudo-cga.svg` — versión a color
+> - `escudo-cga-blanco.svg` — para fondos oscuros
+> - `escudo-cga-negro.svg` — monocromo
+>
+> El favicon (`public/brand/favicon.svg`) repite el mismo trazado a mano, porque es un archivo
+> suelto y no puede compartir el componente. Si cambia uno, cambie el otro.
 
 ## 8. Estructura del proyecto
 

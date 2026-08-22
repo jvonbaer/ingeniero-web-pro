@@ -18,7 +18,7 @@ function BarraSuperior() {
     <header className="topbar no-print">
       <div className="topbar__inner">
         <div className="topbar__marca">
-          <Escudo tamano={38} />
+          <Escudo tamano={38} variante="blanco" />
           <div>
             <div className="topbar__titulo">Escuela de Fútbol</div>
             <div className="topbar__sub">Club Gimnástico Alemán · Temuco</div>

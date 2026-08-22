@@ -1,7 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="CGA">
-  <circle cx="50" cy="50" r="47" fill="#1C1C1C" stroke="#C8102E" stroke-width="6"/>
-  <circle cx="50" cy="43" r="20" fill="none" stroke="#EAAA00" stroke-width="4"/>
-  <path d="M50 29 L61 37 L57 50 L43 50 L39 37 Z" fill="#EAAA00"/>
-  <text x="50" y="80" text-anchor="middle" font-family="Barlow Condensed, Arial Narrow, sans-serif"
-        font-size="21" font-weight="800" letter-spacing="2" fill="#FFFFFF">CGA</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Club Gimnástico Alemán">
+  <!-- Cruz de las cuatro F dentro del anillo. Mismo trazado que el escudo que
+       dibuja src/components/Marca.tsx; si cambia uno, cambie el otro. -->
+  <clipPath id="disco"><circle cx="50" cy="50" r="39.4"/></clipPath>
+  <g clip-path="url(#disco)" fill="#C8102E">
+    <g><rect x="51.7" y="0" width="11.6" height="48.3"/><rect x="63.5" y="38.9" width="95" height="9.4"/><rect x="63.5" y="24.3" width="95" height="9.4"/></g>
+    <g transform="translate(100,0) scale(-1,1)"><rect x="51.7" y="0" width="11.6" height="48.3"/><rect x="63.5" y="38.9" width="95" height="9.4"/><rect x="63.5" y="24.3" width="95" height="9.4"/></g>
+    <g transform="translate(0,100) scale(1,-1)"><rect x="51.7" y="0" width="11.6" height="48.3"/><rect x="63.5" y="38.9" width="95" height="9.4"/><rect x="63.5" y="24.3" width="95" height="9.4"/></g>
+    <g transform="translate(100,100) scale(-1,-1)"><rect x="51.7" y="0" width="11.6" height="48.3"/><rect x="63.5" y="38.9" width="95" height="9.4"/><rect x="63.5" y="24.3" width="95" height="9.4"/></g>
+  </g>
+  <circle cx="50" cy="50" r="44.2" fill="none" stroke="#5A5A5A" stroke-width="3.6"/>
 </svg>

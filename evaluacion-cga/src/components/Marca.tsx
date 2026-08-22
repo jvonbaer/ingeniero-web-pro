@@ -1,80 +1,150 @@
+import { useEffect, useId, useState } from "react";
+
 /**
- * Marca circular del club.
+ * Escudo del Club Gimnástico Alemán: la cruz de las cuatro F —Frisch, Fromm,
+ * Fröhlich, Frei, el Turnerkreuz de los clubes de gimnasia alemanes— dentro del
+ * anillo.
  *
- * Es un sustituto: el escudo oficial del CGA no viene con este repositorio. Para
- * usar el real, deje el archivo en `public/brand/escudo-cga.svg` (o .png) — el
- * componente lo toma automáticamente y sólo cae en el dibujo de abajo si no lo
- * encuentra. Ver README, sección "Poner el escudo oficial".
+ * La geometría está reconstruida a mano desde el logotipo oficial, no es una
+ * imagen incrustada: así se puede pintar en color, en blanco sobre los fondos
+ * oscuros y en negro para fotocopias, y se imprime como vector.
+ *
+ * Si el club entrega el archivo vectorial original, déjelo en `public/brand/`
+ * con uno de estos nombres y se usa ese en vez del dibujo:
+ *   · escudo-cga.svg         (versión a color)
+ *   · escudo-cga-blanco.svg  (para fondos oscuros)
+ *   · escudo-cga-negro.svg   (monocromo)
  */
-import { useEffect, useState } from "react";
 
-const RUTA_ESCUDO = `${import.meta.env.BASE_URL}brand/escudo-cga.svg`;
+export type VarianteEscudo = "color" | "blanco" | "negro";
 
-// La comprobación se hace una vez por carga y el resultado se comparte: en el
-// informe hay varios escudos y no tiene sentido que cada uno pida el archivo.
-let existeEscudo: boolean | null = null;
-let comprobacion: Promise<boolean> | null = null;
+/** Mitad del ancho del canal blanco que separa las cuatro F. */
+const CANAL = 1.7;
+/** Los brazos se dibujan largos y el disco los recorta: así siguen la curva. */
+const LARGO = 95;
 
-function comprobarEscudo(): Promise<boolean> {
-  comprobacion ??= new Promise<boolean>((resolver) => {
+const CUADRANTES = [
+  "", // superior derecho, tal como está definido
+  "translate(100,0) scale(-1,1)", // superior izquierdo
+  "translate(0,100) scale(1,-1)", // inferior derecho
+  "translate(100,100) scale(-1,-1)", // inferior izquierdo
+];
+
+const ARCHIVOS: Record<VarianteEscudo, string> = {
+  color: "escudo-cga.svg",
+  blanco: "escudo-cga-blanco.svg",
+  negro: "escudo-cga-negro.svg",
+};
+
+function colores(variante: VarianteEscudo) {
+  if (variante === "blanco") return { anillo: "var(--cga-blanco)", cruz: "var(--cga-blanco)" };
+  if (variante === "negro") return { anillo: "var(--carbon-900)", cruz: "var(--carbon-900)" };
+  return { anillo: "var(--cga-gris)", cruz: "var(--cga-rojo)" };
+}
+
+interface EscudoProps {
+  tamano?: number;
+  variante?: VarianteEscudo;
+  /** Deja el escudo sin colores propios para que herede el del contenedor. */
+  heredarColor?: boolean;
+  /** Ocupa todo el contenedor en vez de un tamaño fijo. */
+  fluido?: boolean;
+}
+
+/** El dibujo en sí, sin la búsqueda del archivo oficial. */
+export function EscudoDibujado({
+  tamano = 40,
+  variante = "color",
+  heredarColor = false,
+  fluido = false,
+}: EscudoProps) {
+  const id = useId();
+  const disco = `disco-${id}`;
+  const { anillo, cruz } = colores(variante);
+
+  return (
+    <svg
+      width={fluido ? "100%" : tamano}
+      height={fluido ? "100%" : tamano}
+      viewBox="0 0 100 100"
+      role="img"
+      aria-label="Club Gimnástico Alemán"
+      style={{ display: "block", flex: "none" }}
+    >
+      <defs>
+        <clipPath id={disco}>
+          <circle cx="50" cy="50" r="39.4" />
+        </clipPath>
+      </defs>
+
+      <g clipPath={`url(#${disco})`} fill={heredarColor ? "currentColor" : cruz}>
+        {CUADRANTES.map((transformacion) => (
+          <g key={transformacion || "base"} transform={transformacion || undefined}>
+            {/* Asta vertical, pegada al canal central */}
+            <rect x={50 + CANAL} y="0" width="11.6" height={48.3} />
+            {/* Brazo largo, pegado al canal horizontal */}
+            <rect x={61.8 + CANAL} y="38.9" width={LARGO} height="9.4" />
+            {/* Brazo corto, más arriba */}
+            <rect x={61.8 + CANAL} y="24.3" width={LARGO} height="9.4" />
+          </g>
+        ))}
+      </g>
+
+      <circle
+        cx="50"
+        cy="50"
+        r="44.2"
+        fill="none"
+        stroke={heredarColor ? "currentColor" : anillo}
+        strokeWidth="3.6"
+      />
+    </svg>
+  );
+}
+
+// La comprobación del archivo oficial se hace una vez por variante y por carga:
+// en el informe hay varios escudos y no tiene sentido que cada uno lo pida.
+const comprobado: Partial<Record<VarianteEscudo, boolean>> = {};
+const enCurso: Partial<Record<VarianteEscudo, Promise<boolean>>> = {};
+
+function rutaDe(variante: VarianteEscudo) {
+  return `${import.meta.env.BASE_URL}brand/${ARCHIVOS[variante]}`;
+}
+
+function comprobarArchivo(variante: VarianteEscudo): Promise<boolean> {
+  enCurso[variante] ??= new Promise<boolean>((resolver) => {
     const img = new Image();
     img.onload = () => resolver(true);
     img.onerror = () => resolver(false);
-    img.src = RUTA_ESCUDO;
+    img.src = rutaDe(variante);
   }).then((existe) => {
-    existeEscudo = existe;
+    comprobado[variante] = existe;
     return existe;
   });
-  return comprobacion;
+  return enCurso[variante]!;
 }
 
-export function Escudo({ tamano = 40 }: { tamano?: number }) {
-  const [existe, setExiste] = useState<boolean | null>(existeEscudo);
+export function Escudo({ tamano = 40, variante = "color" }: EscudoProps) {
+  const [oficial, setOficial] = useState<boolean | null>(comprobado[variante] ?? null);
 
   useEffect(() => {
-    if (existeEscudo === null) void comprobarEscudo().then(setExiste);
-  }, []);
+    if (comprobado[variante] === undefined) void comprobarArchivo(variante).then(setOficial);
+    else setOficial(comprobado[variante]!);
+  }, [variante]);
 
-  if (existe) {
+  if (oficial) {
     return (
       <img
-        src={RUTA_ESCUDO}
+        src={rutaDe(variante)}
         width={tamano}
         height={tamano}
         alt="Escudo del Club Gimnástico Alemán"
-        style={{ display: "block", objectFit: "contain" }}
+        style={{ display: "block", objectFit: "contain", flex: "none" }}
       />
     );
   }
 
-  return (
-    <svg
-      width={tamano}
-      height={tamano}
-      viewBox="0 0 100 100"
-      role="img"
-      aria-label="Club Gimnástico Alemán"
-    >
-      <circle cx="50" cy="50" r="47" fill="var(--carbon-700)" stroke="var(--cga-rojo)" strokeWidth="5" />
-      <circle cx="50" cy="44" r="20" fill="none" stroke="var(--rama-futbol)" strokeWidth="3.5" />
-      <path
-        d="M50 30 L61 38 L57 51 L43 51 L39 38 Z"
-        fill="var(--rama-futbol)"
-      />
-      <text
-        x="50"
-        y="79"
-        textAnchor="middle"
-        fontFamily="var(--fuente-cond)"
-        fontSize="20"
-        fontWeight="800"
-        letterSpacing="2"
-        fill="var(--cga-blanco)"
-      >
-        CGA
-      </text>
-    </svg>
-  );
+  return <EscudoDibujado tamano={tamano} variante={variante} />;
 }
 
 /**
@@ -85,24 +155,7 @@ export function Escudo({ tamano = 40 }: { tamano?: number }) {
 export function MarcaDeAgua() {
   return (
     <div className="marca-agua" aria-hidden="true">
-      <svg viewBox="0 0 100 100" width="100%" height="100%">
-        <circle cx="50" cy="50" r="46" fill="none" stroke="var(--carbon-700)" strokeWidth="6" />
-        <circle cx="50" cy="50" r="33" fill="none" stroke="var(--carbon-700)" strokeWidth="2.5" />
-        <circle cx="50" cy="42" r="17" fill="none" stroke="var(--carbon-700)" strokeWidth="3" />
-        <path d="M50 29 L60 36 L56 48 L44 48 L40 36 Z" fill="var(--carbon-700)" />
-        <text
-          x="50"
-          y="76"
-          textAnchor="middle"
-          fontFamily="var(--fuente-cond)"
-          fontSize="18"
-          fontWeight="800"
-          letterSpacing="3"
-          fill="var(--carbon-700)"
-        >
-          CGA
-        </text>
-      </svg>
+      <EscudoDibujado fluido variante="negro" heredarColor />
     </div>
   );
 }

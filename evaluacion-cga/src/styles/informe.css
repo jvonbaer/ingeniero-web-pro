@@ -22,6 +22,7 @@
   bottom: -22%;
   width: 78%;
   aspect-ratio: 1;
+  color: var(--carbon-700);
   opacity: 0.08;
   filter: blur(1.8px); /* "marca de agua difusa", según el manual del club */
   pointer-events: none;
