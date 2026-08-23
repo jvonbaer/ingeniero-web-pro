@@ -9,6 +9,7 @@ import {
   guardarConexion,
   validarConexion,
 } from "../data/conexion";
+import { revisarInstalacion, type Prueba } from "../data/diagnostico";
 import { datosDemo } from "../data/seed";
 import {
   calcular,
@@ -221,6 +222,8 @@ export function Datos() {
 
           <ConexionNube />
 
+          <RevisionInstalacion />
+
           <div className="card">
             <h2 className="card__titulo">Datos de demostración</h2>
             <div className="card__cuerpo">
@@ -361,5 +364,186 @@ function ConexionNube() {
         </p>
       </div>
     </div>
+  );
+}
+
+/**
+ * Revisión paso a paso de la instalación en la nube.
+ *
+ * Conectar Supabase son cuatro cosas en dos sitios distintos y ninguna avisa
+ * cuando falta: el entrenador se entera recién cuando la aplicación falla en
+ * medio de una evaluación. Esta tarjeta las prueba de a una —incluida una
+ * escritura real que se borra sola— y dice cuál falta y qué hacer.
+ */
+function RevisionInstalacion() {
+  const [url, setUrl] = useState(conexion?.url ?? "");
+  const [clave, setClave] = useState(conexion?.anonKey ?? "");
+  const [correo, setCorreo] = useState("");
+  const [contrasena, setContrasena] = useState("");
+  const [pruebas, setPruebas] = useState<Prueba[] | null>(null);
+  const [revisando, setRevisando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function revisar() {
+    setRevisando(true);
+    setError(null);
+    setPruebas(null);
+    try {
+      setPruebas(
+        await revisarInstalacion({
+          url,
+          anonKey: clave,
+          correo: correo.trim() || undefined,
+          clave: contrasena || undefined,
+        }),
+      );
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "No se pudo completar la revisión.");
+    } finally {
+      setRevisando(false);
+    }
+  }
+
+  const fallas = pruebas?.filter((p) => p.estado === "falla").length ?? 0;
+  const sinProbar = pruebas?.filter((p) => p.estado === "omitida").length ?? 0;
+
+  return (
+    <div className="card">
+      <h2 className="card__titulo">Revisar la instalación</h2>
+      <div className="card__cuerpo">
+        <p style={{ marginTop: 0, fontSize: 14 }}>
+          Comprueba una por una las cosas que hay que dejar hechas en Supabase y dice cuál falta.
+          Incluye guardar una ficha de prueba, que se borra sola: es la única forma de saber que
+          los permisos de escritura quedaron puestos.
+        </p>
+
+        <div className="revision__campos">
+          <Campo label="Project URL" ayuda="Project Settings → API">
+            <input
+              className="input"
+              value={url}
+              placeholder="https://abcdefgh.supabase.co"
+              onChange={(e) => setUrl(e.target.value)}
+            />
+          </Campo>
+          <Campo label="Clave anónima (anon public)">
+            <input
+              className="input"
+              value={clave}
+              placeholder="eyJhbGciOi…"
+              onChange={(e) => setClave(e.target.value)}
+            />
+          </Campo>
+        </div>
+
+        <p className="campo__ayuda" style={{ margin: "4px 0 10px" }}>
+          El correo y la clave de un entrenador son opcionales, pero sin ellos sólo se puede revisar
+          la mitad: la cuenta, los permisos de lectura y los de escritura quedan sin probar. No se
+          guardan en ninguna parte ni se cierra la sesión que tenga abierta.
+        </p>
+
+        <div className="revision__campos">
+          <Campo label="Correo del entrenador">
+            <input
+              className="input"
+              type="email"
+              autoComplete="off"
+              value={correo}
+              placeholder="entrenador@ejemplo.cl"
+              onChange={(e) => setCorreo(e.target.value)}
+            />
+          </Campo>
+          <Campo label="Su clave">
+            <input
+              className="input"
+              type="password"
+              autoComplete="off"
+              value={contrasena}
+              onChange={(e) => setContrasena(e.target.value)}
+            />
+          </Campo>
+        </div>
+
+        <button
+          type="button"
+          className="btn btn--primario"
+          onClick={() => void revisar()}
+          disabled={revisando || !url.trim() || !clave.trim()}
+        >
+          {revisando ? "Revisando…" : "Revisar la instalación"}
+        </button>
+
+        {error && <p className="campo__error" style={{ marginTop: 10 }}>{error}</p>}
+
+        {pruebas && (
+          <>
+            <ul className="revision">
+              {pruebas.map((prueba) => (
+                <li key={prueba.id} className={`revision__item revision__item--${prueba.estado}`}>
+                  <MarcaPrueba estado={prueba.estado} />
+                  <div>
+                    <div className="revision__titulo">{prueba.titulo}</div>
+                    <p className="revision__detalle">{prueba.detalle}</p>
+                    {prueba.remedio && <p className="revision__remedio">{prueba.remedio}</p>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <p className="revision__resumen">{resumen(fallas, sinProbar)}</p>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Una revisión a medias no es una revisión aprobada: mientras queden pruebas sin
+ * correr hay que decirlo, o el entrenador se va tranquilo con la mitad hecha.
+ */
+function resumen(fallas: number, sinProbar: number): string {
+  if (fallas > 0) {
+    const plural = fallas > 1;
+    const cola = sinProbar > 0 ? `, y ${sinProbar} sin probar` : "";
+    return `Falta${plural ? "n" : ""} ${fallas} ${plural ? "cosas" : "cosa"} por corregir${cola}.`;
+  }
+  if (sinProbar > 0) {
+    return `Bien hasta donde se pudo revisar, pero ${sinProbar} ${
+      sinProbar > 1 ? "pruebas quedaron" : "prueba quedó"
+    } sin correr.`;
+  }
+  return "Todo lo indispensable está hecho. La escuela puede empezar a cargar jugadores.";
+}
+
+/** Marca de estado dibujada, no un emoji: el sistema CGA no admite color ajeno. */
+function MarcaPrueba({ estado }: { estado: Prueba["estado"] }) {
+  const trazos: Record<Prueba["estado"], string> = {
+    ok: "M5.5 10.5 L8.7 13.7 L14.5 6.5",
+    falla: "M6 6 L14 14 M14 6 L6 14",
+    aviso: "M10 5.6 L10 11 M10 13.6 L10 14.4",
+    omitida: "M6 10 L14 10",
+  };
+  const etiquetas: Record<Prueba["estado"], string> = {
+    ok: "Correcto",
+    falla: "Falta",
+    aviso: "Con reparo",
+    omitida: "Sin probar",
+  };
+
+  return (
+    <svg
+      className="revision__marca"
+      viewBox="0 0 20 20"
+      role="img"
+      aria-label={etiquetas[estado]}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="10" cy="10" r="9" strokeWidth="1.4" opacity="0.35" />
+      <path d={trazos[estado]} />
+    </svg>
   );
 }
