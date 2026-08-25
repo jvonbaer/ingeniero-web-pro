@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Backup, Evaluacion, Jugador } from "../domain/types";
 import { conexion } from "./conexion";
+import { esDesfaseDeReloj, traducirError } from "./mensajes";
 import { migrarConfiguracion, migrarEvaluaciones } from "./migrar";
 import type { EstadoDatos, Store } from "./store";
 
@@ -19,8 +20,11 @@ export function db(): SupabaseClient {
 }
 
 function reventar(contexto: string, error: { message: string } | null) {
-  if (error) throw new Error(`${contexto}: ${error.message}`);
+  if (error) throw new Error(`${contexto}: ${traducirError(error.message)}`);
 }
+
+/** Espera sin bloquear, para el reintento de la carga inicial. */
+const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /**
  * Persistencia compartida en Supabase.
@@ -32,16 +36,33 @@ function reventar(contexto: string, error: { message: string } | null) {
  * vez que agrega un indicador. La vista `v_puntajes` de schema.sql expone los
  * mismos datos fila por fila para quien quiera consultarlos en SQL.
  */
+function leerTodo() {
+  return Promise.all([
+    db().from("jugadores").select("datos").order("codigo", { ascending: true }),
+    db().from("evaluaciones").select("datos").order("fecha", { ascending: false }),
+    db().from("rubrica").select("datos").eq("id", 1).maybeSingle(),
+  ]);
+}
+
 export const supabaseDriver: Store = {
   modo: "nube",
   etiqueta: "Nube compartida",
 
   async cargar(): Promise<EstadoDatos> {
-    const [rj, re, rr] = await Promise.all([
-      db().from("jugadores").select("datos").order("codigo", { ascending: true }),
-      db().from("evaluaciones").select("datos").order("fecha", { ascending: false }),
-      db().from("rubrica").select("datos").eq("id", 1).maybeSingle(),
-    ]);
+    let [rj, re, rr] = await leerTodo();
+
+    // El token recién firmado puede llegar con unos milisegundos de adelanto
+    // respecto del servicio que lo valida, y entonces la primera lectura tras
+    // iniciar sesión falla sola. Se reintenta una vez antes de dar la cara:
+    // si era eso, el entrenador nunca se entera; si era el reloj del teléfono,
+    // vuelve a fallar y el mensaje ya dice qué revisar.
+    const desfase = [rj.error, re.error, rr.error].some(
+      (e) => e && esDesfaseDeReloj(e.message),
+    );
+    if (desfase) {
+      await esperar(1500);
+      [rj, re, rr] = await leerTodo();
+    }
 
     reventar("No se pudieron leer los jugadores", rj.error);
     reventar("No se pudieron leer las evaluaciones", re.error);
