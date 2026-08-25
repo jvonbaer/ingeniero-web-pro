@@ -1,0 +1,78 @@
+/* ============================================================
+   IMPRESIÓN — el informe sale en una hoja A4 vertical.
+   El navegador genera el PDF; no se necesita ninguna librería.
+   ============================================================ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html, body {
+    background: var(--cga-blanco);
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Todo lo que es interfaz de la aplicación desaparece del papel. */
+  .no-print,
+  .modal,
+  .topbar,
+  .page-head,
+  .aviso {
+    display: none !important;
+  }
+
+  .app__main {
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .informe-marco { overflow: visible; }
+
+  /* La hoja de papel es un documento que fluye: sin sombra ni borde, y con sus
+     propios márgenes, porque @page va con margin 0 para que el informe salga
+     a sangre. */
+  .hoja {
+    max-width: none;
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 12mm 14mm;
+  }
+
+  .hoja__casillero,
+  .hoja__valores,
+  .hoja__instruccion {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .informe {
+    /* En pantalla la hoja se reduce con transform; en papel va a tamaño real. */
+    transform: none !important;
+    margin: 0 !important;
+    box-shadow: none;
+    page-break-after: avoid;
+    break-inside: avoid;
+  }
+
+  /* Sin esto, Chrome y Safari descartan los fondos oscuros y el informe sale
+     en blanco y negro. */
+  .informe,
+  .informe *,
+  .informe__header,
+  .informe__perfil,
+  .informe__panel-oscuro,
+  .informe__pie,
+  .informe__lema,
+  .informe__valores,
+  .informe__categoria,
+  .informe__dorsal,
+  .informe__lema {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

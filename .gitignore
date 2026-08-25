@@ -4,3 +4,9 @@ node_modules/
 .env
 .env.local
 *.log
+
+# Paquetes armados para enviar la aplicación ya compilada (Netlify Drop, correo).
+# Salen de `npm run build` en evaluacion-cga/, así que no se versionan.
+evaluacion-cga-web.zip
+evaluacion-cga*.tar.gz
+evaluacion-cga*.bundle

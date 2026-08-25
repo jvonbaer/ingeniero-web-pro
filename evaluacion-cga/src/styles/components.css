@@ -1,0 +1,675 @@
+/* ---------- Tarjetas y superficies ---------- */
+.card {
+  background: var(--bg-panel);
+  border: 1px solid var(--borde);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sombra-1);
+  overflow: hidden;
+}
+
+.card--oscura {
+  background: var(--carbon-700);
+  border-color: var(--carbon-500);
+  color: var(--texto-inverso);
+}
+
+.card__cuerpo { padding: 18px; }
+
+.card__titulo {
+  font-size: 17px;
+  padding: 13px 18px;
+  border-bottom: 1px solid var(--borde);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.card--oscura .card__titulo { border-color: var(--carbon-500); }
+
+.grid { display: grid; gap: 16px; }
+.grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid--ficha { grid-template-columns: minmax(0, 340px) minmax(0, 1fr); align-items: start; }
+
+@media (max-width: 900px) {
+  .grid--3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid--ficha { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 620px) {
+  .grid--2, .grid--3 { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- Botones ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--tap);
+  padding: 0 18px;
+  border-radius: var(--r-md);
+  border: 1px solid transparent;
+  font-family: var(--fuente-cond);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  background: var(--carbon-700);
+  color: var(--texto-inverso);
+  transition: transform 0.12s ease, background 0.12s ease, opacity 0.12s ease;
+}
+
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn--primario { background: var(--rama-futbol); color: var(--carbon-900); }
+.btn--primario:hover:not(:disabled) { background: var(--acento-hover); }
+.btn--peligro { background: var(--cga-rojo); color: var(--cga-blanco); }
+.btn--fantasma { background: transparent; color: var(--texto); border-color: var(--borde); }
+.btn--fantasma:hover:not(:disabled) { border-color: var(--carbon-700); }
+.btn--bloque { width: 100%; }
+.btn--sm { min-height: 38px; font-size: 14px; padding: 0 13px; }
+
+/* ---------- Formularios ---------- */
+.campo { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; }
+
+.campo__label {
+  font-family: var(--fuente-cond);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
+.campo__ayuda { font-size: 12.5px; color: var(--texto-suave); }
+
+.campo__error { font-size: 12.5px; color: var(--cga-rojo); font-weight: 600; }
+
+.input, .select, .textarea {
+  width: 100%;
+  min-height: var(--tap);
+  padding: 10px 13px;
+  border: 1.5px solid var(--borde);
+  border-radius: var(--r-md);
+  background: var(--cga-blanco);
+  font-size: 16px; /* 16px evita el zoom automático de iOS */
+}
+
+.textarea { min-height: 110px; resize: vertical; line-height: 1.55; }
+
+.input:focus, .select:focus, .textarea:focus {
+  border-color: var(--carbon-700);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(234, 170, 0, 0.35);
+}
+
+.input[aria-invalid="true"], .select[aria-invalid="true"] { border-color: var(--cga-rojo); }
+
+/* ---------- Barra de búsqueda / filtros ---------- */
+.filtros {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.filtros .input, .filtros .select { width: auto; flex: 1 1 190px; margin: 0; }
+
+/* ---------- Lista de jugadores ---------- */
+.jugador-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-lg);
+  background: var(--cga-blanco);
+  text-decoration: none;
+  box-shadow: var(--sombra-1);
+  transition: border-color 0.12s ease, transform 0.12s ease;
+}
+
+.jugador-item:hover { border-color: var(--carbon-700); transform: translateY(-1px); }
+
+.jugador-item__nombre { font-family: var(--fuente-cond); font-size: 20px; font-weight: 700; line-height: 1.1; text-transform: uppercase; }
+
+.jugador-item__meta { font-size: 12.5px; color: var(--texto-suave); }
+
+.jugador-item__score { margin-left: auto; text-align: right; }
+
+/* ---------- Foto ---------- */
+.foto {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  width: 100%;
+  border-radius: var(--r-md);
+  overflow: hidden;
+  background: var(--carbon-600);
+  display: grid;
+  place-items: center;
+}
+
+.foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.foto__vacia {
+  font-family: var(--fuente-cond);
+  font-size: 40px;
+  font-weight: 800;
+  color: var(--carbon-400);
+  letter-spacing: 0.05em;
+}
+
+.foto--mini { width: 54px; aspect-ratio: 1; border-radius: 50%; flex: none; }
+.foto--mini .foto__vacia { font-size: 18px; }
+
+/* ---------- Chips e insignias ---------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-family: var(--fuente-cond);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  background: var(--hueso-2);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+}
+
+.chip--acento { background: var(--rama-futbol); border-color: var(--rama-futbol); color: var(--carbon-900); }
+.chip--rojo { background: var(--cga-rojo); border-color: var(--cga-rojo); color: var(--cga-blanco); }
+.chip--oscuro { background: var(--carbon-700); border-color: var(--carbon-700); color: var(--cga-blanco); }
+
+.nivel { font-family: var(--fuente-cond); font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
+.nivel--inicial { color: var(--nivel-inicial); }
+.nivel--desarrollo { color: var(--nivel-desarrollo); }
+.nivel--intermedio { color: var(--nivel-intermedio); }
+.nivel--avanzado { color: var(--nivel-avanzado); }
+.nivel--excelente { color: var(--nivel-excelente); }
+.card--oscura .nivel--excelente, .informe__panel-oscuro .nivel--excelente { color: var(--cga-blanco); }
+
+.puntaje { font-family: var(--fuente-cond); font-weight: 800; line-height: 0.9; }
+.puntaje small { font-size: 0.46em; font-weight: 600; color: var(--texto-suave); }
+
+.delta { font-family: var(--fuente-cond); font-weight: 700; font-size: 13px; letter-spacing: 0.05em; }
+.delta--sube { color: var(--exito); }
+.delta--baja { color: var(--cga-rojo); }
+.delta--igual { color: var(--texto-suave); }
+
+/* ---------- Barra de categoría ---------- */
+.barra-cat { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--borde); }
+.barra-cat:last-child { border-bottom: none; }
+.barra-cat__nombre { font-family: var(--fuente-cond); font-size: 16px; font-weight: 700; text-transform: uppercase; flex: 1 1 auto; min-width: 0; }
+.barra-cat__pista { position: relative; height: 8px; border-radius: 999px; background: var(--hueso-2); flex: 2 1 120px; overflow: hidden; }
+.barra-cat__valor { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: var(--rama-futbol); }
+.barra-cat__num { font-family: var(--fuente-cond); font-size: 19px; font-weight: 800; width: 58px; text-align: right; flex: none; }
+
+/* ---------- Encuesta (wizard de evaluación) ---------- */
+.encuesta {
+  max-width: 760px;
+  margin: 0 auto;
+  /* La barra superior es fija: sin este margen, al cambiar de paso la cabecera
+     con el nombre del jugador queda escondida detrás de ella. */
+  scroll-margin-top: 84px;
+}
+
+.encuesta__progreso { display: flex; gap: 5px; margin-bottom: 16px; }
+
+.encuesta__paso {
+  flex: 1;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--hueso-2);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.encuesta__paso--hecho { background: var(--cga-rojo); }
+.encuesta__paso--activo { background: var(--rama-futbol); }
+
+.encuesta__cabecera {
+  background: var(--carbon-700);
+  color: var(--cga-blanco);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  padding: 16px 18px;
+  border-bottom: var(--franja) solid var(--cga-rojo);
+}
+
+.encuesta__cabecera h2 { font-size: 26px; line-height: 1; }
+.encuesta__cabecera p { margin: 5px 0 0; font-size: 13.5px; color: var(--gris-100); }
+
+.pregunta { padding: 16px 18px; border-bottom: 1px solid var(--borde); }
+.pregunta:last-child { border-bottom: none; }
+.pregunta__texto { font-family: var(--fuente-cond); font-size: 20px; font-weight: 700; text-transform: uppercase; line-height: 1.15; }
+.pregunta__ayuda { font-size: 13px; color: var(--texto-suave); margin: 3px 0 11px; }
+
+.escala { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; }
+
+.escala__opcion {
+  min-height: 62px;
+  border: 1.5px solid var(--borde);
+  border-radius: var(--r-md);
+  background: var(--cga-blanco);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 6px 3px;
+  text-align: center;
+  transition: background 0.1s ease, border-color 0.1s ease;
+}
+
+.escala__opcion b { font-family: var(--fuente-cond); font-size: 23px; font-weight: 800; line-height: 1; }
+.escala__opcion span { font-size: 9.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--texto-suave); line-height: 1.15; }
+
+.escala__opcion[aria-pressed="true"] {
+  background: var(--rama-futbol);
+  border-color: var(--carbon-700);
+  color: var(--carbon-900);
+}
+
+.escala__opcion[aria-pressed="true"] span { color: var(--carbon-700); }
+
+.encuesta__pie {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 12px 14px;
+  background: rgba(244, 243, 241, 0.96);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid var(--borde);
+  margin-top: 16px;
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
+}
+
+.encuesta__pie .btn { flex: 1; }
+.encuesta__contador { font-family: var(--fuente-cond); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-suave); }
+
+/* ---------- Estados vacíos y avisos ---------- */
+.vacio { text-align: center; padding: 46px 20px; color: var(--texto-suave); }
+.vacio h3 { font-size: 22px; color: var(--texto); margin-bottom: 7px; }
+
+.aviso {
+  padding: 12px 15px;
+  border-radius: var(--r-md);
+  border-left: var(--franja) solid var(--cga-rojo);
+  background: var(--cga-blanco);
+  border-top: 1px solid var(--borde);
+  border-right: 1px solid var(--borde);
+  border-bottom: 1px solid var(--borde);
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.aviso--ok { border-left-color: var(--exito); }
+.aviso--acento { border-left-color: var(--rama-futbol); }
+
+.lista-limpia { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+
+.tabla { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tabla th, .tabla td { padding: 9px 11px; text-align: left; border-bottom: 1px solid var(--borde); }
+.tabla th { font-family: var(--fuente-cond); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--texto-suave); }
+.tabla td.num, .tabla th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.tabla-scroll { overflow-x: auto; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* ---------- Iconos de categoría ---------- */
+.icono { flex: none; display: inline-block; vertical-align: -0.15em; }
+.card__titulo .icono, .encuesta__titulo-cat .icono { vertical-align: -0.18em; }
+.encuesta__titulo-cat { display: flex; align-items: center; gap: 9px; }
+
+/* ---------- Pantalla de acceso (modo nube) ---------- */
+.acceso {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px 18px;
+  background: var(--carbon-700);
+}
+
+.acceso__caja {
+  width: 100%;
+  max-width: 420px;
+  background: var(--bg-panel);
+  border-radius: var(--r-lg);
+  border-top: var(--franja) solid var(--cga-rojo); /* franja institucional */
+  padding: 26px 24px 24px;
+  box-shadow: var(--sombra-2);
+}
+
+.acceso__marca { display: flex; align-items: center; gap: 13px; margin-bottom: 16px; }
+.acceso__marca h1 { font-size: 24px; line-height: 1; }
+.acceso__marca p { margin: 3px 0 0; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--texto-suave); }
+.acceso__texto { font-size: 13.5px; color: var(--texto-suave); margin: 0 0 18px; }
+
+.topbar__link[type="button"] { border: none; background: transparent; cursor: pointer; font-family: var(--fuente-cond); }
+
+/* ---------- Métricas del panel de jugadores ----------
+   Se mantienen en tres columnas también en teléfono: apiladas ocupaban media
+   pantalla antes de llegar a la lista, que es lo que el entrenador viene a ver. */
+.grid--metricas { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.metrica .card__cuerpo { padding: 12px 14px; }
+.metrica__rotulo { margin-bottom: 3px; line-height: 1.2; }
+.metrica__valor { font-size: 38px; }
+
+@media (max-width: 620px) {
+  .metrica .card__cuerpo { padding: 10px 11px; }
+  .metrica__rotulo { font-size: 10.5px; letter-spacing: 0.07em; }
+  .metrica__valor { font-size: 30px; }
+}
+
+/* ---------- Ventana modal ---------- */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: var(--velo);
+  backdrop-filter: blur(3px);
+}
+
+.modal__caja {
+  width: 100%;
+  max-width: 460px;
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  padding: 16px 18px 18px;
+  background: var(--bg-panel);
+  border-radius: var(--r-lg);
+  border-top: var(--franja) solid var(--cga-rojo); /* franja institucional */
+  box-shadow: var(--sombra-2);
+}
+
+/* ---------- Visor de cámara ---------- */
+.camara__cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.camara__cabecera h2 { font-size: 23px; line-height: 1; }
+
+.camara__visor {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background: var(--carbon-800);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+
+.camara__video,
+.camara__visor img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* La cámara frontal se ve en espejo, como la gente espera verse; lo que se
+   guarda va sin espejo. */
+.camara__video--espejo { transform: scaleX(-1); }
+
+.camara__aviso {
+  position: absolute;
+  inset: auto 14px 14px;
+  margin: 0;
+  padding: 10px 13px;
+  border-radius: var(--r-sm);
+  background: var(--panel-flotante);
+  color: var(--cga-blanco);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.camara__aviso--error { background: var(--cga-rojo); }
+
+.camara__acciones { display: flex; gap: 9px; margin-top: 12px; }
+.camara__acciones .btn { flex: 1; }
+
+.camara__pie { margin: 10px 0 0; font-size: 12.5px; line-height: 1.4; color: var(--texto-suave); }
+
+/* ---------- Acciones de la foto ---------- */
+.foto__acciones { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.foto__mensaje { margin: 9px 0 0; font-size: 12.5px; font-weight: 600; color: var(--exito); }
+
+/* La foto llena el ancho de su tarjeta, con un tope para que no se agrande de
+   más en pantallas anchas. */
+.entrada-foto { max-width: 300px; }
+
+/* ---------- Parámetros: listas y asignaciones ---------- */
+.fila-simple {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 13px;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-md);
+  background: var(--cga-blanco);
+}
+
+.fila-simple__texto { flex: 1 1 auto; font-weight: 600; }
+
+.asignaciones {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+  gap: 11px;
+  margin-bottom: 16px;
+}
+
+.asignacion { display: flex; flex-direction: column; gap: 5px; }
+
+.asignacion__categoria {
+  font-family: var(--fuente-cond);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.subpunto {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr) auto;
+  gap: 10px;
+  align-items: start;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--borde);
+}
+
+@media (max-width: 720px) {
+  .subpunto { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---------- Pie de formulario ----------
+   El botón de guardar vive abajo, donde uno termina de escribir, y la barra
+   queda fija al borde inferior para no obligar a volver arriba en el teléfono. */
+.form-pie {
+  position: sticky;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px;
+  padding: 12px 14px;
+  background: rgba(244, 243, 241, 0.96);
+  backdrop-filter: blur(6px);
+  border-top: 1px solid var(--borde);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+}
+
+.form-pie .btn { flex: 1 1 auto; }
+.form-pie .btn--primario { flex: 2 1 auto; }
+
+.form-pie__error {
+  flex: 1 1 100%;
+  order: -1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--cga-rojo);
+}
+
+/* ---------- Hoja escaneada adjunta ---------- */
+.entrada-hoja { margin-top: 6px; }
+
+.entrada-hoja__vista {
+  display: block;
+  position: relative;
+  max-width: 340px;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  text-decoration: none;
+  background: var(--hueso-2);
+}
+
+.entrada-hoja__vista img { display: block; width: 100%; max-height: 220px; object-fit: cover; object-position: top; }
+
+.entrada-hoja__vista span {
+  display: block;
+  padding: 6px 11px;
+  font-family: var(--fuente-cond);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--texto);
+  border-top: 1px solid var(--borde);
+  background: var(--bg-panel);
+}
+
+.entrada-hoja__vacia { margin: 0 0 10px; font-size: 13px; color: var(--texto-suave); }
+
+/* ---------- Encuesta: vista compacta ---------- */
+.encuesta__modo { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.encuesta__compacta > .encuesta__cabecera { border-radius: 0; }
+.encuesta__compacta > .encuesta__cabecera:first-child { border-radius: var(--r-lg) var(--r-lg) 0 0; }
+
+/* Revisión de la instalación en la nube ----------------------------------- */
+
+.revision {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.revision__item {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 10px;
+  padding: 11px 0;
+  border-top: 1px solid var(--borde);
+}
+
+.revision__item:first-child { border-top: none; }
+
+.revision__marca {
+  width: 20px;
+  height: 20px;
+  margin-top: 1px;
+  color: var(--texto-suave);
+}
+
+.revision__item--ok      .revision__marca { color: var(--exito); }
+.revision__item--falla   .revision__marca { color: var(--alerta); }
+.revision__item--aviso   .revision__marca { color: var(--nivel-desarrollo); }
+
+.revision__titulo {
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.revision__item--omitida .revision__titulo { color: var(--texto-suave); font-weight: 600; }
+
+.revision__detalle {
+  margin: 3px 0 0;
+  font-size: 13px;
+  color: var(--texto-suave);
+  line-height: 1.45;
+}
+
+.revision__remedio {
+  margin: 7px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  padding: 9px 11px;
+  border-left: 3px solid var(--alerta);
+  background: var(--hueso);
+  border-radius: 0 4px 4px 0;
+}
+
+.revision__item--aviso .revision__remedio { border-left-color: var(--nivel-desarrollo); }
+
+.revision__resumen {
+  margin: 16px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.revision__campos {
+  display: grid;
+  gap: 0 14px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+/* Subsecciones dentro de una sección de la encuesta ----------------------- */
+
+.encuesta__subseccion {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--fuente-cond);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--texto);
+  margin: 26px 0 2px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--acento);
+}
+
+.encuesta__subseccion:first-child { margin-top: 8px; }
+
+.encuesta__subseccion-num {
+  font-variant-numeric: tabular-nums;
+  color: var(--cga-rojo);
+}
+
+/* Encabezado de subsección dentro del editor de sub-puntos ---------------- */
+
+.subpunto__grupo {
+  font-family: var(--fuente-cond);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--cga-rojo);
+  margin: 14px 0 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--borde);
+}

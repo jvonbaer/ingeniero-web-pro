@@ -1,0 +1,88 @@
+import { NavLink, Route, Routes } from "react-router-dom";
+import { Escudo } from "./components/Marca";
+import { useDatos } from "./data/DatosContext";
+import { useSesion } from "./data/sesion";
+import { Jugadores } from "./pages/Jugadores";
+import { JugadorForm } from "./pages/JugadorForm";
+import { JugadorFicha } from "./pages/JugadorFicha";
+import { Evaluar } from "./pages/Evaluar";
+import { Informe } from "./pages/Informe";
+import { HojaPapel } from "./pages/HojaPapel";
+import { Parametros } from "./pages/Parametros";
+import { Datos } from "./pages/Datos";
+
+function BarraSuperior() {
+  const { modo, etiquetaModo } = useDatos();
+  const { requiereAcceso, email, salir } = useSesion();
+  return (
+    <header className="topbar no-print">
+      <div className="topbar__inner">
+        <div className="topbar__marca">
+          <Escudo tamano={38} variante="blanco" />
+          <div>
+            <div className="topbar__titulo">Escuela de Fútbol</div>
+            <div className="topbar__sub">Club Gimnástico Alemán · Temuco</div>
+          </div>
+        </div>
+
+        <nav className="topbar__nav" aria-label="Secciones">
+          <NavLink to="/" end className="topbar__link">Jugadores</NavLink>
+          <NavLink to="/parametros" className="topbar__link">Parámetros</NavLink>
+          <NavLink to="/datos" className="topbar__link">Datos</NavLink>
+        </nav>
+
+        <span
+          className={`topbar__modo ${modo === "nube" ? "topbar__modo--nube" : ""}`}
+          title={
+            modo === "nube"
+              ? `Los datos se guardan en la nube compartida. Sesión: ${email ?? ""}`
+              : "Los datos se guardan sólo en este dispositivo."
+          }
+        >
+          {etiquetaModo}
+        </span>
+
+        {requiereAcceso && (
+          <button type="button" className="topbar__link" onClick={() => void salir()}>
+            Salir
+          </button>
+        )}
+      </div>
+    </header>
+  );
+}
+
+export function App() {
+  const { cargando, error } = useDatos();
+
+  return (
+    <div className="app">
+      <BarraSuperior />
+      <main className="app__main">
+        {error && (
+          <div className="aviso" role="alert">
+            <strong>Hubo un problema:</strong> {error}
+          </div>
+        )}
+        {cargando ? (
+          <p className="vacio">Cargando datos de la escuela…</p>
+        ) : (
+          <Routes>
+            <Route path="/" element={<Jugadores />} />
+            <Route path="/jugadores/nuevo" element={<JugadorForm />} />
+            <Route path="/jugadores/:id" element={<JugadorFicha />} />
+            <Route path="/jugadores/:id/editar" element={<JugadorForm />} />
+            <Route path="/jugadores/:id/evaluar" element={<Evaluar />} />
+            <Route path="/evaluaciones/:evaluacionId" element={<Evaluar />} />
+            <Route path="/informe/:evaluacionId" element={<Informe />} />
+            <Route path="/hoja/:pautaId" element={<HojaPapel />} />
+            <Route path="/hoja/:pautaId/:jugadorId" element={<HojaPapel />} />
+            <Route path="/parametros" element={<Parametros />} />
+            <Route path="/datos" element={<Datos />} />
+            <Route path="*" element={<p className="vacio">Esta página no existe.</p>} />
+          </Routes>
+        )}
+      </main>
+    </div>
+  );
+}

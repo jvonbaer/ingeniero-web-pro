@@ -1,0 +1,9 @@
+# Despliegue en Netlify (plan gratuito).
+# Conecte el repositorio y Netlify leerá esta configuración sola.
+[build]
+  base    = "evaluacion-cga"
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
