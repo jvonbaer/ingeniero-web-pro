@@ -1,6 +1,8 @@
 export interface EjeRadar {
   id: string;
   nombre: string;
+  /** Etiqueta breve para la punta del eje. Si falta, se usa `nombre`. */
+  nombreCorto?: string;
   icono: string;
   descripcion?: string;
 }
@@ -223,7 +225,7 @@ export function RadarChart({
           return (
             <g key={eje.id}>
               <text x={p.x} y={y0} textAnchor={anclaje} className="radar__eje-nombre">
-                {eje.nombre.toUpperCase()}
+                {(eje.nombreCorto ?? eje.nombre).toUpperCase()}
               </text>
               <text x={p.x} y={y0 + 21} textAnchor={anclaje} className="radar__eje-valor">
                 {valor === null ? "—" : valor}

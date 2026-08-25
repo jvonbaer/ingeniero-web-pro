@@ -90,7 +90,7 @@
   display: grid;
   /* identidad · gráfico · tabla · observaciones. Suman 919 con los 11 px
      de separación: es el alto exacto del cuerpo dentro de la hoja A4. */
-  grid-template-rows: 156px 390px 176px 1fr;
+  grid-template-rows: 160px 316px 244px 1fr;
   gap: 11px;
   min-height: 0;
 }
@@ -268,16 +268,16 @@
 .informe__tabla { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .informe__tabla td {
   padding: 0 4px;
-  height: 24px; /* seis filas de 24 = 144; con el título, los 176 del bloque */
+  height: 30px; /* siete filas de 30 = 210; con el título, los 246 del bloque */
   line-height: 1.1;
   border-bottom: 1px solid var(--borde);
   vertical-align: middle;
 }
 .informe__tabla tr:last-child td { border-bottom: none; }
 .informe__tabla-icono { width: 24px; color: var(--carbon-700); line-height: 0; }
-.informe__tabla-nombre { width: 96px; font-family: var(--fuente-cond); font-size: 15px; font-weight: 700; text-transform: uppercase; }
+.informe__tabla-nombre { width: 132px; font-family: var(--fuente-cond); font-size: 12.5px; font-weight: 700; line-height: 1.05; text-transform: uppercase; padding-right: 10px; }
 .informe__tabla-desc { font-size: 10.5px; color: var(--texto-suave); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 12px; }
-.informe__tabla-barra { width: 150px; }
+.informe__tabla-barra { width: 122px; }
 .informe__tabla-valor { width: 56px; font-family: var(--fuente-cond); font-size: 18px; font-weight: 800; text-align: right; }
 .informe__tabla-valor small { font-size: 9px; font-weight: 600; color: var(--texto-suave); }
 .informe__tabla-delta { width: 34px; text-align: right; }

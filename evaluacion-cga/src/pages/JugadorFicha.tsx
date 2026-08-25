@@ -83,6 +83,7 @@ export function JugadorFicha() {
   const ejes = pautaVigente.categorias.map((c) => ({
     id: c.id,
     nombre: c.nombre,
+    nombreCorto: c.nombreCorto,
     icono: c.icono,
     descripcion: c.descripcion,
   }));
@@ -223,7 +224,7 @@ export function JugadorFicha() {
               </div>
 
               <div className="card">
-                <h2 className="card__titulo">Niveles por categoría</h2>
+                <h2 className="card__titulo">Niveles por sección</h2>
                 <div className="card__cuerpo">
                   {actual.categorias.map((cat) => (
                     <BarraCategoria

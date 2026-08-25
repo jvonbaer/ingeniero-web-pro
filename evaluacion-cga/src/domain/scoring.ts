@@ -2,11 +2,13 @@ import type {
   CategoriaRubrica,
   Configuracion,
   Evaluacion,
+  Indicador,
   Jugador,
   Nivel,
   Pauta,
   ResultadoCategoria,
   ResultadoEvaluacion,
+  ResultadoGrupo,
 } from "./types";
 
 /** Escala de niveles. El corte se lee de mayor a menor. */
@@ -34,31 +36,85 @@ export function indicadoresActivos(categoria: CategoriaRubrica) {
 }
 
 /**
- * Calcula el puntaje de una categoría promediando sólo los indicadores
- * respondidos. Si el entrenador deja preguntas en blanco, la categoría se
- * calcula con lo que sí contestó en vez de castigar el promedio con ceros.
+ * Agrupa los sub-puntos activos de una sección por subsección, respetando el
+ * orden en que están escritos. Los que no declaran grupo caen en uno sin nombre,
+ * que es el caso de las secciones que no se subdividen.
  */
-export function puntajeCategoria(
+export function gruposDe(categoria: CategoriaRubrica): { nombre: string; indicadores: Indicador[] }[] {
+  const grupos: { nombre: string; indicadores: Indicador[] }[] = [];
+  for (const ind of indicadoresActivos(categoria)) {
+    const nombre = ind.grupo ?? "";
+    const ultimo = grupos[grupos.length - 1];
+    if (ultimo && ultimo.nombre === nombre) ultimo.indicadores.push(ind);
+    else grupos.push({ nombre, indicadores: [ind] });
+  }
+  return grupos;
+}
+
+/** ¿Esta sección viene dividida en subsecciones con nombre? */
+export function tieneSubsecciones(categoria: CategoriaRubrica): boolean {
+  return categoria.indicadores.some((i) => i.activo && i.grupo);
+}
+
+function promedio(
   evaluacion: Evaluacion,
-  categoria: CategoriaRubrica,
-): { puntaje: number | null; respondidos: number; total: number } {
-  const activos = indicadoresActivos(categoria);
+  indicadores: Indicador[],
+): { puntaje: number | null; respondidos: number } {
   const escala = evaluacion.escalaMax || 5;
   let suma = 0;
   let respondidos = 0;
-
-  for (const ind of activos) {
+  for (const ind of indicadores) {
     const valor = evaluacion.puntajes[ind.id];
     if (typeof valor === "number" && valor > 0) {
       suma += aCien(valor, escala);
       respondidos += 1;
     }
   }
+  return { puntaje: respondidos === 0 ? null : suma / respondidos, respondidos };
+}
+
+/**
+ * Calcula el puntaje de una sección promediando sólo los sub-puntos
+ * respondidos. Si el entrenador deja preguntas en blanco, la sección se calcula
+ * con lo que sí contestó en vez de castigar el promedio con ceros.
+ *
+ * Cuando la sección tiene subsecciones, se promedian los promedios de cada una
+ * y no los ochenta y cuatro sub-puntos por igual. Es lo que dice la pauta —cada
+ * subsección trae su propio "Promedio ___ / 5"— y además evita que dentro de
+ * "Técnica" pese más lo que tiene más preguntas.
+ */
+export function puntajeCategoria(
+  evaluacion: Evaluacion,
+  categoria: CategoriaRubrica,
+): { puntaje: number | null; respondidos: number; total: number; grupos: ResultadoGrupo[] } {
+  const grupos = gruposDe(categoria);
+  const total = grupos.reduce((a, g) => a + g.indicadores.length, 0);
+
+  const resultados: ResultadoGrupo[] = grupos.map((g) => {
+    const { puntaje, respondidos } = promedio(evaluacion, g.indicadores);
+    return {
+      nombre: g.nombre,
+      puntaje: puntaje === null ? null : Math.round(puntaje),
+      respondidos,
+      total: g.indicadores.length,
+    };
+  });
+
+  const conDato = grupos
+    .map((g) => promedio(evaluacion, g.indicadores))
+    .filter((r) => r.puntaje !== null);
+
+  const puntaje =
+    conDato.length === 0
+      ? null
+      : Math.round(conDato.reduce((a, r) => a + r.puntaje!, 0) / conDato.length);
 
   return {
-    puntaje: respondidos === 0 ? null : Math.round(suma / respondidos),
-    respondidos,
-    total: activos.length,
+    puntaje,
+    respondidos: resultados.reduce((a, g) => a + g.respondidos, 0),
+    total,
+    // Una sección sin subsecciones no tiene desglose que mostrar.
+    grupos: tieneSubsecciones(categoria) ? resultados : [],
   };
 }
 
@@ -76,7 +132,7 @@ export function calcular(
   pauta: Pauta,
 ): ResultadoEvaluacion {
   const categorias: ResultadoCategoria[] = pauta.categorias.map((cat) => {
-    const { puntaje, respondidos, total } = puntajeCategoria(evaluacion, cat);
+    const { puntaje, respondidos, total, grupos } = puntajeCategoria(evaluacion, cat);
     return {
       categoriaId: cat.id,
       nombre: cat.nombre,
@@ -86,6 +142,7 @@ export function calcular(
       respondidos,
       total,
       nivel: nivelDe(puntaje),
+      grupos,
     };
   });
 

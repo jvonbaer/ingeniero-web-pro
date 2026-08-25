@@ -635,3 +635,41 @@
   gap: 0 14px;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
 }
+
+/* Subsecciones dentro de una sección de la encuesta ----------------------- */
+
+.encuesta__subseccion {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-family: var(--fuente-cond);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--texto);
+  margin: 26px 0 2px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--acento);
+}
+
+.encuesta__subseccion:first-child { margin-top: 8px; }
+
+.encuesta__subseccion-num {
+  font-variant-numeric: tabular-nums;
+  color: var(--cga-rojo);
+}
+
+/* Encabezado de subsección dentro del editor de sub-puntos ---------------- */
+
+.subpunto__grupo {
+  font-family: var(--fuente-cond);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--cga-rojo);
+  margin: 14px 0 4px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--borde);
+}

@@ -132,6 +132,10 @@ select
   p.categoria ->> 'id'                                  as categoria_evaluacion,
   ind.valor ->> 'id'                                    as indicador,
   ind.valor ->> 'nombre'                                as indicador_nombre,
+  -- La subsección hace falta para leer la tabla: dentro de "Técnica" hay dos
+  -- sub-puntos llamados "Precisión" —uno del pase y otro del remate— y dos
+  -- llamados "Cambia de dirección". Sin esta columna no se distinguen.
+  ind.valor ->> 'grupo'                                 as subseccion,
   (e.datos -> 'puntajes' ->> (ind.valor ->> 'id'))::int as valor,
   (e.datos ->> 'escalaMax')::int                        as escala_max,
   round(

@@ -28,122 +28,232 @@ export const ENTRENADORES_BASE = [
 const ESCALA = ["Inicial", "En progreso", "Aceptable", "Bueno", "Destacado"];
 
 /**
- * Catálogo de sub-puntos, uno por identificador.
+ * Construye los sub-puntos de una subsección.
  *
- * Las pautas se arman eligiendo de aquí. Es deliberado que compartan los mismos
- * identificadores: cuando un niño pasa de SUB-10 a SUB-12 y cambia de pauta, los
- * sub-puntos que existen en ambas siguen siendo el mismo dato, así que la tela
- * de araña compara de verdad en vez de partir de cero.
+ * Cada entrada es `[id, nombre]`, o `[id, nombre, etiquetas]` cuando la pregunta
+ * se mide con nombres propios en vez de la escala general.
+ *
+ * Los identificadores son el dato que hay que cuidar: las evaluaciones guardan
+ * el puntaje contra el id, no contra la posición en la lista. Renombrar un
+ * sub-punto es inofensivo; cambiarle el id equivale a borrarlo y crear otro, y
+ * deja huérfano todo el historial de ese sub-punto.
  */
-const CATALOGO: Record<string, Omit<Indicador, "activo">> = {
-  "tec-control": { id: "tec-control", nombre: "Control y recepción", ayuda: "Domina el balón en el primer toque, con ambos pies y de distintas alturas." },
-  "tec-conduccion": { id: "tec-conduccion", nombre: "Conducción y regate", ayuda: "Conduce con la cabeza levantada y supera rivales en el uno contra uno." },
-  "tec-pase": { id: "tec-pase", nombre: "Pase y precisión", ayuda: "Entrega precisa a corta y media distancia, con la fuerza adecuada." },
-  "tec-remate": { id: "tec-remate", nombre: "Remate y definición", ayuda: "Golpeo firme y dirigido; define con ambos pies dentro del área." },
-  "tec-juego-aereo": { id: "tec-juego-aereo", nombre: "Juego aéreo", ayuda: "Cabecea con seguridad en ataque y defensa; mide el salto." },
+type Fila = [string, string] | [string, string, string[]];
 
-  "fis-velocidad": { id: "fis-velocidad", nombre: "Velocidad", ayuda: "Aceleración en los primeros metros y velocidad punta con balón y sin él." },
-  "fis-resistencia": { id: "fis-resistencia", nombre: "Resistencia", ayuda: "Sostiene el ritmo durante todo el entrenamiento o partido." },
-  "fis-fuerza": { id: "fis-fuerza", nombre: "Fuerza y duelo físico", ayuda: "Aguanta el cuerpo a cuerpo y protege el balón." },
-  "fis-coordinacion": { id: "fis-coordinacion", nombre: "Coordinación y agilidad", ayuda: "Cambia de dirección con equilibrio y control del cuerpo." },
-
-  "tac-posicionamiento": { id: "tac-posicionamiento", nombre: "Posicionamiento", ayuda: "Ocupa el espacio que le corresponde según su puesto y el momento del juego." },
-  "tac-lectura": { id: "tac-lectura", nombre: "Lectura de juego", ayuda: "Anticipa la jugada y reconoce dónde está el espacio libre." },
-  "tac-decision": { id: "tac-decision", nombre: "Toma de decisiones", ayuda: "Elige bien entre conducir, pasar o rematar, y lo hace a tiempo." },
-  "tac-transiciones": { id: "tac-transiciones", nombre: "Transiciones", ayuda: "Reacciona rápido al perder o recuperar el balón." },
-  "tac-marca": { id: "tac-marca", nombre: "Marca y presión", ayuda: "Presiona coordinado con sus compañeros y sigue a su marca." },
-
-  "men-concentracion": { id: "men-concentracion", nombre: "Concentración", ayuda: "Mantiene la atención en la tarea durante toda la sesión." },
-  "men-confianza": { id: "men-confianza", nombre: "Confianza", ayuda: "Se atreve a pedir el balón y a intentar jugadas." },
-  "men-frustracion": { id: "men-frustracion", nombre: "Manejo de la frustración", ayuda: "Reacciona bien ante el error propio, del compañero o del árbitro." },
-  "men-competitividad": { id: "men-competitividad", nombre: "Competitividad", ayuda: "Compite con intensidad sana y no baja los brazos." },
-
-  "soc-equipo": { id: "soc-equipo", nombre: "Trabajo en equipo", ayuda: "Juega para el equipo y celebra el logro del compañero." },
-  "soc-comunicacion": { id: "soc-comunicacion", nombre: "Comunicación", ayuda: "Habla en la cancha, pide y avisa." },
-  "soc-respeto": { id: "soc-respeto", nombre: "Respeto", ayuda: "Trata bien a compañeros, rivales, árbitros y cuerpo técnico." },
-  "soc-liderazgo": { id: "soc-liderazgo", nombre: "Liderazgo", ayuda: "Arrastra al grupo con el ejemplo y ayuda a los que van más atrás." },
-
-  "dis-asistencia": { id: "dis-asistencia", nombre: "Asistencia", ayuda: "Asiste de forma regular a entrenamientos y partidos." },
-  "dis-puntualidad": { id: "dis-puntualidad", nombre: "Puntualidad", ayuda: "Llega a la hora y listo para entrenar." },
-  "dis-esfuerzo": { id: "dis-esfuerzo", nombre: "Esfuerzo en entrenamiento", ayuda: "Entrega el máximo en cada ejercicio, no sólo en el partido." },
-  "dis-habitos": { id: "dis-habitos", nombre: "Hábitos y autocuidado", ayuda: "Cuida su equipamiento, descanso, hidratación y alimentación." },
-};
-
-function indicadores(...ids: string[]): Indicador[] {
-  return ids.map((id) => ({ ...CATALOGO[id], activo: true }));
-}
-
-/**
- * Los seis ejes de la tela de araña. Las pautas comparten estos identificadores
- * a propósito: lo que cambia entre una y otra son los sub-puntos y los pesos, no
- * los ejes, para que el gráfico de un niño se pueda comparar con el del año
- * pasado aunque haya cambiado de categoría.
- */
-function ejes(
-  pesos: Record<string, number>,
-  subpuntos: Record<string, Indicador[]>,
-): CategoriaRubrica[] {
-  const base = [
-    { id: "tecnica", nombre: "Técnica", descripcion: "Control de balón, regate, pases, remates.", icono: "balon" },
-    { id: "fisico", nombre: "Físico", descripcion: "Velocidad, resistencia, fuerza, coordinación.", icono: "correr" },
-    { id: "tactico", nombre: "Táctico", descripcion: "Lectura de juego, posición y decisiones.", icono: "brujula" },
-    { id: "mental", nombre: "Mental", descripcion: "Concentración, confianza, actitud, manejo emocional.", icono: "diana" },
-    { id: "social", nombre: "Social", descripcion: "Trabajo en equipo, comunicación, respeto.", icono: "equipo" },
-    { id: "disciplina", nombre: "Disciplina", descripcion: "Compromiso, puntualidad, esfuerzo, hábitos.", icono: "escudo" },
-  ];
-  return base.map((eje) => ({
-    ...eje,
-    peso: pesos[eje.id] ?? 1,
-    indicadores: subpuntos[eje.id] ?? [],
+function sub(grupo: string | undefined, filas: Fila[]): Indicador[] {
+  return filas.map(([id, nombre, etiquetas]) => ({
+    id,
+    nombre,
+    ayuda: "",
+    activo: true,
+    ...(grupo ? { grupo } : {}),
+    ...(etiquetas ? { etiquetas } : {}),
   }));
 }
 
 /**
- * Pauta formativa. Menos sub-puntos y menos peso táctico: a esta edad importa
- * más que el niño quiera venir, se lleve bien con el grupo y tome contacto con
- * el balón que dónde se para en una salida desde el fondo.
+ * Las siete secciones de la pauta de la escuela. Son los siete ejes de la tela
+ * de araña, en este orden.
+ *
+ * Las secciones 2 y 3 vienen divididas en subsecciones —conducción, control,
+ * pase…—. Cada subsección tiene su propio promedio, y el de la sección es el
+ * promedio de esos promedios: así "Técnica", que trae veinticinco sub-puntos,
+ * no pesa cinco veces más que "Asistencia", que trae seis.
  */
-export const PAUTA_FORMATIVA: Pauta = {
-  id: "pauta-formativa",
-  nombre: "Formativa",
-  descripcion: "Primeros años en la escuela. Fundamentos, hábitos y convivencia.",
-  version: 1,
-  actualizadaEn: "2024-01-01",
-  escalaMax: 5,
-  etiquetasEscala: ESCALA,
-  categorias: ejes(
-    { tecnica: 1.25, fisico: 1, tactico: 0.75, mental: 1, social: 1.25, disciplina: 1.25 },
-    {
-      tecnica: indicadores("tec-control", "tec-conduccion", "tec-pase", "tec-remate"),
-      fisico: indicadores("fis-velocidad", "fis-coordinacion", "fis-resistencia"),
-      tactico: indicadores("tac-posicionamiento", "tac-decision"),
-      mental: indicadores("men-concentracion", "men-confianza", "men-frustracion"),
-      social: indicadores("soc-equipo", "soc-comunicacion", "soc-respeto"),
-      disciplina: indicadores("dis-asistencia", "dis-puntualidad", "dis-esfuerzo"),
-    },
-  ),
-};
+const SECCIONES: CategoriaRubrica[] = [
+  {
+    id: "asistencia",
+    nombre: "Asistencia y compromiso",
+    nombreCorto: "Asistencia",
+    descripcion: "Presencia, puntualidad y cuidado de los materiales.",
+    icono: "reloj",
+    peso: 1,
+    indicadores: sub(undefined, [
+      ["s1-asistencia", "Asistencia a entrenamientos"],
+      ["s1-puntualidad", "Puntualidad"],
+      ["s1-implementos", "Trae implementos necesarios"],
+      ["s1-participa", "Participa activamente"],
+      ["s1-materiales", "Cuida los materiales"],
+      ["s1-compromiso", "Mantiene compromiso con los entrenamientos"],
+    ]),
+  },
+  {
+    id: "tecnica",
+    nombre: "Técnica individual",
+    nombreCorto: "Técnica",
+    descripcion: "Fundamentos técnicos básicos.",
+    icono: "balon",
+    peso: 1,
+    indicadores: [
+      ...sub("Conducción de balón", [
+        ["s2-cond-control", "Controla el balón mientras conduce"],
+        ["s2-cond-cerca", "Mantiene el balón cerca del cuerpo"],
+        ["s2-cond-direccion", "Cambia de dirección"],
+        ["s2-cond-velocidad", "Cambia de velocidad"],
+        ["s2-cond-perfiles", "Utiliza ambos perfiles"],
+      ]),
+      ...sub("Control y recepción", [
+        ["s2-ctrl-rasos", "Controla pases rasos"],
+        ["s2-ctrl-movimiento", "Controla balones en movimiento"],
+        ["s2-ctrl-orienta", "Orienta correctamente el control"],
+        ["s2-ctrl-superficies", "Utiliza diferentes superficies del pie"],
+        ["s2-ctrl-perfiles", "Controla utilizando ambos perfiles"],
+      ]),
+      ...sub("Pase", [
+        ["s2-pase-precision", "Precisión"],
+        ["s2-pase-fuerza", "Fuerza adecuada"],
+        ["s2-pase-ambos", "Pase con ambos pies"],
+        ["s2-pase-movimiento", "Pase en movimiento"],
+        ["s2-pase-eleccion", "Elige correctamente al compañero"],
+      ]),
+      ...sub("Regate y duelos 1 contra 1", [
+        ["s2-reg-atreve", "Se atreve a enfrentar al rival"],
+        ["s2-reg-direccion", "Cambia de dirección"],
+        ["s2-reg-ritmo", "Cambia de ritmo"],
+        ["s2-reg-protege", "Protege el balón"],
+        ["s2-reg-recursos", "Utiliza recursos para superar rivales"],
+      ]),
+      ...sub("Finalización (remate al arco)", [
+        ["s2-fin-precision", "Precisión"],
+        ["s2-fin-potencia", "Potencia"],
+        ["s2-fin-movimiento", "Remate en movimiento"],
+        ["s2-fin-eleccion", "Elige dónde rematar"],
+        ["s2-fin-perfiles", "Utiliza ambos perfiles"],
+      ]),
+    ],
+  },
+  {
+    id: "tactica",
+    nombre: "Iniciación táctica",
+    nombreCorto: "Táctica",
+    descripcion: "Ataque, defensa y lectura del juego.",
+    icono: "brujula",
+    peso: 1,
+    indicadores: [
+      ...sub("Ataque (momento ofensivo)", [
+        ["s3-ata-desmarca", "Se desmarca"],
+        ["s3-ata-espacios", "Busca espacios libres"],
+        ["s3-ata-apoya", "Apoya al compañero con balón"],
+        ["s3-ata-decisiones", "Toma buenas decisiones"],
+        ["s3-ata-comprende", "Comprende cuándo pasar, conducir o regatear"],
+      ]),
+      ...sub("Defensa (momento defensivo)", [
+        ["s3-def-marca", "Marca correctamente"],
+        ["s3-def-recupera", "Intenta recuperar el balón"],
+        ["s3-def-espacios", "Ocupa correctamente los espacios"],
+        ["s3-def-ayuda", "Ayuda a sus compañeros"],
+        ["s3-def-reaccion", "Reacciona al perder el balón"],
+      ]),
+      ...sub("Comprensión del juego", [
+        ["s3-comp-cabeza", "Levanta la cabeza antes de recibir"],
+        ["s3-comp-observa", "Observa antes de tomar decisiones"],
+        ["s3-comp-espacios", "Entiende los espacios"],
+        ["s3-comp-adapta", "Se adapta a diferentes situaciones"],
+        ["s3-comp-instrucciones", "Comprende las instrucciones tácticas"],
+      ]),
+      ...sub("Evaluación durante el partido", [
+        ["s3-par-participacion", "Participación", ["Muy baja", "Baja", "Adecuada", "Alta", "Muy alta"]],
+        ["s3-par-decisiones", "Toma de decisiones", ["Necesita mucha ayuda", "Irregular", "Adecuada", "Buena", "Excelente"]],
+        ["s3-par-ofensiva", "Participación ofensiva"],
+        ["s3-par-defensiva", "Participación defensiva"],
+        ["s3-par-comprension", "Comprensión del juego"],
+        ["s3-par-actitud", "Actitud durante el partido"],
+      ]),
+    ],
+  },
+  {
+    id: "fisico",
+    nombre: "Capacidades físicas y motrices",
+    nombreCorto: "Físico",
+    descripcion: "Coordinación, velocidad, agilidad y resistencia.",
+    icono: "correr",
+    peso: 1,
+    indicadores: sub(undefined, [
+      ["s4-coordinacion", "Coordinación general"],
+      ["s4-equilibrio", "Equilibrio"],
+      ["s4-agilidad", "Agilidad"],
+      ["s4-reaccion", "Velocidad de reacción"],
+      ["s4-cambios", "Cambios de dirección"],
+      ["s4-velocidad", "Velocidad"],
+      ["s4-resistencia", "Resistencia"],
+      ["s4-coord-balon", "Coordinación con balón"],
+    ]),
+  },
+  {
+    id: "psicologico",
+    nombre: "Aspectos psicológicos y actitudinales",
+    nombreCorto: "Psicológico",
+    descripcion: "Motivación, esfuerzo, concentración y confianza.",
+    icono: "diana",
+    peso: 1,
+    indicadores: sub(undefined, [
+      ["s5-motivacion", "Motivación"],
+      ["s5-disfruta", "Disfruta del entrenamiento"],
+      ["s5-esfuerzo", "Se esfuerza"],
+      ["s5-persevera", "Persevera ante las dificultades"],
+      ["s5-errores", "Acepta los errores"],
+      ["s5-escucha", "Escucha al entrenador"],
+      ["s5-concentracion", "Capacidad de concentración"],
+      ["s5-iniciativa", "Iniciativa"],
+      ["s5-confianza", "Confianza en sí mismo"],
+      ["s5-correcciones", "Acepta correcciones"],
+    ]),
+  },
+  {
+    id: "conducta",
+    nombre: "Conducta y valores",
+    nombreCorto: "Conducta",
+    descripcion: "Respeto, trabajo en equipo y actitud deportiva.",
+    icono: "escudo",
+    peso: 1,
+    indicadores: sub(undefined, [
+      ["s6-resp-companeros", "Respeta a sus compañeros"],
+      ["s6-resp-entrenador", "Respeta al entrenador"],
+      ["s6-resp-reglas", "Respeta las reglas"],
+      ["s6-equipo", "Trabaja en equipo"],
+      ["s6-ayuda", "Ayuda a sus compañeros"],
+      ["s6-frustracion", "Maneja adecuadamente la frustración"],
+      ["s6-deportiva", "Tiene actitud deportiva"],
+      ["s6-instalaciones", "Cuida las instalaciones y materiales"],
+    ]),
+  },
+  {
+    id: "creatividad",
+    nombre: "Creatividad y capacidad de aprendizaje",
+    nombreCorto: "Creatividad",
+    descripcion: "Iniciativa, adaptación y velocidad de aprendizaje.",
+    icono: "estrella",
+    peso: 1,
+    indicadores: sub(undefined, [
+      ["s7-soluciones", "Propone soluciones diferentes"],
+      ["s7-atreve", "Se atreve a intentar cosas nuevas"],
+      ["s7-creativo", "Es creativo con el balón"],
+      ["s7-aprende", "Aprende rápidamente"],
+      ["s7-aplica", "Aplica lo aprendido en el juego"],
+      ["s7-adapta", "Se adapta a nuevos ejercicios"],
+    ]),
+  },
+];
 
-/** Pauta competitiva. La rúbrica completa, con el peso puesto en técnica y táctica. */
-export const PAUTA_COMPETITIVA: Pauta = {
-  id: "pauta-competitiva",
-  nombre: "Competitiva",
-  descripcion: "Categorías de competencia. Rúbrica completa, con lectura táctica.",
+/**
+ * La pauta de la Escuela de Fútbol, tal como la definió el cuerpo técnico.
+ *
+ * Es una sola y la usan todas las categorías de edad. El mecanismo para tener
+ * pautas distintas por categoría sigue en pie —está en Parámetros—: el día que
+ * la escuela quiera una versión recortada para SUB-6, se duplica ésta, se
+ * desactivan los sub-puntos que no correspondan y se le asigna esa categoría.
+ * Conviene duplicar y desactivar antes que escribir una pauta nueva desde cero,
+ * porque los sub-puntos compartidos mantienen el historial comparable.
+ */
+export const PAUTA_ESCUELA: Pauta = {
+  id: "pauta-escuela-2026",
+  nombre: "Escuela de Fútbol",
+  descripcion: "Siete secciones: asistencia, técnica, táctica, físico, psicológico, conducta y creatividad.",
   version: 1,
-  actualizadaEn: "2024-01-01",
+  actualizadaEn: "2026-08-25",
   escalaMax: 5,
   etiquetasEscala: ESCALA,
-  categorias: ejes(
-    { tecnica: 1.25, fisico: 1, tactico: 1.25, mental: 1, social: 1, disciplina: 1 },
-    {
-      tecnica: indicadores("tec-control", "tec-conduccion", "tec-pase", "tec-remate", "tec-juego-aereo"),
-      fisico: indicadores("fis-velocidad", "fis-resistencia", "fis-fuerza", "fis-coordinacion"),
-      tactico: indicadores("tac-posicionamiento", "tac-lectura", "tac-decision", "tac-transiciones", "tac-marca"),
-      mental: indicadores("men-concentracion", "men-confianza", "men-frustracion", "men-competitividad"),
-      social: indicadores("soc-equipo", "soc-comunicacion", "soc-respeto", "soc-liderazgo"),
-      disciplina: indicadores("dis-asistencia", "dis-puntualidad", "dis-esfuerzo", "dis-habitos"),
-    },
-  ),
+  categorias: SECCIONES,
 };
 
 /**
@@ -153,17 +263,9 @@ export const PAUTA_COMPETITIVA: Pauta = {
  */
 export const CONFIGURACION_BASE: Configuracion = {
   formato: 2,
-  pautas: [PAUTA_FORMATIVA, PAUTA_COMPETITIVA],
-  asignaciones: {
-    "SUB-6": PAUTA_FORMATIVA.id,
-    "SUB-8": PAUTA_FORMATIVA.id,
-    "SUB-10": PAUTA_FORMATIVA.id,
-    "SUB-12": PAUTA_COMPETITIVA.id,
-    "SUB-14": PAUTA_COMPETITIVA.id,
-    "SUB-16": PAUTA_COMPETITIVA.id,
-    "SUB-18": PAUTA_COMPETITIVA.id,
-  },
-  pautaPorDefecto: PAUTA_COMPETITIVA.id,
+  pautas: [PAUTA_ESCUELA],
+  asignaciones: Object.fromEntries(CATEGORIAS_EDAD.map((c) => [c, PAUTA_ESCUELA.id])),
+  pautaPorDefecto: PAUTA_ESCUELA.id,
   entrenadores: ENTRENADORES_BASE,
-  actualizadaEn: "2024-01-01",
+  actualizadaEn: "2026-08-25",
 };

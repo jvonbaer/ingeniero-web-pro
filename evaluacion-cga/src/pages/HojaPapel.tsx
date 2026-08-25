@@ -4,6 +4,7 @@ import { useDatos } from "../data/DatosContext";
 import { Escudo } from "../components/Marca";
 import { Icono } from "../components/Iconos";
 import {
+  gruposDe,
   indicadoresActivos,
   nombreCompleto,
   pautaDeCategoria,
@@ -124,34 +125,51 @@ export function HojaPapel() {
           Deje en blanco lo que no alcanzó a observar: no cuenta en contra.
         </p>
 
-        {pauta.categorias.map((categoria) => {
-          const activos = indicadoresActivos(categoria);
-          if (activos.length === 0) return null;
+        {pauta.categorias.map((categoria, iCat) => {
+          const grupos = gruposDe(categoria);
+          if (grupos.length === 0) return null;
           return (
             <section key={categoria.id} className="hoja__categoria">
               <h3 className="hoja__categoria-titulo">
                 <Icono nombre={categoria.icono} tamano={17} />
-                {categoria.nombre}
+                {iCat + 1}. {categoria.nombre}
                 <span className="hoja__categoria-desc">{categoria.descripcion}</span>
               </h3>
 
-              <table className="hoja__tabla">
-                <tbody>
-                  {activos.map((indicador) => (
-                    <tr key={indicador.id}>
-                      <td className="hoja__subpunto">
-                        <b>{indicador.nombre}</b>
-                        {indicador.ayuda && <span>{indicador.ayuda}</span>}
-                      </td>
-                      <td className="hoja__casilleros">
-                        {opciones.map((valor) => (
-                          <span key={valor} className="hoja__casillero">{valor}</span>
-                        ))}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              {grupos.map((grupo, iGrupo) => (
+                <div key={grupo.nombre || `grupo-${iGrupo}`} className="hoja__grupo">
+                  {grupo.nombre && (
+                    <h4 className="hoja__grupo-titulo">
+                      {iCat + 1}.{iGrupo + 1} {grupo.nombre}
+                    </h4>
+                  )}
+                  <table className="hoja__tabla">
+                    <tbody>
+                      {grupo.indicadores.map((indicador) => (
+                        <tr key={indicador.id}>
+                          <td className="hoja__subpunto">
+                            <b>{indicador.nombre}</b>
+                            {indicador.etiquetas && (
+                              <span>{indicador.etiquetas.join(" · ")}</span>
+                            )}
+                            {!indicador.etiquetas && indicador.ayuda && (
+                              <span>{indicador.ayuda}</span>
+                            )}
+                          </td>
+                          <td className="hoja__casilleros">
+                            {opciones.map((valor) => (
+                              <span key={valor} className="hoja__casillero">{valor}</span>
+                            ))}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  <p className="hoja__promedio">
+                    Promedio <span className="hoja__linea"></span> / {pauta.escalaMax}
+                  </p>
+                </div>
+              ))}
             </section>
           );
         })}

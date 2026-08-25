@@ -122,14 +122,25 @@ Si la ficha tiene el correo del apoderado, el botón **Escribir al apoderado** a
 
 **Qué pauta usa cada categoría.** Una tabla que asigna una pauta a cada categoría de edad. Al abrir una evaluación, la aplicación mira la categoría del jugador y levanta la pauta asignada: el entrenador no la elige ni puede equivocarse.
 
-**Contenido de las pautas.** Ahí se crean, duplican y editan las pautas: categorías, sub-puntos, pesos y etiquetas de la escala. Vienen dos de fábrica, pensadas como punto de partida para editar:
+**Contenido de las pautas.** Ahí se crean, duplican y editan las pautas: secciones, sub-puntos, pesos y etiquetas de la escala.
 
-| Pauta | Categorías | Qué mira |
-|---|---|---|
-| **Formativa** | SUB-6, SUB-8, SUB-10 | 18 sub-puntos. Menos peso táctico y más social y de hábitos: a esa edad importa más que el niño quiera venir y se lleve bien con el grupo que dónde se para en una salida desde el fondo. |
-| **Competitiva** | SUB-12 a SUB-18 | 26 sub-puntos. Rúbrica completa, con el peso en técnica y táctica. |
+Viene una de fábrica, **Escuela de Fútbol**, que es la pauta del cuerpo técnico: siete secciones y 84 sub-puntos, todos en escala de 1 a 5. La usan todas las categorías de edad.
 
-> Las dos pautas comparten los mismos seis ejes y los mismos identificadores de sub-punto a propósito. Cuando un niño pasa de SUB-10 a SUB-12 y cambia de pauta, lo que ya tenía medido se sigue pudiendo comparar en vez de partir de cero. Si crea una pauta nueva, conviene mantener esa convención.
+| # | Sección | Sub-puntos | |
+|---|---|---|---|
+| 1 | Asistencia y compromiso | 6 | |
+| 2 | Técnica individual | 25 | en 5 subsecciones: conducción, control, pase, regate, finalización |
+| 3 | Iniciación táctica | 21 | en 4 subsecciones: ataque, defensa, comprensión del juego, evaluación durante el partido |
+| 4 | Capacidades físicas y motrices | 8 | |
+| 5 | Aspectos psicológicos y actitudinales | 10 | |
+| 6 | Conducta y valores | 8 | |
+| 7 | Creatividad y capacidad de aprendizaje | 6 | |
+
+**El puntaje de una sección con subsecciones es el promedio de los promedios de sus subsecciones**, no el promedio de sus sub-puntos. Es lo que dice la pauta —cada subsección trae su propio «Promedio ___ / 5»— y evita que dentro de «Técnica» pese cinco veces más lo que tiene cinco veces más preguntas. Las siete secciones pesan igual entre sí.
+
+Dos sub-puntos se responden con nombres propios en vez de números pelados: «Participación» va de *Muy baja* a *Muy alta*, y «Toma de decisiones» de *Necesita mucha ayuda* a *Excelente*. Se definen en el campo `etiquetas` del sub-punto.
+
+> Si la escuela quiere una versión recortada para las categorías chicas, **duplique esta pauta y desactive los sub-puntos que no correspondan**, en vez de escribir una nueva desde cero. Los puntajes se guardan contra el identificador del sub-punto, así que una pauta duplicada mantiene el historial comparable; una escrita de nuevo parte de cero. Por lo mismo: renombrar un sub-punto es inofensivo, cambiarle el identificador equivale a borrarlo.
 
 ### Respaldos
 

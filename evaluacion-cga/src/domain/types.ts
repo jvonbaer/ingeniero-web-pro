@@ -36,12 +36,33 @@ export interface Indicador {
   nombre: string;
   ayuda: string;
   activo: boolean;
+  /**
+   * Subsección a la que pertenece, cuando la sección se divide —"Pase",
+   * "Finalización"—. Los indicadores de un mismo grupo van seguidos en la lista.
+   *
+   * Es una etiqueta en el propio sub-punto y no un tercer nivel de la
+   * estructura: así el editor de Parámetros sigue trabajando sobre una lista
+   * plana, y una sección sin subsecciones no necesita envoltorio alguno.
+   */
+  grupo?: string;
+  /**
+   * Nombres propios de los cinco puntos de la escala, cuando este sub-punto no
+   * se mide con la escala general de la pauta. Sirve para preguntas como
+   * "Participación", que va de "Muy baja" a "Muy alta".
+   */
+  etiquetas?: string[];
 }
 
 /** Un eje del gráfico de tela de araña. */
 export interface CategoriaRubrica {
   id: string;
   nombre: string;
+  /**
+   * Nombre de una o dos palabras para la tela de araña. Los nombres completos
+   * —"Aspectos psicológicos y actitudinales"— no caben en la punta de un eje sin
+   * chocar con el de al lado. Si falta, se usa el nombre completo.
+   */
+  nombreCorto?: string;
   descripcion: string;
   /** Emoji o glifo mostrado junto al eje. */
   icono: string;
@@ -139,6 +160,14 @@ export interface Nivel {
   min: number;
 }
 
+export interface ResultadoGrupo {
+  nombre: string;
+  /** 0-100, o null si no hay ningún indicador de la subsección respondido. */
+  puntaje: number | null;
+  respondidos: number;
+  total: number;
+}
+
 export interface ResultadoCategoria {
   categoriaId: string;
   nombre: string;
@@ -149,6 +178,8 @@ export interface ResultadoCategoria {
   respondidos: number;
   total: number;
   nivel: Nivel | null;
+  /** Desglose por subsección. Vacío cuando la sección no tiene subsecciones. */
+  grupos: ResultadoGrupo[];
 }
 
 export interface ResultadoEvaluacion {

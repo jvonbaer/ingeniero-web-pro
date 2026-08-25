@@ -71,8 +71,46 @@
 .hoja__escala-ref { margin: 0 7px; white-space: nowrap; }
 .hoja__escala-ref b { font-family: var(--fuente-cond); font-size: 13px; }
 
-/* --- Categorías --- */
-.hoja__categoria { margin-bottom: 14px; break-inside: avoid; page-break-inside: avoid; }
+/* --- Secciones ---
+   El corte de página se evita por subsección y no por sección: "Técnica" trae
+   veinticinco sub-puntos y no cabe entera en ninguna hoja, así que pedirle al
+   navegador que no la parta sólo consigue una página en blanco antes. Una
+   subsección de cinco o seis filas sí cabe siempre. */
+.hoja__categoria { margin-bottom: 14px; }
+
+.hoja__grupo { margin-bottom: 10px; break-inside: avoid; page-break-inside: avoid; }
+.hoja__grupo:last-child { margin-bottom: 0; }
+
+.hoja__grupo-titulo {
+  font-family: var(--fuente-cond);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--cga-rojo);
+  margin: 8px 0 3px;
+}
+
+/* Renglón para anotar a mano el promedio de la subsección, como en la pauta. */
+.hoja__promedio {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  justify-content: flex-end;
+  font-family: var(--fuente-cond);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+  margin: 4px 0 0;
+}
+
+.hoja__linea {
+  display: inline-block;
+  width: 54px;
+  border-bottom: 1px solid var(--carbon-700);
+}
 
 .hoja__categoria-titulo {
   display: flex;

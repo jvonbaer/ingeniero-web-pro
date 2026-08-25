@@ -8,6 +8,7 @@ import {
   calcular,
   categoriasDePauta,
   historial,
+  gruposDe,
   hoyISO,
   indicadoresActivos,
   nombreCompleto,
@@ -444,34 +445,47 @@ function PasoCategoria({
           <Icono nombre={categoria.icono} tamano={26} /> {categoria.nombre}
         </h2>
         <p>
-          Categoría {indice} de {total} · {categoria.descripcion}
+          Sección {indice} de {total} · {categoria.descripcion}
         </p>
       </div>
 
-      {indicadoresActivos(categoria).map((indicador) => (
-        <fieldset key={indicador.id} className="pregunta" style={{ border: 0, margin: 0 }}>
-          <legend style={{ padding: 0, width: "100%" }}>
-            <span className="pregunta__texto">{indicador.nombre}</span>
-          </legend>
-          <p className="pregunta__ayuda">{indicador.ayuda}</p>
-          <div className="escala">
-            {opciones.map((valor) => (
-              <button
-                key={valor}
-                type="button"
-                className="escala__opcion"
-                aria-pressed={borrador.puntajes[indicador.id] === valor}
-                aria-label={`${indicador.nombre}: ${valor} de ${pauta.escalaMax}, ${
-                  pauta.etiquetasEscala[valor - 1] ?? ""
-                }`}
-                onClick={() => onResponder(indicador.id, valor)}
-              >
-                <b>{valor}</b>
-                <span>{pauta.etiquetasEscala[valor - 1] ?? ""}</span>
-              </button>
-            ))}
-          </div>
-        </fieldset>
+      {gruposDe(categoria).map((grupo, i) => (
+        <div key={grupo.nombre || `grupo-${i}`}>
+          {grupo.nombre && (
+            <h3 className="encuesta__subseccion">
+              <span className="encuesta__subseccion-num">{indice}.{i + 1}</span>
+              {grupo.nombre}
+            </h3>
+          )}
+          {grupo.indicadores.map((indicador) => {
+            const etiquetas = indicador.etiquetas ?? pauta.etiquetasEscala;
+            return (
+              <fieldset key={indicador.id} className="pregunta" style={{ border: 0, margin: 0 }}>
+                <legend style={{ padding: 0, width: "100%" }}>
+                  <span className="pregunta__texto">{indicador.nombre}</span>
+                </legend>
+                {indicador.ayuda && <p className="pregunta__ayuda">{indicador.ayuda}</p>}
+                <div className="escala">
+                  {opciones.map((valor) => (
+                    <button
+                      key={valor}
+                      type="button"
+                      className="escala__opcion"
+                      aria-pressed={borrador.puntajes[indicador.id] === valor}
+                      aria-label={`${indicador.nombre}: ${valor} de ${pauta.escalaMax}, ${
+                        etiquetas[valor - 1] ?? ""
+                      }`}
+                      onClick={() => onResponder(indicador.id, valor)}
+                    >
+                      <b>{valor}</b>
+                      <span>{etiquetas[valor - 1] ?? ""}</span>
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+            );
+          })}
+        </div>
       ))}
     </>
   );

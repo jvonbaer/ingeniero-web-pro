@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDatos } from "../data/DatosContext";
 import { Campo } from "../components/ui";
@@ -470,8 +470,12 @@ export function Parametros() {
                 Sub-puntos de evaluación
               </div>
 
-              {categoria.indicadores.map((indicador) => (
-                <div key={indicador.id} className="subpunto">
+              {categoria.indicadores.map((indicador, i) => (
+                <Fragment key={indicador.id}>
+                  {indicador.grupo && indicador.grupo !== categoria.indicadores[i - 1]?.grupo && (
+                    <div className="subpunto__grupo">{indicador.grupo}</div>
+                  )}
+                  <div className="subpunto">
                   <input
                     className="input"
                     value={indicador.nombre}
@@ -499,7 +503,8 @@ export function Parametros() {
                   >
                     {indicador.activo ? "Activo" : "Inactivo"}
                   </button>
-                </div>
+                  </div>
+                </Fragment>
               ))}
 
               <button

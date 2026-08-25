@@ -1,5 +1,5 @@
 import { CONFIGURACION_BASE } from "../config/pautas";
-import { indicadoresActivos, nuevoId, pautaDeCategoria } from "../domain/scoring";
+import { gruposDe, nuevoId, pautaDeCategoria } from "../domain/scoring";
 import type { Backup, Evaluacion, Jugador } from "../domain/types";
 
 /**
@@ -28,12 +28,16 @@ function armarEvaluacion(
   // Cada jugador se evalúa con la pauta de su categoría, igual que en el uso real.
   const pauta = pautaDeCategoria(CONFIGURACION_BASE, jugador.categoria);
   const puntajes: Record<string, number> = {};
+  // Se reparte dentro de cada subsección: el puntaje de una sección es el
+  // promedio de los promedios de sus subsecciones, así que repartir sobre la
+  // lista plana daría un resultado distinto al que pide el guion.
   for (const categoria of pauta.categorias) {
-    const activos = indicadoresActivos(categoria);
-    const valores = repartir(objetivos[categoria.id] ?? 3, activos.length);
-    activos.forEach((indicador, i) => {
-      puntajes[indicador.id] = valores[i];
-    });
+    for (const grupo of gruposDe(categoria)) {
+      const valores = repartir(objetivos[categoria.id] ?? 3, grupo.indicadores.length);
+      grupo.indicadores.forEach((indicador, i) => {
+        puntajes[indicador.id] = valores[i];
+      });
+    }
   }
   return {
     id: nuevoId("ev"),
@@ -93,19 +97,19 @@ export function datosDemo(): Backup {
   const evaluaciones: Evaluacion[] = [
     armarEvaluacion(
       matias, "2023-11-20", "Andrés Mercado",
-      { tecnica: 3.4, fisico: 3.0, tactico: 2.8, mental: 3.2, social: 3.6, disciplina: 4.0 },
+      { asistencia: 4.0, tecnica: 3.4, tactica: 2.8, fisico: 3.0, psicologico: 3.2, conducta: 3.6, creatividad: 3.3 },
       "Matías llega con buena base técnica y muy buena actitud. Le cuesta sostener el ritmo en la segunda mitad y se apura en la decisión final.",
       ["Trabajar resistencia aeróbica dos veces por semana.", "Levantar la cabeza antes de recibir."],
     ),
     armarEvaluacion(
       matias, "2024-02-20", "Andrés Mercado",
-      { tecnica: 3.8, fisico: 3.4, tactico: 3.2, mental: 3.6, social: 4.0, disciplina: 4.4 },
+      { asistencia: 4.4, tecnica: 3.8, tactica: 3.2, fisico: 3.4, psicologico: 3.6, conducta: 4.0, creatividad: 3.7 },
       "Avance claro en el control y en la lectura del juego. Se nota el trabajo físico del verano, aunque todavía cae el rendimiento en los últimos 15 minutos.",
       ["Sostener la intensidad hasta el final del partido.", "Mejorar el perfil de recepción."],
     ),
     armarEvaluacion(
       matias, "2024-05-20", "Andrés Mercado",
-      { tecnica: 4.1, fisico: 3.8, tactico: 3.5, mental: 4.0, social: 4.3, disciplina: 4.5 },
+      { asistencia: 4.5, tecnica: 4.1, tactica: 3.5, fisico: 3.8, psicologico: 4.0, conducta: 4.3, creatividad: 4.0 },
       "Matías ha mostrado una gran evolución en su desempeño general. Destaca su compromiso y actitud positiva en cada entrenamiento. Sigue trabajando en la toma de decisiones bajo presión y en su resistencia física para alcanzar su máximo potencial.",
       [
         "Mejorar resistencia física y velocidad.",
@@ -115,25 +119,25 @@ export function datosDemo(): Backup {
     ),
     armarEvaluacion(
       emilia, "2024-02-20", "Andrés Mercado",
-      { tecnica: 3.6, fisico: 4.0, tactico: 4.2, mental: 3.8, social: 4.2, disciplina: 4.6 },
+      { asistencia: 4.6, tecnica: 3.6, tactica: 4.2, fisico: 4.0, psicologico: 3.8, conducta: 4.2, creatividad: 3.7 },
       "Emilia ordena al equipo desde el mediocampo y casi nunca pierde la posición. Puede ganar mucho si mejora el pase largo.",
       ["Trabajar el cambio de frente.", "Rematar más desde fuera del área."],
     ),
     armarEvaluacion(
       emilia, "2024-05-20", "Andrés Mercado",
-      { tecnica: 3.9, fisico: 4.1, tactico: 4.4, mental: 4.0, social: 4.4, disciplina: 4.8 },
+      { asistencia: 4.8, tecnica: 3.9, tactica: 4.4, fisico: 4.1, psicologico: 4.0, conducta: 4.4, creatividad: 4.0 },
       "Sigue siendo la referencia táctica de la categoría. El pase largo mejoró y ya lo usa en partido.",
       ["Liderar la presión alta.", "Sumar remate de media distancia."],
     ),
     armarEvaluacion(
       benja, "2024-05-20", "Andrés Mercado",
-      { tecnica: 3.2, fisico: 3.6, tactico: 3.4, mental: 3.0, social: 3.4, disciplina: 4.2 },
+      { asistencia: 4.2, tecnica: 3.2, tactica: 3.4, fisico: 3.6, psicologico: 3.0, conducta: 3.4, creatividad: 3.1 },
       "Muy seguro bajo los tres palos en el juego aéreo. Le falta confianza para salir jugando con los pies.",
       ["Practicar salida con los pies bajo presión.", "Trabajar la comunicación con la línea de defensa."],
     ),
     armarEvaluacion(
       tomas, "2024-05-20", "Estefani Contreras",
-      { tecnica: 3.0, fisico: 2.8, tactico: 2.6, mental: 3.4, social: 3.8, disciplina: 4.0 },
+      { asistencia: 4.0, tecnica: 3.0, tactica: 2.6, fisico: 2.8, psicologico: 3.4, conducta: 3.8, creatividad: 3.2 },
       "Primer semestre de Tomás en la escuela. Entusiasta, aprende rápido y se integró muy bien al grupo.",
       ["Afianzar el control orientado.", "Sumar minutos de juego reducido."],
     ),

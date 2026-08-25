@@ -70,6 +70,7 @@ export function Informe() {
   const ejes = pauta.categorias.map((c) => ({
     id: c.id,
     nombre: c.nombre,
+    nombreCorto: c.nombreCorto,
     icono: c.icono,
     descripcion: c.descripcion,
   }));
@@ -208,8 +209,7 @@ export function Informe() {
                 </span>
                 {previo && (
                   <span className="informe__panel-delta">
-                    <Delta valor={delta(actual.general, previo.general)} /> respecto de la
-                    evaluación anterior
+                    <Delta valor={delta(actual.general, previo.general)} /> respecto de la anterior
                   </span>
                 )}
               </div>
@@ -236,14 +236,14 @@ export function Informe() {
                 ejes={ejes}
                 series={series}
                 ancho={766}
-                alto={367}
-                radio={108}
+                alto={284}
+                radio={88}
                 mostrarLeyenda={false}
               />
             </section>
 
             <section className="informe__bloque">
-              <h3 className="informe__bloque-titulo">Niveles de evaluación por categoría</h3>
+              <h3 className="informe__bloque-titulo">Niveles de evaluación por sección</h3>
               <table className="informe__tabla">
                 <tbody>
                   {actual.categorias.map((cat) => {
