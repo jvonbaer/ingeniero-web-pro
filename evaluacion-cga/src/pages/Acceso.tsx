@@ -1,3 +1,4 @@
+import { traducirError } from "../data/mensajes";
 import { useState } from "react";
 import { Escudo } from "../components/Marca";
 import { Campo } from "../components/ui";
@@ -17,7 +18,7 @@ export function Acceso() {
     try {
       await entrar(correo.trim(), clave);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "No se pudo iniciar sesión.");
+      setError(traducirError(e instanceof Error ? e.message : "No se pudo iniciar sesión."));
       setEnviando(false);
     }
   }

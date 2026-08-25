@@ -53,7 +53,7 @@ function BarraSuperior() {
 }
 
 export function App() {
-  const { cargando, error } = useDatos();
+  const { cargando, error, recargar } = useDatos();
 
   return (
     <div className="app">
@@ -61,7 +61,19 @@ export function App() {
       <main className="app__main">
         {error && (
           <div className="aviso" role="alert">
-            <strong>Hubo un problema:</strong> {error}
+            <div>
+              <strong>Hubo un problema:</strong> {error}
+            </div>
+            {/* Sin esto, un error de carga deja la pantalla muerta: el
+                entrenador queda con la sesión abierta y sin nada que tocar. */}
+            <button
+              type="button"
+              className="btn btn--fantasma btn--sm"
+              style={{ marginTop: 10 }}
+              onClick={() => void recargar()}
+            >
+              Reintentar
+            </button>
           </div>
         )}
         {cargando ? (
