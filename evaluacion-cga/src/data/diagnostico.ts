@@ -100,11 +100,11 @@ export async function revisarInstalacion({
   const hechas = new Map<string, Prueba>();
   const cerrar = () => ORDEN.map((id) => hechas.get(id) ?? omitida(id));
 
-  const proyecto = await probarProyecto(limpia, llave);
+  const anonimo = nuevoCliente(limpia, llave);
+
+  const proyecto = await probarProyecto(limpia, llave, anonimo);
   hechas.set("proyecto", proyecto);
   if (proyecto.estado === "falla") return cerrar();
-
-  const anonimo = nuevoCliente(limpia, llave);
 
   const { prueba: tablas, expuestas } = await probarTablas(anonimo);
   hechas.set("tablas", tablas);
@@ -202,31 +202,32 @@ export async function revisarInstalacion({
   return cerrar();
 }
 
-async function probarProyecto(url: string, anonKey: string): Promise<Prueba> {
+/**
+ * ¿La clave fue rechazada por el portero de Supabase?
+ *
+ * Se mira el error de una consulta de verdad, no el código del endpoint raíz.
+ * La primera versión preguntaba por `/rest/v1/` mandando sólo la cabecera
+ * `apikey`, y Supabase exige además `Authorization: Bearer`: devolvía 401 con
+ * claves perfectamente válidas, y el diagnóstico acusaba a la escuela de un
+ * error que no había cometido mientras la aplicación funcionaba al lado.
+ */
+function claveRechazada(error: ErrorPostgrest): boolean {
+  return (
+    error.code === "401" ||
+    error.code === "PGRST301" ||
+    /invalid api key|no api key|api key found|jwt/i.test(error.message)
+  );
+}
+
+async function probarProyecto(url: string, anonKey: string, sb: Cliente): Promise<Prueba> {
   const titulo = TITULOS.proyecto;
+
+  // Primero, que el host conteste algo. Cualquier respuesta sirve: lo que se
+  // descarta acá es la dirección mal escrita y el proyecto en pausa.
   try {
-    const respuesta = await fetch(`${url}/rest/v1/`, { headers: { apikey: anonKey } });
-    if (respuesta.status === 401 || respuesta.status === 403) {
-      return {
-        id: "proyecto",
-        titulo,
-        estado: "falla",
-        detalle: `El proyecto responde, pero rechaza la clave (${respuesta.status}).`,
-        remedio:
-          "Copie de nuevo la clave desde Project Settings → API. Tiene que ser la «anon public», " +
-          "no la «service_role» ni la contraseña de la base de datos.",
-      };
-    }
-    if (!respuesta.ok) {
-      return {
-        id: "proyecto",
-        titulo,
-        estado: "falla",
-        detalle: `El proyecto contestó con un error ${respuesta.status}.`,
-        remedio: "Revise en supabase.com que el proyecto esté activo y no en pausa.",
-      };
-    }
-    return { id: "proyecto", titulo, estado: "ok", detalle: "La dirección y la clave son válidas." };
+    await fetch(`${url}/rest/v1/`, {
+      headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}` },
+    });
   } catch {
     return {
       id: "proyecto",
@@ -239,6 +240,26 @@ async function probarProyecto(url: string, anonKey: string): Promise<Prueba> {
         "se reactivan desde el panel con «Restore project».",
     };
   }
+
+  // Y ahora la clave, preguntada con la misma consulta que hace la aplicación.
+  // Así el diagnóstico no puede contradecirla: si una entra, la otra también.
+  const r = await contar(sb, TABLAS[0]);
+  if (r.error && claveRechazada(r.error)) {
+    return {
+      id: "proyecto",
+      titulo,
+      estado: "falla",
+      detalle: `El proyecto responde, pero rechaza la clave: ${r.error.message}`,
+      remedio:
+        "Copie de nuevo la clave desde Project Settings → API. Tiene que ser la «anon public», " +
+        "no la «service_role» ni la contraseña de la base de datos.",
+    };
+  }
+
+  // Que la tabla no exista no es problema de la clave: la clave pasó el portero
+  // y por eso llegamos a que Postgres se queje de otra cosa. Eso lo levanta la
+  // prueba siguiente.
+  return { id: "proyecto", titulo, estado: "ok", detalle: "La dirección y la clave son válidas." };
 }
 
 interface Expuesta {
