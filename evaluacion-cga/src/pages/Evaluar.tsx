@@ -23,8 +23,8 @@ import type { Configuracion, Evaluacion, Jugador, Pauta } from "../domain/types"
 // estos números son lo que cabe medido: seis líneas para las observaciones y dos
 // por objetivo. Pasarse no da error, pero el apoderado recibiría la frase cortada
 // en el PDF. Si cambia el alto de esos bloques en informe.css, recalcule acá.
-const MAX_OBSERVACIONES = 380;
-const MAX_OBJETIVO = 68;
+const MAX_OBSERVACIONES = 360;
+const MAX_OBJETIVO = 70;
 
 function evaluacionVacia(jugadorId: string, pauta: Pauta): Evaluacion {
   const fecha = hoyISO();

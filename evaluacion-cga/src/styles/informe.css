@@ -45,7 +45,7 @@
   background: var(--hueso);
   color: var(--texto);
   display: grid;
-  grid-template-rows: 116px 1fr 60px;
+  grid-template-rows: 76px 1fr 60px;
   box-shadow: var(--sombra-2);
   overflow: hidden;
   font-family: var(--fuente);
@@ -56,31 +56,26 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-rows: 50px 1fr;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
   background: var(--carbon-700);
   color: var(--cga-blanco);
   border-bottom: var(--franja) solid var(--cga-rojo); /* franja institucional */
   padding: 0 20px;
 }
 
-.informe__header-fila {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
 .informe__marca { display: flex; align-items: center; gap: 11px; }
-.informe__marca-titulo { font-family: var(--fuente-cond); font-size: 21px; font-weight: 800; text-transform: uppercase; line-height: 1; }
+.informe__marca-titulo { font-family: var(--fuente-cond); font-size: 19px; font-weight: 800; text-transform: uppercase; line-height: 1; }
 .informe__marca-lema { font-size: 9.5px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--gris-200); }
 
 .informe__fecha { text-align: right; }
 .informe__fecha span { display: block; font-family: var(--fuente-cond); font-size: 10px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--rama-futbol); }
-.informe__fecha strong { display: block; font-family: var(--fuente-cond); font-size: 16px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+.informe__fecha strong { display: block; font-family: var(--fuente-cond); font-size: 15px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
 
-.informe__titulo { text-align: center; align-self: center; padding-bottom: 4px; }
-.informe__titulo h1 { font-size: 37px; line-height: 0.94; letter-spacing: 0.01em; white-space: nowrap; }
-.informe__titulo p { margin: 4px 0 0; font-family: var(--fuente-cond); font-size: 12.5px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--rama-futbol); }
+.informe__titulo { text-align: center; min-width: 0; }
+.informe__titulo h1 { font-size: 25px; line-height: 1; letter-spacing: 0.01em; white-space: nowrap; }
+.informe__titulo p { margin: 3px 0 0; font-family: var(--fuente-cond); font-size: 10px; font-weight: 600; letter-spacing: 0.13em; text-transform: uppercase; color: var(--rama-futbol); white-space: nowrap; }
 
 /* --- Cuerpo: cuatro bandas apiladas --- */
 .informe__cuerpo {
@@ -93,7 +88,7 @@
      Descontados los 28 de relleno y los 33 de separación, quedan 819 para
      repartir, y así están repartidos. Cambiar cualquiera obliga a devolver el
      mismo número en otra. */
-  grid-template-rows: 160px 267px 232px 1fr;
+  grid-template-rows: 160px 310px 232px 1fr;
   gap: 11px;
   min-height: 0;
 }

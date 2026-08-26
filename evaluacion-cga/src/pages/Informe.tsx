@@ -167,26 +167,28 @@ export function Informe() {
         >
           <MarcaDeAgua />
 
+          {/* Escudo, título y fecha en una sola línea. Antes el título ocupaba
+              una segunda fila entera para él solo; recuperar ese alto es lo que
+              le da tamaño a la tela de araña. */}
           <header className="informe__header">
-            <div className="informe__header-fila">
-              <div className="informe__marca">
-                <Escudo tamano={44} variante="blanco" />
-                <div>
-                  <div className="informe__marca-titulo">Escuela de Fútbol</div>
-                  <div className="informe__marca-lema">
-                    Formamos jugadores, formamos personas
-                  </div>
+            <div className="informe__marca">
+              <Escudo tamano={38} variante="blanco" />
+              <div>
+                <div className="informe__marca-titulo">Escuela de Fútbol</div>
+                <div className="informe__marca-lema">
+                  Formamos jugadores, formamos personas
                 </div>
-              </div>
-              <div className="informe__fecha">
-                <span>Fecha de evaluación</span>
-                <strong>{fechaLarga(evaluacion.fecha)}</strong>
               </div>
             </div>
 
             <div className="informe__titulo">
               <h1>Evaluación de Habilidades</h1>
               <p>Desarrollando talento, construyendo futuro</p>
+            </div>
+
+            <div className="informe__fecha">
+              <span>Fecha de evaluación</span>
+              <strong>{fechaLarga(evaluacion.fecha)}</strong>
             </div>
           </header>
 
@@ -266,7 +268,7 @@ export function Informe() {
                 ejes={ejes}
                 series={series}
                 ancho={788}
-                alto={236}
+                alto={279}
                 mostrarLeyenda={false}
                 mostrarDescripciones={false}
               />
