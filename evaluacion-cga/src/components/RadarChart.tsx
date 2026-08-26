@@ -83,8 +83,21 @@ export function RadarChart({
   const alto = altoProp ?? Math.round(ancho * 0.78);
   const cx = ancho / 2;
   const cy = alto / 2 + (mostrarLeyenda ? 10 : 0);
-  const radio = radioProp ?? Math.min(ancho, alto) * 0.3;
-  const radioEtiqueta = radio + 26;
+  /**
+   * El rótulo de cada eje se dibuja por fuera del vértice, y el de arriba es el
+   * que manda: nombre y puntaje ocupan unos 44 px hacia arriba, más las líneas
+   * de descripción cuando se muestran. Si el radio pedido no deja ese espacio,
+   * el texto queda fuera del lienzo y el navegador lo recorta —que es lo que
+   * venía pasando en el informe, con "ASISTENCIA" montada sobre el título—.
+   *
+   * Así que el radio se limita a lo que de verdad cabe. Vale más una tela de
+   * araña algo menor que una con los rótulos cortados.
+   */
+  const separacionRotulo = mostrarDescripciones ? 26 : 18;
+  const altoRotulo = 44 + (mostrarDescripciones ? 22 : 0);
+  const radioMaximo = Math.max(28, alto / 2 - separacionRotulo - altoRotulo);
+  const radio = Math.min(radioProp ?? Math.min(ancho, alto) * 0.3, radioMaximo);
+  const radioEtiqueta = radio + separacionRotulo;
 
   const escala = (valor: number) => (Math.max(0, Math.min(100, valor)) / 100) * radio;
 

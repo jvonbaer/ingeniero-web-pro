@@ -20,10 +20,11 @@ import {
 
 const COLORES_SERIE = ["var(--serie-1)", "var(--serie-2)", "var(--serie-3)"];
 const VALORES_CLUB = ["Trabajo en equipo", "Disciplina", "Respeto", "Pasión", "Superación"];
-const ANCHO_HOJA = 794; // A4 vertical a 96 dpi (794 × 1123)
+const ANCHO_HOJA = 816; // Carta vertical a 96 dpi (816 × 1056)
+const ALTO_HOJA = 1056;
 
 export function Informe() {
-  usePagina("A4");
+  usePagina("letter");
   const { evaluacionId = "" } = useParams();
   const [parametros] = useSearchParams();
   const { jugadores, evaluaciones, configuracion } = useDatos();
@@ -162,7 +163,7 @@ export function Informe() {
       <div className="informe-marco" ref={marco}>
         <div
           className="informe"
-          style={{ transform: `scale(${escala})`, marginBottom: (escala - 1) * 1123 }}
+          style={{ transform: `scale(${escala})`, marginBottom: (escala - 1) * ALTO_HOJA }}
         >
           <MarcaDeAgua />
 
@@ -264,10 +265,10 @@ export function Informe() {
               <RadarChart
                 ejes={ejes}
                 series={series}
-                ancho={766}
-                alto={284}
-                radio={88}
+                ancho={788}
+                alto={236}
                 mostrarLeyenda={false}
+                mostrarDescripciones={false}
               />
             </section>
 
