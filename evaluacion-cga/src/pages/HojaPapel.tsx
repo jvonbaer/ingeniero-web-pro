@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useDatos } from "../data/DatosContext";
 import { Escudo } from "../components/Marca";
 import { Icono } from "../components/Iconos";
+import { usePagina } from "../components/usePagina";
 import {
   gruposDe,
   indicadoresActivos,
@@ -46,6 +47,7 @@ function Renglones({ cantidad }: { cantidad: number }) {
  * cortada.
  */
 export function HojaPapel() {
+  usePagina("letter");
   const { pautaId = "", jugadorId } = useParams();
   const { configuracion, jugadores } = useDatos();
 

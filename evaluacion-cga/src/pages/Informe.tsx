@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useDatos } from "../data/DatosContext";
 import { Escudo, MarcaDeAgua } from "../components/Marca";
 import { RadarChart, type SerieRadar } from "../components/RadarChart";
 import { Icono } from "../components/Iconos";
+import { usePagina } from "../components/usePagina";
 import { Delta } from "../components/ui";
 import {
   calcular,
@@ -22,7 +23,9 @@ const VALORES_CLUB = ["Trabajo en equipo", "Disciplina", "Respeto", "Pasión", "
 const ANCHO_HOJA = 794; // A4 vertical a 96 dpi (794 × 1123)
 
 export function Informe() {
+  usePagina("A4");
   const { evaluacionId = "" } = useParams();
+  const [parametros] = useSearchParams();
   const { jugadores, evaluaciones, configuracion } = useDatos();
   const marco = useRef<HTMLDivElement>(null);
   const [escala, setEscala] = useState(1);
@@ -46,6 +49,32 @@ export function Informe() {
     window.addEventListener("resize", ajustar);
     return () => window.removeEventListener("resize", ajustar);
   }, []);
+
+  /**
+   * Al llegar desde el historial con `?imprimir=1`, el cuadro de impresión se
+   * abre solo: es el atajo para mandarle el informe al apoderado sin pasar por
+   * la pantalla intermedia.
+   *
+   * Se espera a que las tipografías terminen de cargar. Si se imprime antes, el
+   * navegador compone la hoja con la fuente de reemplazo y el informe sale con
+   * otra métrica —los nombres de sección se parten distinto y la tabla no
+   * cuadra—.
+   */
+  useEffect(() => {
+    if (parametros.get("imprimir") !== "1" || !evaluacion || !jugador) return;
+    let vigente = true;
+    const listo = document.fonts?.ready ?? Promise.resolve();
+    void listo.then(() => {
+      if (!vigente) return;
+      // Un cuadro después de la carga, para que el escudo y la foto ya estén.
+      setTimeout(() => vigente && window.print(), 350);
+    });
+    return () => {
+      vigente = false;
+    };
+    // Sólo al abrir la pantalla: reimprimir se hace con el botón.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [evaluacionId]);
 
   const previas = useMemo(
     () => (evaluacion ? historial(evaluaciones, evaluacion.jugadorId) : []),
