@@ -20,10 +20,11 @@ import {
 
 const COLORES_SERIE = ["var(--serie-1)", "var(--serie-2)", "var(--serie-3)"];
 const VALORES_CLUB = ["Trabajo en equipo", "Disciplina", "Respeto", "Pasión", "Superación"];
-const ANCHO_HOJA = 794; // A4 vertical a 96 dpi (794 × 1123)
+const ANCHO_HOJA = 816; // Carta vertical a 96 dpi (816 × 1056)
+const ALTO_HOJA = 1056;
 
 export function Informe() {
-  usePagina("A4");
+  usePagina("letter");
   const { evaluacionId = "" } = useParams();
   const [parametros] = useSearchParams();
   const { jugadores, evaluaciones, configuracion } = useDatos();
@@ -162,30 +163,32 @@ export function Informe() {
       <div className="informe-marco" ref={marco}>
         <div
           className="informe"
-          style={{ transform: `scale(${escala})`, marginBottom: (escala - 1) * 1123 }}
+          style={{ transform: `scale(${escala})`, marginBottom: (escala - 1) * ALTO_HOJA }}
         >
           <MarcaDeAgua />
 
+          {/* Escudo, título y fecha en una sola línea. Antes el título ocupaba
+              una segunda fila entera para él solo; recuperar ese alto es lo que
+              le da tamaño a la tela de araña. */}
           <header className="informe__header">
-            <div className="informe__header-fila">
-              <div className="informe__marca">
-                <Escudo tamano={44} variante="blanco" />
-                <div>
-                  <div className="informe__marca-titulo">Escuela de Fútbol</div>
-                  <div className="informe__marca-lema">
-                    Formamos jugadores, formamos personas
-                  </div>
+            <div className="informe__marca">
+              <Escudo tamano={38} variante="blanco" />
+              <div>
+                <div className="informe__marca-titulo">Escuela de Fútbol</div>
+                <div className="informe__marca-lema">
+                  Formamos jugadores, formamos personas
                 </div>
-              </div>
-              <div className="informe__fecha">
-                <span>Fecha de evaluación</span>
-                <strong>{fechaLarga(evaluacion.fecha)}</strong>
               </div>
             </div>
 
             <div className="informe__titulo">
               <h1>Evaluación de Habilidades</h1>
               <p>Desarrollando talento, construyendo futuro</p>
+            </div>
+
+            <div className="informe__fecha">
+              <span>Fecha de evaluación</span>
+              <strong>{fechaLarga(evaluacion.fecha)}</strong>
             </div>
           </header>
 
@@ -264,10 +267,10 @@ export function Informe() {
               <RadarChart
                 ejes={ejes}
                 series={series}
-                ancho={766}
-                alto={284}
-                radio={88}
+                ancho={788}
+                alto={279}
                 mostrarLeyenda={false}
+                mostrarDescripciones={false}
               />
             </section>
 
