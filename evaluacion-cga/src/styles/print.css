@@ -1,12 +1,12 @@
 /* ============================================================
-   IMPRESIÓN — el informe sale en una hoja A4 vertical.
-   El navegador genera el PDF; no se necesita ninguna librería.
+   IMPRESIÓN — el navegador genera el PDF; no hace falta librería.
+
+   El tamaño del papel NO se fija acá. La aplicación imprime dos cosas de
+   tamaños distintos —la hoja de terreno en Carta y el informe para los
+   apoderados— y `@page` es global al documento, así que cada pantalla lo
+   declara al abrirse. Ver `usePagina`.
    ============================================================ */
 @media print {
-  @page {
-    size: A4 portrait;
-    margin: 0;
-  }
 
   html, body {
     background: var(--cga-blanco);

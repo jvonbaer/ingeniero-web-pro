@@ -271,7 +271,17 @@ export function JugadorFicha() {
                           <td><NivelTexto nivel={r.nivel} /></td>
                           <td className="num">
                             <Link to={`/informe/${r.evaluacion.id}`} className="btn btn--fantasma btn--sm">
-                              Informe
+                              Ver
+                            </Link>{" "}
+                            {/* Atajo para mandarle el informe al apoderado sin
+                                pasar por la pantalla intermedia: abre el cuadro
+                                de impresión apenas termina de componerse. */}
+                            <Link
+                              to={`/informe/${r.evaluacion.id}?imprimir=1`}
+                              className="btn btn--fantasma btn--sm"
+                              title="Abre el cuadro de impresión para guardarlo como PDF"
+                            >
+                              PDF
                             </Link>{" "}
                             <button
                               type="button"
