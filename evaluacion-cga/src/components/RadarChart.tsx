@@ -94,9 +94,33 @@ export function RadarChart({
    * araña algo menor que una con los rótulos cortados.
    */
   const separacionRotulo = mostrarDescripciones ? 26 : 18;
-  const altoRotulo = 44 + (mostrarDescripciones ? 22 : 0);
+  const altoRotulo = 48 + (mostrarDescripciones ? 22 : 0);
   const radioMaximo = Math.max(28, alto / 2 - separacionRotulo - altoRotulo);
-  const radio = Math.min(radioProp ?? Math.min(ancho, alto) * 0.3, radioMaximo);
+
+  /**
+   * Y lo mismo a lo ancho. Antes sólo se cuidaba el alto porque el gráfico
+   * vivía en una banda muy ancha y sobraba costado; en una caja angosta el que
+   * se sale es el rótulo lateral, que se dibuja hacia afuera desde su vértice.
+   *
+   * El ancho del rótulo se estima con el nombre más largo. Es una estimación,
+   * no una medición: el texto va en un SVG y medirlo obligaría a dibujarlo
+   * primero. Por eso se toma con holgura.
+   */
+  const letras = Math.max(...ejes.map((e) => (e.nombreCorto ?? e.nombre).length));
+  const anchoRotulo = letras * 7.2 + 8;
+  const cosMaximo = Math.max(
+    ...Array.from({ length: n }, (_, i) => Math.abs(Math.cos(punto(0, 0, 1, i, n).angulo))),
+  );
+  const radioMaximoAncho = Math.max(
+    28,
+    (ancho / 2 - anchoRotulo) / Math.max(cosMaximo, 0.1) - separacionRotulo,
+  );
+
+  const radio = Math.min(
+    radioProp ?? Math.min(ancho, alto) * 0.3,
+    radioMaximo,
+    radioMaximoAncho,
+  );
   const radioEtiqueta = radio + separacionRotulo;
 
   const escala = (valor: number) => (Math.max(0, Math.min(100, valor)) / 100) * radio;
