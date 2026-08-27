@@ -88,20 +88,66 @@
      Descontados los 28 de relleno y los 33 de separación, quedan 819 para
      repartir, y así están repartidos. Cambiar cualquiera obliga a devolver el
      mismo número en otra. */
-  grid-template-rows: 160px 310px 232px 1fr;
+  grid-template-rows: 495px 218px 1fr;
   gap: 11px;
   min-height: 0;
 }
 
 /* --- 1. Identidad del jugador --- */
-.informe__identidad {
+/* La identidad baja a una columna angosta a la izquierda y el gráfico se queda
+   con todo el alto de esta fila. Antes eran dos bandas apiladas y el gráfico
+   sólo disponía de la suya; así la tela de araña dobla su caja. */
+.informe__superior {
   display: grid;
-  grid-template-columns: 132px minmax(0, 1fr) 190px;
-  gap: 14px;
+  grid-template-columns: 272px minmax(0, 1fr);
+  gap: 16px;
   min-height: 0;
 }
 
+.informe__columna {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+}
+
+/* El puntaje general se pega al pie de la columna: queda a la altura de la
+   base del gráfico y las dos columnas cierran parejas. */
+.informe__columna .informe__panel-oscuro {
+  margin-top: auto;
+  flex: none;
+  padding: 11px 14px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.informe__derecha {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  min-height: 0;
+}
+
+.informe__ficha-cabecera { display: flex; flex-direction: column; gap: 5px; }
+
+.informe__panel-mitad { display: flex; flex-direction: column; min-width: 0; }
+
+/* Un filete separa las dos mitades sin cargar el panel con otra caja. */
+.informe__panel-mitad + .informe__panel-mitad {
+  padding-left: 14px;
+  border-left: 1px solid var(--carbon-400);
+}
+.informe__columna .informe__panel-puntaje { font-size: 46px; margin: 1px 0 0; }
+.informe__columna .informe__panel-nivel { font-size: 21px; margin: 1px 0 0; }
+.informe__columna .informe__chips { flex: none; }
+.informe__columna .informe__dato { padding: 1px 0; }
+.informe__columna .informe__datos { flex: none; }
+
 .informe__foto {
+  height: 274px;
+  flex: none;
   position: relative;
   border-radius: var(--r-md);
   overflow: hidden;
@@ -131,13 +177,13 @@
 }
 
 .informe__perfil { display: flex; flex-direction: column; min-width: 0; }
-.informe__nombre { font-size: 30px; line-height: 1; margin: 0 0 8px; }
+.informe__nombre { font-size: 26px; line-height: 1; margin: 0; }
 
-.informe__chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+.informe__chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 0; }
 
 .informe__chip {
   font-family: var(--fuente-cond);
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -154,8 +200,7 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: 18px;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .informe__dato {
@@ -163,7 +208,7 @@
   justify-content: space-between;
   align-items: baseline;
   gap: 8px;
-  padding: 4px 0;
+  padding: 2px 0;
   border-bottom: 1px solid var(--borde);
 }
 
@@ -231,22 +276,25 @@
   margin-bottom: 7px;
 }
 
-.informe__leyenda { display: flex; gap: 18px; list-style: none; margin: 0; padding: 0; }
+.informe__leyenda { display: flex; gap: 12px; list-style: none; margin: 0; padding: 0; }
 
 .informe__leyenda li {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 5px;
   font-family: var(--fuente-cond);
-  font-size: 12px;
+  font-size: 10.5px;
   font-weight: 600;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.05em;
+  /* La columna del gráfico es más angosta que la banda de antes: sin esto las
+     fechas se parten en dos renglones y la cabecera crece. */
+  white-space: nowrap;
   text-transform: uppercase;
   color: var(--texto-suave);
 }
 
 .informe__leyenda-linea {
-  width: 22px;
+  width: 16px;
   height: 3px;
   border-radius: 2px;
   background: currentColor;
@@ -266,16 +314,16 @@
 .informe__tabla { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .informe__tabla td {
   padding: 0 4px;
-  height: 28px; /* siete filas de 28 = 196; con el título, los 232 del bloque */
+  height: 26px; /* siete filas de 26 = 182; con el título, los 218 del bloque */
   line-height: 1.1;
   border-bottom: 1px solid var(--borde);
   vertical-align: middle;
 }
 .informe__tabla tr:last-child td { border-bottom: none; }
 .informe__tabla-icono { width: 24px; color: var(--carbon-700); line-height: 0; }
-.informe__tabla-nombre { width: 132px; font-family: var(--fuente-cond); font-size: 12.5px; font-weight: 700; line-height: 1; text-transform: uppercase; padding-right: 10px; }
+.informe__tabla-nombre { width: 150px; font-family: var(--fuente-cond); font-size: 11.5px; font-weight: 700; line-height: 1; text-transform: uppercase; padding-right: 10px; }
 .informe__tabla-desc { font-size: 10.5px; color: var(--texto-suave); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding-right: 12px; }
-.informe__tabla-barra { width: 130px; }
+.informe__tabla-barra { width: 112px; }
 .informe__tabla-valor { width: 56px; font-family: var(--fuente-cond); font-size: 18px; font-weight: 800; text-align: right; }
 .informe__tabla-valor small { font-size: 9px; font-weight: 600; color: var(--texto-suave); }
 .informe__tabla-delta { width: 34px; text-align: right; }

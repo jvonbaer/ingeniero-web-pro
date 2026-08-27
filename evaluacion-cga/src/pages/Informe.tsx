@@ -193,7 +193,8 @@ export function Informe() {
           </header>
 
           <div className="informe__cuerpo">
-            <section className="informe__identidad">
+            <section className="informe__superior">
+              <div className="informe__columna">
               <div className="informe__foto">
                 {jugador.fotoDataUrl ? (
                   <img src={jugador.fotoDataUrl} alt={nombreCompleto(jugador)} />
@@ -203,15 +204,7 @@ export function Informe() {
                 {jugador.dorsal && <span className="informe__dorsal">#{jugador.dorsal}</span>}
               </div>
 
-              <div className="informe__perfil">
-                <h2 className="informe__nombre">{nombreCompleto(jugador)}</h2>
-                <div className="informe__chips">
-                  <span className="informe__chip informe__chip--acento">{jugador.categoria}</span>
-                  <span className="informe__chip">{jugador.posicion}</span>
-                  <span className="informe__chip informe__chip--codigo">{jugador.codigo}</span>
-                </div>
-
-                <dl className="informe__datos">
+              <dl className="informe__datos">
                   <DatoInforme
                     rotulo="Nacimiento"
                     valor={`${fechaCorta(jugador.fechaNacimiento)} · ${
@@ -227,27 +220,45 @@ export function Informe() {
                   <DatoInforme rotulo="Entrenador" valor={evaluacion.entrenador || "—"} />
                   <DatoInforme rotulo="Pauta" valor={pauta.nombre} />
                 </dl>
-              </div>
 
+              {/* Puntaje y nivel lado a lado, no apilados: el panel queda bajo y
+                  ancho, y ese alto se lo lleva la foto del jugador. */}
               <div className="informe__panel-oscuro">
-                <span className="informe__panel-rotulo">Puntaje general</span>
-                <span className="puntaje informe__panel-puntaje">
-                  {actual.general}
-                  <small>/100</small>
-                </span>
-                <span className="informe__panel-rotulo">Nivel actual</span>
-                <span className="nivel informe__panel-nivel">
-                  {actual.nivel?.etiqueta ?? "—"}
-                </span>
-                {previo && (
-                  <span className="informe__panel-delta">
-                    <Delta valor={delta(actual.general, previo.general)} /> respecto de la anterior
+                <div className="informe__panel-mitad">
+                  <span className="informe__panel-rotulo">Puntaje general</span>
+                  <span className="puntaje informe__panel-puntaje">
+                    {actual.general}
+                    <small>/100</small>
                   </span>
-                )}
+                </div>
+                <div className="informe__panel-mitad">
+                  <span className="informe__panel-rotulo">Nivel actual</span>
+                  <span className="nivel informe__panel-nivel">
+                    {actual.nivel?.etiqueta ?? "—"}
+                  </span>
+                  {previo && (
+                    <span className="informe__panel-delta">
+                      <Delta valor={delta(actual.general, previo.general)} /> respecto de la anterior
+                    </span>
+                  )}
+                </div>
               </div>
-            </section>
+              </div>
 
-            <section className="informe__bloque">
+            <div className="informe__derecha">
+              {/* Quién es, arriba y al lado de la foto. Sacarlo de la columna
+                  izquierda es lo que deja a la foto crecer hasta ser un retrato
+                  vertical de verdad. */}
+              <div className="informe__ficha-cabecera">
+                <h2 className="informe__nombre">{nombreCompleto(jugador)}</h2>
+                <div className="informe__chips">
+                  <span className="informe__chip informe__chip--acento">{jugador.categoria}</span>
+                  <span className="informe__chip">{jugador.posicion}</span>
+                  <span className="informe__chip informe__chip--codigo">{jugador.codigo}</span>
+                </div>
+              </div>
+
+            <div className="informe__bloque">
               <div className="informe__bloque-cabecera">
                 <h3 className="informe__bloque-titulo">Comparativo de evaluaciones</h3>
                 <ul className="informe__leyenda">
@@ -267,11 +278,14 @@ export function Informe() {
               <RadarChart
                 ejes={ejes}
                 series={series}
-                ancho={788}
-                alto={279}
+                ancho={500}
+                alto={390}
+                radio={220}
                 mostrarLeyenda={false}
                 mostrarDescripciones={false}
               />
+            </div>
+            </div>
             </section>
 
             <section className="informe__bloque">
