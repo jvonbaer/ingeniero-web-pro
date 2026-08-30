@@ -1,0 +1,39 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Credenciales del modo nube — nunca deben llegar al repositorio
+.env
+.env.*
+!.env.example
+
+# Respaldos exportados desde la aplicación (datos de menores de edad)
+respaldo-socios-cga-*.json
+socios-cga-*.csv
+pagos-cga-*.csv
+
+# Tipografías Barlow: son binarias y las repone `npm install`
+# (scripts/preparar-fuentes.mjs). Ver README, sección 9.
+src/fuentes/
+src/styles/fuentes.css
