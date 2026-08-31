@@ -166,6 +166,35 @@ export function PersonaFicha() {
             </div>
           )}
 
+          {(persona.creadoPor || persona.actualizadoPor) && (
+            <div className="card" style={{ marginBottom: 16 }}>
+              <h2 className="card__titulo">Quién registró esta ficha</h2>
+              <div className="card__cuerpo">
+                <dl className="datos-lista">
+                  <dt>La creó</dt>
+                  <dd>
+                    {persona.creadoPor || "—"}
+                    {persona.creadoEn ? ` · ${formatoCorto(persona.creadoEn.slice(0, 10))}` : ""}
+                  </dd>
+                  <dt>Último cambio</dt>
+                  <dd>
+                    {persona.actualizadoPor || "—"}
+                    {persona.actualizadoEn
+                      ? ` · ${formatoCorto(persona.actualizadoEn.slice(0, 10))}`
+                      : ""}
+                  </dd>
+                </dl>
+                <Link
+                  className="btn btn--fantasma btn--sm no-print"
+                  style={{ marginTop: 12 }}
+                  to={`/bitacora?q=${encodeURIComponent(nombreCompleto(persona))}`}
+                >
+                  Ver todo su historial
+                </Link>
+              </div>
+            </div>
+          )}
+
           <button
             type="button"
             className="btn btn--peligro btn--bloque no-print"

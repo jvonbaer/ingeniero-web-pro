@@ -12,11 +12,31 @@
  *   · Al leer, todo campo de texto ausente vuelve como `""`, para que los
  *     formularios de React nunca reciban `null` y salten a modo no controlado.
  */
-import type { Aviso, Inscripcion, Pago, Persona, Plan, Vinculo } from "../domain/types";
+import type {
+  Aviso,
+  EntradaBitacora,
+  Inscripcion,
+  Pago,
+  Persona,
+  Plan,
+  Vinculo,
+} from "../domain/types";
 
 type Fila = Record<string, unknown>;
 
 const t = (v: unknown): string => (typeof v === "string" ? v : v == null ? "" : String(v));
+/**
+ * La huella de auditoría se lee y no se escribe: la firman los disparadores de
+ * la base a partir del token de la sesión. Si la aplicación la mandara, quien
+ * abra las herramientas del navegador podría guardar cualquier cosa a nombre de
+ * otro, y la bitácora dejaría de servir para lo único que sirve.
+ */
+const huella = (r: Fila) => ({
+  creadoEn: t(r.creado_en),
+  creadoPor: t(r.creado_por),
+  actualizadoEn: t(r.actualizado_en),
+  actualizadoPor: t(r.actualizado_por),
+});
 const n = (v: unknown): number => (typeof v === "number" ? v : Number(v) || 0);
 const b = (v: unknown): boolean => v === true;
 /** Fecha vacía → null, para las columnas `date` de PostgreSQL. */
@@ -47,8 +67,6 @@ export const personas = {
       autoriza_imagen: p.autorizaImagen,
       activo: p.activo,
       notas: p.notas,
-      creado_en: p.creadoEn || new Date().toISOString(),
-      actualizado_en: new Date().toISOString(),
     };
   },
   deFila(r: Fila): Persona {
@@ -75,8 +93,7 @@ export const personas = {
       autorizaImagen: b(r.autoriza_imagen),
       activo: b(r.activo),
       notas: t(r.notas),
-      creadoEn: t(r.creado_en),
-      actualizadoEn: t(r.actualizado_en),
+      ...huella(r),
     };
   },
 };
@@ -102,6 +119,7 @@ export const vinculos = {
       pagador: b(r.pagador),
       contactoPrincipal: b(r.contacto_principal),
       notas: t(r.notas),
+      ...huella(r),
     };
   },
 };
@@ -127,7 +145,6 @@ export const planes = {
       edad_maxima: p.edadMaxima,
       activo: p.activo,
       notas: p.notas,
-      actualizado_en: new Date().toISOString(),
     };
   },
   deFila(r: Fila): Plan {
@@ -155,6 +172,7 @@ export const planes = {
       edadMaxima: r.edad_maxima == null ? null : n(r.edad_maxima),
       activo: b(r.activo),
       notas: t(r.notas),
+      ...huella(r),
     };
   },
 };
@@ -176,7 +194,6 @@ export const inscripciones = {
       dias_aviso: i.diasAviso,
       matricula_pagada: i.matriculaPagada,
       notas: i.notas,
-      creado_en: i.creadoEn || new Date().toISOString(),
     };
   },
   deFila(r: Fila): Inscripcion {
@@ -195,7 +212,7 @@ export const inscripciones = {
       diasAviso: n(r.dias_aviso),
       matriculaPagada: b(r.matricula_pagada),
       notas: t(r.notas),
-      creadoEn: t(r.creado_en),
+      ...huella(r),
     };
   },
 };
@@ -215,7 +232,6 @@ export const pagos = {
       comprobante: p.comprobante,
       registrado_por: p.registradoPor,
       notas: p.notas,
-      creado_en: p.creadoEn || new Date().toISOString(),
     };
   },
   deFila(r: Fila): Pago {
@@ -232,7 +248,7 @@ export const pagos = {
       comprobante: t(r.comprobante),
       registradoPor: t(r.registrado_por),
       notas: t(r.notas),
-      creadoEn: t(r.creado_en),
+      ...huella(r),
     };
   },
 };
@@ -260,6 +276,22 @@ export const avisos = {
       enviadoEn: t(r.enviado_en),
       estado: t(r.estado) as Aviso["estado"],
       detalle: t(r.detalle),
+    };
+  },
+};
+
+/** La bitácora sólo se lee: la escriben los disparadores de la base. */
+export const bitacora = {
+  deFila(r: Fila): EntradaBitacora {
+    return {
+      id: t(r.id),
+      ocurridoEn: t(r.ocurrido_en),
+      usuario: t(r.usuario),
+      accion: t(r.accion) as EntradaBitacora["accion"],
+      tabla: t(r.tabla),
+      registroId: t(r.registro_id),
+      descripcion: t(r.descripcion),
+      cambios: (r.cambios ?? null) as EntradaBitacora["cambios"],
     };
   },
 };

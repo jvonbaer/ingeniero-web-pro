@@ -1,31 +1,43 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { borrarOperador, guardarOperador, operadorActual } from "./operador";
 import { db, nubeConfigurada } from "./supabaseDriver";
 
 type Estado = "cargando" | "sin-sesion" | "con-sesion";
 
 interface Sesion {
   estado: Estado;
-  email: string | null;
-  requiereAcceso: boolean;
+  /** `nube` = cuentas de verdad; `local` = sólo un nombre en este computador. */
+  modo: "nube" | "local";
+  /** Quién está trabajando: el correo de la cuenta, o el nombre configurado. */
+  usuario: string;
   entrar: (email: string, clave: string) => Promise<void>;
+  /** Modo local: dejar dicho quién está en el teclado. */
+  identificarse: (nombre: string) => void;
   salir: () => Promise<void>;
 }
 
 const Ctx = createContext<Sesion | null>(null);
 
 /**
- * Control de acceso de la base compartida.
+ * Quién entra y con qué garantías.
  *
- * Trabajando sólo en este computador no hay nada que proteger más allá del
- * propio equipo. En la nube sí: la base guarda RUT, direcciones y teléfonos de
- * socios y de menores de edad, así que entra únicamente quien tenga una cuenta
- * creada por el club. Las políticas RLS de supabase/schema.sql rechazan
- * cualquier lectura sin sesión, de modo que la clave anónima publicada dentro
- * del sitio no alcanza para ver nada.
+ * Contra la base compartida la identidad es de verdad: cada persona tiene su
+ * cuenta, y la base firma cada fila con el correo que viene dentro del token,
+ * sin que el navegador pueda meter mano. Eso es lo que hace que la bitácora
+ * sirva para responder «quién ingresó este dato».
+ *
+ * Trabajando sólo contra este computador no hay servidor que verifique nada, y
+ * pedir una clave sería un teatro: cualquiera podría borrarla desde el propio
+ * navegador. Lo que se pide entonces es un nombre, la bitácora lo anota como
+ * «sin cuenta» y la aplicación lo dice en pantalla, para que nadie confunda las
+ * dos cosas.
  */
 export function ProveedorSesion({ children }: { children: ReactNode }) {
-  const [estado, setEstado] = useState<Estado>(nubeConfigurada ? "cargando" : "con-sesion");
-  const [email, setEmail] = useState<string | null>(null);
+  const [estado, setEstado] = useState<Estado>(() => {
+    if (nubeConfigurada) return "cargando";
+    return operadorActual() ? "con-sesion" : "sin-sesion";
+  });
+  const [usuario, setUsuario] = useState<string>(nubeConfigurada ? "" : operadorActual());
 
   useEffect(() => {
     if (!nubeConfigurada) return;
@@ -35,12 +47,12 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
       .auth.getSession()
       .then(({ data }) => {
         if (!vigente) return;
-        setEmail(data.session?.user.email ?? null);
+        setUsuario(data.session?.user.email ?? "");
         setEstado(data.session ? "con-sesion" : "sin-sesion");
       });
 
     const { data: sub } = db().auth.onAuthStateChange((_evento, sesion) => {
-      setEmail(sesion?.user.email ?? null);
+      setUsuario(sesion?.user.email ?? "");
       setEstado(sesion ? "con-sesion" : "sin-sesion");
     });
 
@@ -52,14 +64,25 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
 
   const valor: Sesion = {
     estado,
-    email,
-    requiereAcceso: nubeConfigurada,
+    modo: nubeConfigurada ? "nube" : "local",
+    usuario,
     async entrar(correo, clave) {
       const { error } = await db().auth.signInWithPassword({ email: correo, password: clave });
       if (error) throw new Error("Correo o clave incorrectos.");
     },
+    identificarse(nombre) {
+      guardarOperador(nombre);
+      setUsuario(nombre.trim());
+      setEstado("con-sesion");
+    },
     async salir() {
-      await db().auth.signOut();
+      if (nubeConfigurada) {
+        await db().auth.signOut();
+        return;
+      }
+      borrarOperador();
+      setUsuario("");
+      setEstado("sin-sesion");
     },
   };
 

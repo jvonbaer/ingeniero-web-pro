@@ -140,6 +140,20 @@ export const supabaseDriver: Store = {
   },
 
   /**
+   * La bitácora no se carga con el resto: crece sin techo y casi nunca se
+   * mira, así que se pide sólo cuando alguien abre su pantalla.
+   */
+  async bitacora(limite = 500) {
+    const { data, error } = await db()
+      .from("bitacora")
+      .select("*")
+      .order("ocurrido_en", { ascending: false })
+      .limit(limite);
+    reventar("No se pudo leer la bitácora", error);
+    return (data ?? []).map(mapa.bitacora.deFila);
+  },
+
+  /**
    * Importar respeta el orden de las dependencias: primero las personas y los
    * planes, después lo que los referencia. Al revés, la base rechaza las filas
    * por clave foránea.

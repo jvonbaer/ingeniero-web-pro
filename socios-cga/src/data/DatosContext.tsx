@@ -10,6 +10,7 @@ import {
 import type {
   Aviso,
   Backup,
+  EntradaBitacora,
   Inscripcion,
   Pago,
   Persona,
@@ -38,6 +39,8 @@ interface Contexto extends EstadoDatos {
   guardarPago: (pago: Pago) => Promise<void>;
   eliminarPago: (id: string) => Promise<void>;
   guardarAviso: (aviso: Aviso) => Promise<void>;
+  /** La bitácora se pide aparte: crece sin techo y casi nunca se mira. */
+  leerBitacora: (limite?: number) => Promise<EntradaBitacora[]>;
   importar: (backup: Backup) => Promise<void>;
   vaciar: () => Promise<void>;
   exportar: () => Backup;
@@ -257,6 +260,7 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
       guardarPago,
       eliminarPago,
       guardarAviso,
+      leerBitacora: (limite?: number) => store.bitacora(limite),
       importar,
       vaciar,
       exportar: () => construirBackup(estado),

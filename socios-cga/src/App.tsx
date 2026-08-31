@@ -2,6 +2,7 @@ import { NavLink, Route, Routes } from "react-router-dom";
 import { Escudo } from "./components/Marca";
 import { useDatos } from "./data/DatosContext";
 import { useSesion } from "./data/sesion";
+import { Bitacora } from "./pages/Bitacora";
 import { Cobranzas } from "./pages/Cobranzas";
 import { Datos } from "./pages/Datos";
 import { Pagos } from "./pages/Pagos";
@@ -13,7 +14,7 @@ import { estadoCobro } from "./domain/cobros";
 
 function BarraSuperior() {
   const { modo, etiquetaModo, inscripciones, pagos } = useDatos();
-  const { requiereAcceso, email, salir } = useSesion();
+  const { usuario, modo: modoSesion, salir } = useSesion();
 
   // El número junto a «Cobranzas» es lo que hace que alguien entre a mirarla:
   // sin él, la pantalla de avisos sólo se visita cuando ya es tarde.
@@ -47,27 +48,31 @@ function BarraSuperior() {
           <NavLink to="/pagos" className="topbar__link">
             Pagos
           </NavLink>
+          <NavLink to="/bitacora" className="topbar__link">
+            Bitácora
+          </NavLink>
           <NavLink to="/datos" className="topbar__link">
             Datos
           </NavLink>
         </nav>
 
+        {/* El nombre de quien está trabajando va a la vista, no escondido en
+            un tooltip: es lo que queda anotado en cada dato que se guarde. */}
         <span
           className={`topbar__modo ${modo === "nube" ? "topbar__modo--nube" : ""}`}
           title={
             modo === "nube"
-              ? `Los datos se guardan en la base compartida del club. Sesión: ${email ?? ""}`
-              : "Los datos se guardan sólo en este computador."
+              ? "Los datos se guardan en la base compartida del club."
+              : "Los datos se guardan sólo en este computador, y este nombre no está verificado."
           }
         >
-          {etiquetaModo}
+          {usuario || etiquetaModo}
+          {modoSesion === "local" && " · sin cuenta"}
         </span>
 
-        {requiereAcceso && (
-          <button type="button" className="topbar__link" onClick={() => void salir()}>
-            Salir
-          </button>
-        )}
+        <button type="button" className="topbar__link" onClick={() => void salir()}>
+          Salir
+        </button>
       </div>
     </header>
   );
@@ -108,6 +113,7 @@ export function App() {
             <Route path="/planes" element={<Planes />} />
             <Route path="/cobranzas" element={<Cobranzas />} />
             <Route path="/pagos" element={<Pagos />} />
+            <Route path="/bitacora" element={<Bitacora />} />
             <Route path="/datos" element={<Datos />} />
             <Route path="*" element={<p className="vacio">Esta página no existe.</p>} />
           </Routes>

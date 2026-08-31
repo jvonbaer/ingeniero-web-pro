@@ -545,5 +545,7 @@
   overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
 }
 
+.mensaje-ok { margin: 9px 0 0; font-size: 12.5px; font-weight: 600; color: var(--exito); }
+
 .texto-suave { color: var(--texto-suave); }
 .mono { font-variant-numeric: tabular-nums; }

@@ -14,6 +14,9 @@ import type { Backup, Inscripcion, Pago, Persona, Plan, Vinculo } from "../domai
 
 const ahora = new Date().toISOString();
 
+/** Los registros de ejemplo se firman como lo que son, no a nombre de nadie. */
+const FIRMA = "datos de ejemplo";
+
 function persona(p: Partial<Persona> & Pick<Persona, "id" | "nombres" | "apellidos">): Persona {
   return {
     rut: "",
@@ -36,7 +39,9 @@ function persona(p: Partial<Persona> & Pick<Persona, "id" | "nombres" | "apellid
     activo: true,
     notas: "",
     creadoEn: ahora,
+    creadoPor: FIRMA,
     actualizadoEn: ahora,
+    actualizadoPor: FIRMA,
     ...p,
   };
 }

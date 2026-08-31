@@ -9,6 +9,8 @@ Registro único de socios, deportistas de ramas, alumnos de escuelas y actividad
   enlazado con la madre que paga; desde ella se ve a sus dos hijos, todo lo que debe y cuándo.
 - **Planes, valores y condiciones** de ramas, escuelas y actividades puntuales, cargados por el
   propio club.
+- **Queda huella de quién ingresa cada dato.** Cada persona entra con su cuenta y la base firma
+  cada alta, cambio y baja con su correo; la pantalla de *Bitácora* lo muestra y lo exporta.
 - **Pagos y alarmas de renovación**: la aplicación avisa al pagador **cinco días antes** —o los que
   el club decida— por correo o por WhatsApp, y el correo se envía solo, todos los días, sin que
   nadie tenga que entrar.
@@ -25,10 +27,11 @@ Registro único de socios, deportistas de ramas, alumnos de escuelas y actividad
 4. [La base compartida en Supabase](#4-la-base-compartida-en-supabase)
 5. [Publicar la aplicación](#5-publicar-la-aplicación)
 6. [Los avisos automáticos](#6-los-avisos-automáticos)
-7. [Qué es gratis y hasta dónde](#7-qué-es-gratis-y-hasta-dónde)
-8. [Segunda etapa: el portal de apoderados](#8-segunda-etapa-el-portal-de-apoderados)
-9. [Estructura del proyecto](#9-estructura-del-proyecto)
-10. [Cuidado con los datos personales](#10-cuidado-con-los-datos-personales)
+7. [La huella: quién ingresó cada dato](#7-la-huella-quién-ingresó-cada-dato)
+8. [Qué es gratis y hasta dónde](#8-qué-es-gratis-y-hasta-dónde)
+9. [Segunda etapa: el portal de apoderados](#9-segunda-etapa-el-portal-de-apoderados)
+10. [Estructura del proyecto](#10-estructura-del-proyecto)
+11. [Cuidado con los datos personales](#11-cuidado-con-los-datos-personales)
 
 ---
 
@@ -196,15 +199,21 @@ gratis una base PostgreSQL, las cuentas de acceso y el respaldo. Son cuatro paso
 2. Abra el archivo `socios-cga/supabase/schema.sql` de este repositorio, cópielo entero y péguelo.
 3. **Run**.
 
-Crea las seis tablas, sus índices, las políticas de seguridad y las dos vistas de consulta. Se puede
-volver a ejecutar las veces que haga falta sin romper nada ni perder datos.
+Crea las tablas, sus índices, las políticas de seguridad, los disparadores que dejan la huella de
+quién guarda cada cosa y las vistas de consulta. Se puede volver a ejecutar las veces que haga falta
+sin romper nada ni perder datos: sirve tanto para instalar como para poner al día una base que ya
+estaba andando.
 
 ### 4.3 Crear las cuentas
 
-**Authentication → Users → Add user**, una por cada persona que vaya a usar el sistema. Marque
+**Authentication → Users → Add user**, **una por cada persona** que vaya a usar el sistema. Marque
 **Auto Confirm User** para no tener que pasar por el correo de confirmación.
 
 Sin cuenta no se ve nada: las políticas del esquema rechazan toda lectura sin sesión iniciada.
+
+> Una cuenta por persona, nunca una compartida entre todos. Es lo que hace que la bitácora de la
+> [sección 7](#7-la-huella-quién-ingresó-cada-dato) pueda responder quién ingresó cada dato, y lo
+> que permite quitarle el acceso a alguien sin cambiarle la clave al resto.
 
 ### 4.4 Conectar la aplicación
 
@@ -319,7 +328,55 @@ estructura ya está: cada inscripción guarda su canal preferido.
 
 ---
 
-## 7. Qué es gratis y hasta dónde
+## 7. La huella: quién ingresó cada dato
+
+Cada persona entra con su cuenta, y **todo lo que guarda queda anotado a su nombre**. No hay una
+cuenta del club que usen todos: eso borraría la única pista de quién hizo cada cosa.
+
+### Dónde se ve
+
+| Dónde | Qué muestra |
+|---|---|
+| **Bitácora** (en el menú) | Cada alta, cambio y baja, con quién, cuándo y qué cambió exactamente. Se filtra por persona, por tipo de dato, por acción y por fechas, y se exporta a CSV. |
+| Ficha de una persona | Quién creó la ficha y quién la tocó por última vez, con un enlace a su historial completo. |
+| **Datos → Descargar nómina** | Las columnas `registrada_por`, `registrada_el`, `ultimo_cambio_por` y `ultimo_cambio_el`, para ordenar la planilla por quien cargó cada ficha. |
+| Supabase → Table Editor | Las mismas cuatro columnas en `personas`, `vinculos`, `planes`, `inscripciones` y `pagos`, más la tabla `bitacora` completa. |
+
+Un ejemplo de lo que responde: *«¿quién le cambió el valor a la inscripción de este niño?»* → la
+bitácora muestra `tesoreria@club.cl · modificó inscripciones · Valor: $28.000 → $22.400`, con la
+fecha y la hora.
+
+### Por qué es confiable
+
+La bitácora **la escribe la base de datos, no la aplicación**. Cada vez que se guarda algo, un
+disparador de PostgreSQL toma el correo del token de la sesión —el que emitió Supabase al iniciar
+sesión— y lo anota. Eso tiene tres consecuencias que importan:
+
+1. **No se puede firmar con el nombre de otro.** Aunque alguien manipule el navegador y mande otro
+   nombre, la base lo ignora y usa el del token.
+2. **También anota lo que se edita fuera de la aplicación.** Si alguien corrige una fila
+   directamente en el Table Editor de Supabase, queda igual de registrado.
+3. **No se puede corregir ni borrar.** La tabla `bitacora` es la única sin política de escritura:
+   desde la aplicación sólo se lee. Ni el administrador puede tachar una línea desde ahí.
+
+El autor original tampoco se reescribe: al modificar una ficha cambia el «último cambio», pero
+`creado_por` conserva a quien la ingresó el primer día. Y guardar sin cambiar nada no anota nada,
+para que la bitácora no se llene de líneas vacías que escondan las que importan.
+
+Las escrituras de la tarea automática de avisos aparecen como `sistema (tarea automática)`, no a
+nombre de una persona.
+
+### Trabajando sin base compartida
+
+Si la aplicación está guardando sólo en un computador, no hay servidor que verifique nada y pedir
+una clave sería un teatro: cualquiera podría borrarla desde el propio navegador. En ese caso la
+aplicación pide **un nombre** al entrar, la bitácora lo anota como *«sin cuenta»* y lo dice en
+pantalla. Sirve para ordenarse entre dos personas que comparten un computador; no sirve como
+prueba. **La huella de verdad exige la base compartida.**
+
+---
+
+## 8. Qué es gratis y hasta dónde
 
 | Pieza | Plan gratuito | Alcanza para |
 |---|---|---|
@@ -339,7 +396,7 @@ Dos advertencias honestas:
 
 ---
 
-## 8. Segunda etapa: el portal de apoderados
+## 9. Segunda etapa: el portal de apoderados
 
 La idea es que el pagador entre con su correo y vea lo suyo: qué tiene inscrito cada hijo, qué pagó,
 qué le vence y —lo más pedido— **reserve los horarios de su plan**.
@@ -366,7 +423,7 @@ mostrar.
 
 ---
 
-## 9. Estructura del proyecto
+## 10. Estructura del proyecto
 
 ```
 socios-cga/
@@ -390,6 +447,8 @@ socios-cga/
     │   ├── localDriver.ts        IndexedDB, este computador
     │   ├── supabaseDriver.ts     La base compartida
     │   ├── mapeo.ts              Objetos ↔ filas de PostgreSQL
+    │   ├── sesion.tsx            Quién entró y con qué garantías
+    │   ├── operador.ts           El nombre, cuando no hay cuentas
     │   ├── diagnostico.ts        Revisión de la instalación
     │   └── ejemplo.ts            Datos de demostración
     ├── pages/                    Las pantallas
@@ -416,13 +475,15 @@ y la aplicación lo usará en vez del dibujo.
 
 ---
 
-## 10. Cuidado con los datos personales
+## 11. Cuidado con los datos personales
 
 Este registro contiene RUT, direcciones, teléfonos, previsión de salud y observaciones médicas de
 socios y de **menores de edad**. Eso obliga a algunas cosas, más allá de lo que diga la ley:
 
 - **Cada persona con su cuenta.** No comparta una sola cuenta entre todos: si hay que quitarle el
-  acceso a alguien, se borra la suya y nadie más se entera.
+  acceso a alguien, se borra la suya y nadie más se entera, y la bitácora de la
+  [sección 7](#7-la-huella-quién-ingresó-cada-dato) sólo sirve si cada nombre corresponde a una
+  persona de verdad.
 - **El acceso lo dan las políticas, no el secreto.** La clave `anon` va dentro del sitio y no
   alcanza para leer nada sin sesión. La `service_role` **jamás** debe salir de los secretos del
   repositorio: quien la tenga puede leer y escribir todo.

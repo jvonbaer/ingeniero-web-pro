@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { Campo, Confirmar } from "../components/ui";
 import { useDatos } from "../data/DatosContext";
 import {
@@ -9,6 +10,8 @@ import {
   validarConexion,
 } from "../data/conexion";
 import { revisarInstalacion, type Prueba } from "../data/diagnostico";
+import { guardarOperador, operadorActual } from "../data/operador";
+import { useSesion } from "../data/sesion";
 import { backupDeEjemplo } from "../data/ejemplo";
 import { validarBackup } from "../data/store";
 import { estadoCobro, formatoPesos } from "../domain/cobros";
@@ -62,6 +65,9 @@ export function Datos() {
     const columnas = [
       "rut", "nombres", "apellidos", "edad", "socio", "numero_socio", "correo", "telefono",
       "direccion", "comuna", "responsables", "paga", "inscripciones", "estado_cuotas",
+      // La huella viaja con la nómina: en la planilla se puede ordenar por
+      // «registrada_por» y ver de un vistazo quién cargó qué.
+      "registrada_por", "registrada_el", "ultimo_cambio_por", "ultimo_cambio_el",
     ];
 
     const filas = personas.map((p) => {
@@ -100,6 +106,10 @@ export function Datos() {
           .filter(Boolean)
           .join(" · "),
         peor ? peor.etiqueta : "",
+        p.creadoPor ?? "",
+        p.creadoEn ? p.creadoEn.slice(0, 10) : "",
+        p.actualizadoPor ?? "",
+        p.actualizadoEn ? p.actualizadoEn.slice(0, 10) : "",
       ];
     });
 
@@ -259,6 +269,36 @@ export function Datos() {
               <button type="button" className="btn btn--fantasma" onClick={exportarNomina}>
                 Descargar nómina (CSV)
               </button>
+            </div>
+          </div>
+
+          <QuienTrabaja />
+
+          <div className="card" style={{ marginBottom: 16 }}>
+            <h2 className="card__titulo">Huella de quién ingresa los datos</h2>
+            <div className="card__cuerpo">
+              <p style={{ marginTop: 0, fontSize: 14 }}>
+                Cada alta, cambio y baja queda anotada con quién la hizo y a qué hora.{" "}
+                {modo === "nube" ? (
+                  <>
+                    La escribe <strong>la propia base de datos</strong> a partir de la cuenta con
+                    que se entró, así que no se puede firmar con el nombre de otro ni borrar una
+                    línea desde acá.
+                  </>
+                ) : (
+                  <>
+                    En este computador la anota la aplicación con el nombre que se escribió al
+                    entrar, <strong>sin cuenta que lo respalde</strong>.
+                  </>
+                )}
+              </p>
+              <p style={{ fontSize: 14 }}>
+                La nómina en CSV incluye las columnas <em>registrada_por</em> y{" "}
+                <em>ultimo_cambio_por</em>, y en Supabase las mismas columnas están en cada tabla.
+              </p>
+              <Link className="btn btn--fantasma" to="/bitacora">
+                Abrir la bitácora
+              </Link>
             </div>
           </div>
 
@@ -580,6 +620,75 @@ function resumen(fallas: number, sinProbar: number): string {
     } sin correr.`;
   }
   return "Todo lo indispensable está hecho. El club puede empezar a cargar personas.";
+}
+
+/**
+ * Quién está trabajando en este computador.
+ *
+ * En la nube muestra la cuenta y no deja cambiarla acá: se cambia saliendo y
+ * entrando con otra, que es justamente lo que hace que la huella valga. En modo
+ * local deja corregir el nombre, porque no hay nada que verificar y el turno de
+ * la tarde puede ser otra persona.
+ */
+function QuienTrabaja() {
+  const { modo, usuario, salir } = useSesion();
+  const [nombre, setNombre] = useState(operadorActual());
+  const [guardado, setGuardado] = useState(false);
+
+  if (modo === "nube") {
+    return (
+      <div className="card">
+        <h2 className="card__titulo">Quién está trabajando</h2>
+        <div className="card__cuerpo">
+          <p style={{ marginTop: 0, fontSize: 14 }}>
+            Sesión iniciada como <strong>{usuario}</strong>. Todo lo que guarde queda anotado a su
+            nombre.
+          </p>
+          <p className="campo__ayuda" style={{ marginBottom: 12 }}>
+            Si el computador lo usa otra persona, cierre la sesión y que entre con su propia
+            cuenta. Compartir una cuenta borra la única pista de quién hizo cada cosa.
+          </p>
+          <button type="button" className="btn btn--fantasma" onClick={() => void salir()}>
+            Cerrar sesión
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card">
+      <h2 className="card__titulo">Quién está trabajando</h2>
+      <div className="card__cuerpo">
+        <p style={{ marginTop: 0, fontSize: 14 }}>
+          En este computador no hay cuentas: la bitácora anota el nombre que se escriba acá, y lo
+          marca como <strong>«sin cuenta»</strong>.
+        </p>
+        <Campo label="Nombre de quien está usando este computador">
+          <input
+            className="input"
+            value={nombre}
+            onChange={(e) => {
+              setNombre(e.target.value);
+              setGuardado(false);
+            }}
+          />
+        </Campo>
+        <button
+          type="button"
+          className="btn btn--fantasma"
+          disabled={nombre.trim().length < 3}
+          onClick={() => {
+            guardarOperador(nombre);
+            setGuardado(true);
+          }}
+        >
+          Guardar el nombre
+        </button>
+        {guardado && <p className="mensaje-ok">Listo. Lo que guarde de ahora en adelante irá a su nombre.</p>}
+      </div>
+    </div>
+  );
 }
 
 /** Marca de estado dibujada, no un emoji: el sistema CGA no admite color ajeno. */

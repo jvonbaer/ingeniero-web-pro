@@ -53,7 +53,9 @@ create table if not exists public.personas (
   activo                boolean not null default true,
   notas                 text default '',
   creado_en             timestamptz not null default now(),
-  actualizado_en        timestamptz not null default now()
+  creado_por            text default '',
+  actualizado_en        timestamptz not null default now(),
+  actualizado_por       text default ''
 );
 
 -- El cruce entre quien practica y el adulto que responde por ella.
@@ -67,6 +69,10 @@ create table if not exists public.vinculos (
   pagador             boolean not null default false,
   contacto_principal  boolean not null default false,
   notas               text default '',
+  creado_en           timestamptz not null default now(),
+  creado_por          text default '',
+  actualizado_en      timestamptz not null default now(),
+  actualizado_por     text default '',
   -- La misma pareja no se registra dos veces: evita que un apoderado aparezca
   -- duplicado en la ficha por haber tocado dos veces «Enlazar».
   unique (persona_id, adulto_id),
@@ -95,7 +101,10 @@ create table if not exists public.planes (
   edad_maxima     integer,
   activo          boolean not null default true,
   notas           text default '',
-  actualizado_en  timestamptz not null default now()
+  creado_en       timestamptz not null default now(),
+  creado_por      text default '',
+  actualizado_en  timestamptz not null default now(),
+  actualizado_por text default ''
 );
 
 -- `valor` y `periodicidad` son una COPIA de los del plan al momento de
@@ -117,7 +126,10 @@ create table if not exists public.inscripciones (
   dias_aviso        integer not null default 5,
   matricula_pagada  boolean not null default false,
   notas             text default '',
-  creado_en         timestamptz not null default now()
+  creado_en         timestamptz not null default now(),
+  creado_por        text default '',
+  actualizado_en    timestamptz not null default now(),
+  actualizado_por   text default ''
 );
 
 -- Cada pago cubre un período concreto, y de ahí sale el próximo vencimiento: no
@@ -136,7 +148,10 @@ create table if not exists public.pagos (
   comprobante     text default '',
   registrado_por  text default '',
   notas           text default '',
-  creado_en       timestamptz not null default now()
+  creado_en       timestamptz not null default now(),
+  creado_por      text default '',
+  actualizado_en  timestamptz not null default now(),
+  actualizado_por text default ''
 );
 
 -- Registro de los avisos de renovación ya enviados, para no repetirlos.
@@ -150,6 +165,32 @@ create table if not exists public.avisos (
   estado          text not null default 'enviado',    -- enviado | error | manual
   detalle         text default ''
 );
+
+-- Bitácora: quién hizo qué y cuándo.
+--
+-- Una fila por cada alta, cambio o baja en las cinco tablas de trabajo. La
+-- escriben los disparadores de más abajo, no la aplicación: si la escribiera el
+-- navegador, bastaría con abrir las herramientas de desarrollo para anotar
+-- cualquier cosa, y una bitácora que se puede falsear no sirve como huella.
+--
+-- Por lo mismo no tiene políticas de escritura: desde la aplicación sólo se
+-- puede leer. Los disparadores son `security definer` y por eso sí pueden
+-- insertar.
+create table if not exists public.bitacora (
+  id            bigserial primary key,
+  ocurrido_en   timestamptz not null default now(),
+  usuario       text not null,
+  accion        text not null,                        -- creó | modificó | eliminó
+  tabla         text not null,
+  registro_id   text not null,
+  descripcion   text default '',
+  -- Qué cambió, campo por campo, con el valor de antes y el de después.
+  cambios       jsonb
+);
+
+create index if not exists bitacora_fecha_idx    on public.bitacora (ocurrido_en desc);
+create index if not exists bitacora_registro_idx on public.bitacora (tabla, registro_id);
+create index if not exists bitacora_usuario_idx  on public.bitacora (usuario);
 
 create index if not exists personas_apellidos_idx    on public.personas (apellidos, nombres);
 create index if not exists personas_activas_idx      on public.personas (activo) where activo;
@@ -173,6 +214,27 @@ create index if not exists pagos_fecha_idx           on public.pagos (fecha desc
 create unique index if not exists avisos_sin_repetir_idx
   on public.avisos (inscripcion_id, vence) where estado = 'enviado';
 
+
+-- ---------------------------------------------------------------------------
+-- Puesta al día de instalaciones anteriores
+--
+-- Las columnas de autoría se agregan también acá, con `if not exists`, para que
+-- un club que ya tenía la base andando pueda volver a correr este archivo y
+-- quedar al día sin perder un solo dato.
+-- ---------------------------------------------------------------------------
+
+do $$
+declare
+  t text;
+begin
+  foreach t in array array['personas', 'vinculos', 'planes', 'inscripciones', 'pagos'] loop
+    execute format('alter table public.%I add column if not exists creado_en timestamptz not null default now()', t);
+    execute format('alter table public.%I add column if not exists creado_por text default %L', t, '');
+    execute format('alter table public.%I add column if not exists actualizado_en timestamptz not null default now()', t);
+    execute format('alter table public.%I add column if not exists actualizado_por text default %L', t, '');
+  end loop;
+end $$;
+
 -- ---------------------------------------------------------------------------
 -- Seguridad
 --
@@ -189,6 +251,7 @@ alter table public.planes        enable row level security;
 alter table public.inscripciones enable row level security;
 alter table public.pagos         enable row level security;
 alter table public.avisos        enable row level security;
+alter table public.bitacora      enable row level security;
 
 do $$
 declare
@@ -207,6 +270,185 @@ begin
       create policy "club escribe %1$s" on public.%1$I
         for all to authenticated using (true) with check (true)
     $f$, t);
+  end loop;
+end $$;
+
+-- La bitácora se lee, no se escribe ni se corrige: es la única tabla sin
+-- política de escritura, a propósito. Ni siquiera desde la aplicación se puede
+-- borrar una línea, y por eso sirve para responder «quién ingresó esto».
+drop policy if exists "club lee bitacora" on public.bitacora;
+create policy "club lee bitacora" on public.bitacora
+  for select to authenticated using (true);
+
+-- ---------------------------------------------------------------------------
+-- La huella: quién está guardando
+--
+-- El nombre no lo manda el navegador, se saca del propio token de la sesión.
+-- Así la huella vale también cuando alguien edita una fila directamente en el
+-- Table Editor de Supabase, y no se puede firmar con el nombre de otro.
+-- ---------------------------------------------------------------------------
+
+create or replace function public.usuario_actual()
+returns text
+language plpgsql
+stable
+as $$
+declare
+  claims jsonb;
+begin
+  begin
+    claims := nullif(current_setting('request.jwt.claims', true), '')::jsonb;
+  exception when others then
+    claims := null;
+  end;
+
+  -- La tarea de avisos entra con la clave de servicio, que no tiene correo:
+  -- sus escrituras quedan a nombre del sistema, no de una persona.
+  if claims is null then
+    return coalesce(current_setting('cga.usuario', true), current_user);
+  end if;
+  if claims ->> 'role' = 'service_role' then
+    return 'sistema (tarea automática)';
+  end if;
+  return coalesce(nullif(claims ->> 'email', ''), nullif(claims ->> 'sub', ''), current_user);
+end;
+$$;
+
+/*
+ * Firma cada fila al guardarla. El autor original nunca se reescribe: aunque
+ * el navegador mande otra cosa, en un UPDATE se conserva el `creado_por` que
+ * ya estaba.
+ */
+create or replace function public.marcar_autor()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  quien text := public.usuario_actual();
+begin
+  if TG_OP = 'INSERT' then
+    new.creado_en := coalesce(new.creado_en, now());
+    new.creado_por := quien;
+  else
+    new.creado_en := old.creado_en;
+    new.creado_por := old.creado_por;
+  end if;
+  new.actualizado_en := now();
+  new.actualizado_por := quien;
+  return new;
+end;
+$$;
+
+/* Nombre legible de una fila, para que la bitácora se lea sin descifrar ids. */
+create or replace function public.etiqueta_registro(tabla text, d jsonb)
+returns text
+language plpgsql
+stable
+as $$
+declare
+  nombre_persona text;
+  nombre_plan text;
+begin
+  if tabla = 'personas' then
+    return nullif(trim(coalesce(d ->> 'nombres', '') || ' ' || coalesce(d ->> 'apellidos', '')), '');
+  elsif tabla = 'planes' then
+    return d ->> 'nombre';
+  end if;
+
+  -- Para el resto hace falta ir a buscar el nombre. Puede no estar: si la
+  -- persona se eliminó, sus vínculos e inscripciones se van con ella y para
+  -- entonces la ficha ya no existe. En ese caso queda el identificador, que es
+  -- justamente lo que permite cruzar la línea con la del borrado.
+  select trim(nombres || ' ' || apellidos) into nombre_persona
+  from public.personas where id = coalesce(d ->> 'persona_id', '');
+
+  if tabla = 'vinculos' then
+    return coalesce(nombre_persona, d ->> 'persona_id') || ' · ' || coalesce(d ->> 'tipo', 'vínculo');
+  elsif tabla = 'inscripciones' then
+    select nombre into nombre_plan from public.planes where id = coalesce(d ->> 'plan_id', '');
+    return coalesce(nombre_persona, d ->> 'persona_id') || ' en ' || coalesce(nombre_plan, d ->> 'plan_id');
+  elsif tabla = 'pagos' then
+    select trim(p.nombres || ' ' || p.apellidos) into nombre_persona
+    from public.inscripciones i join public.personas p on p.id = i.persona_id
+    where i.id = coalesce(d ->> 'inscripcion_id', '');
+    return '$' || coalesce(d ->> 'monto', '0') || ' · ' || coalesce(nombre_persona, d ->> 'inscripcion_id');
+  end if;
+
+  return d ->> 'id';
+end;
+$$;
+
+/*
+ * Escribe una línea de bitácora por cada alta, cambio o baja.
+ *
+ * En los cambios guarda sólo los campos que efectivamente cambiaron, con el
+ * valor de antes y el de después. Se ignoran las propias marcas de auditoría:
+ * si no, cada línea diría que lo que cambió fue la hora de modificación.
+ */
+create or replace function public.registrar_en_bitacora()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  d jsonb;
+  v_accion text;
+  v_cambios jsonb;
+begin
+  if TG_OP = 'DELETE' then
+    d := to_jsonb(old);
+    v_accion := 'eliminó';
+  elsif TG_OP = 'INSERT' then
+    d := to_jsonb(new);
+    v_accion := 'creó';
+  else
+    d := to_jsonb(new);
+    v_accion := 'modificó';
+
+    select jsonb_object_agg(
+             k, jsonb_build_object('antes', to_jsonb(old) -> k, 'despues', to_jsonb(new) -> k))
+      into v_cambios
+      from jsonb_object_keys(to_jsonb(new)) as k
+     where to_jsonb(new) -> k is distinct from to_jsonb(old) -> k
+       and k not in ('actualizado_en', 'actualizado_por');
+
+    -- Guardar de nuevo sin cambiar nada no es un hecho que valga la pena
+    -- anotar: llenaría la bitácora de ruido y escondería lo que sí importa.
+    if v_cambios is null then
+      return null;
+    end if;
+  end if;
+
+  insert into public.bitacora (usuario, accion, tabla, registro_id, descripcion, cambios)
+  values (
+    public.usuario_actual(),
+    v_accion,
+    TG_TABLE_NAME,
+    coalesce(d ->> 'id', '?'),
+    coalesce(public.etiqueta_registro(TG_TABLE_NAME, d), ''),
+    v_cambios
+  );
+  return null;
+end;
+$$;
+
+do $$
+declare
+  t text;
+begin
+  foreach t in array array['personas', 'vinculos', 'planes', 'inscripciones', 'pagos'] loop
+    execute format('drop trigger if exists %1$I_marcar_autor on public.%1$I', t);
+    execute format(
+      'create trigger %1$I_marcar_autor before insert or update on public.%1$I
+         for each row execute function public.marcar_autor()', t);
+
+    execute format('drop trigger if exists %1$I_bitacora on public.%1$I', t);
+    execute format(
+      'create trigger %1$I_bitacora after insert or update or delete on public.%1$I
+         for each row execute function public.registrar_en_bitacora()', t);
   end loop;
 end $$;
 
@@ -337,6 +579,23 @@ order by p.apellidos, p.nombres;
 --   from public.personas p
 --   where p.fecha_nacimiento > current_date - interval '18 years'
 --     and not exists (select 1 from public.vinculos v where v.persona_id = p.id);
+--
+-- Quién ingresó y quién tocó por última vez cada ficha:
+--   select trim(nombres || ' ' || apellidos) as persona, creado_por, creado_en,
+--          actualizado_por, actualizado_en
+--   from public.personas order by actualizado_en desc;
+--
+-- Todo lo que hizo una persona del equipo la última semana:
+--   select ocurrido_en, accion, tabla, descripcion
+--   from public.bitacora
+--   where usuario = 'secretaria@ejemplo.cl' and ocurrido_en > now() - interval '7 days'
+--   order by ocurrido_en desc;
+--
+-- La historia completa de una ficha, desde que se creó:
+--   select ocurrido_en, usuario, accion, cambios
+--   from public.bitacora
+--   where tabla = 'personas' and registro_id = 'per_xxxxx'
+--   order by ocurrido_en;
 --
 -- Recaudación del mes por rama:
 --   select pl.rama, sum(pg.monto) as total

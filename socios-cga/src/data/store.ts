@@ -1,6 +1,7 @@
 import type {
   Aviso,
   Backup,
+  EntradaBitacora,
   Inscripcion,
   Pago,
   Persona,
@@ -40,6 +41,8 @@ export interface Store {
   guardarPago(pago: Pago): Promise<void>;
   eliminarPago(id: string): Promise<void>;
   guardarAviso(aviso: Aviso): Promise<void>;
+  /** Quién hizo qué, de lo más reciente a lo más antiguo. */
+  bitacora(limite?: number): Promise<EntradaBitacora[]>;
   importar(backup: Backup): Promise<void>;
   vaciar(): Promise<void>;
 }

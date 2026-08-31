@@ -34,6 +34,6 @@ socios-cga-*.csv
 pagos-cga-*.csv
 
 # Tipografías Barlow: son binarias y las repone `npm install`
-# (scripts/preparar-fuentes.mjs). Ver README, sección 9.
+# (scripts/preparar-fuentes.mjs). Ver README, sección 10.
 src/fuentes/
 src/styles/fuentes.css
