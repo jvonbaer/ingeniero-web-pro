@@ -1,0 +1,11 @@
+# Despliegue en Netlify (plan gratuito).
+#
+# En Netlify: Add new site → Import an existing project → elija el repositorio y
+# ponga «socios-cga» como Base directory. Con eso Netlify lee este archivo y no
+# hay nada más que configurar.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
