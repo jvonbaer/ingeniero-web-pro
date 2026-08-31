@@ -17,6 +17,10 @@ Registro único de socios, deportistas de ramas, alumnos de escuelas y actividad
 - **Gratis de punta a punta** en su primera etapa: base de datos, sitio publicado y envío de
   correos, todo en planes sin costo.
 
+> **¿Va a usar el sistema, no a programarlo?** Lea el [**Manual**](MANUAL.md): puesta en marcha,
+> instalación en cada computador y uso diario, escrito para el mesón y no para la consola. Este
+> README es la documentación técnica.
+
 ---
 
 ## Índice
@@ -428,6 +432,7 @@ mostrar.
 ```
 socios-cga/
 ├── README.md                     Este archivo
+├── MANUAL.md                     Manual para quien usa el sistema
 ├── .env.example                  Variables de la nube y del envío de avisos
 ├── netlify.toml, vercel.json     Publicación en un clic
 ├── avisos/
