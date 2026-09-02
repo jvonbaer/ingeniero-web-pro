@@ -12,6 +12,10 @@
 -- Cómo usarlo: supabase.com → su proyecto → SQL Editor → New query → pegar
 -- todo → Run. ANTES DE EJECUTAR, cambie el correo del paso 3 por el suyo.
 --
+-- ORDEN: este archivo va DESPUÉS de migracion-camisetas.sql, porque reparte
+-- permisos sobre la tabla `camisetas` y no puede repartir sobre algo que no
+-- existe. Si se corre antes, se detiene en el paso 0 y lo dice.
+--
 -- ----------------------------------------------------------------------------
 -- LEA ESTO ANTES DE CORRER, PORQUE SUPABASE VA A MOSTRAR SU AVISO
 --
@@ -34,6 +38,36 @@
 -- no cambia nada, después la verificación, y sólo al final los permisos. Así no
 -- hace falta confiar en que la base deshaga a medio camino.
 -- ============================================================================
+
+-- ---------------------------------------------------------------------------
+-- 0. Requisitos
+--
+-- Este archivo reparte permisos sobre las tablas de la escuela, así que las
+-- tablas tienen que estar. Se comprueba acá, al principio, para que una que
+-- falte se avise ahora y no a mitad de camino con un error de PostgreSQL que no
+-- dice qué hacer.
+--
+-- Si falta `camisetas`, lo que falta es correr antes migracion-camisetas.sql.
+-- ---------------------------------------------------------------------------
+
+do $$
+declare
+  t      text;
+  faltan text[] := array[]::text[];
+begin
+  foreach t in array array['jugadores', 'evaluaciones', 'rubrica', 'hojas', 'camisetas'] loop
+    if to_regclass('public.' || t) is null then
+      faltan := faltan || t;
+    end if;
+  end loop;
+
+  if array_length(faltan, 1) > 0 then
+    raise exception
+      'No se cambió nada. Falta% en esta base: %. Corra primero supabase/migracion-camisetas.sql (crea `camisetas`) o supabase/schema.sql, y después vuelva a este archivo.',
+      case when array_length(faltan, 1) = 1 then ' la tabla' else 'n las tablas' end,
+      array_to_string(faltan, ', ');
+  end if;
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- 1. La tabla de perfiles
@@ -165,6 +199,11 @@ declare
   solo_admin_borra boolean;
 begin
   foreach t in array array['jugadores', 'evaluaciones', 'camisetas', 'hojas'] loop
+    -- El paso 0 ya comprobó que están todas. Esto es el cinturón además de los
+    -- tirantes: una tabla que faltara haría reventar el bloque entero a mitad
+    -- de camino, y las políticas de las anteriores se desharían con él.
+    continue when to_regclass('public.' || t) is null;
+
     solo_admin_borra := t in ('jugadores', 'evaluaciones');
 
     -- Fuera las dos reglas anchas de antes.
