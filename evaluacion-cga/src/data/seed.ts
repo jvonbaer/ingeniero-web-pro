@@ -1,6 +1,7 @@
 import { CONFIGURACION_BASE } from "../config/pautas";
+import { temporadaActual } from "../domain/camisetas";
 import { gruposDe, nuevoId, pautaDeCategoria } from "../domain/scoring";
-import type { Backup, Evaluacion, Jugador } from "../domain/types";
+import type { Backup, Camiseta, Evaluacion, Jugador } from "../domain/types";
 
 /**
  * Reparte un promedio objetivo (en la escala 1-5) entre `n` sub-puntos usando
@@ -87,6 +88,42 @@ function armarJugador(
   };
 }
 
+/**
+ * Camiseta de ejemplo. Los cuatro casos que se arman abajo cubren lo que el
+ * club se encuentra de verdad: pagada y entregada, pagada sin entregar, con un
+ * abono a medias, y sin pagar todavía.
+ */
+function armarCamiseta(
+  jugador: Jugador,
+  numero: number,
+  talla: string,
+  precio: number,
+  abonado: number,
+  entregada: boolean,
+): Camiseta {
+  const ahora = new Date().toISOString();
+  const temporada = temporadaActual();
+  return {
+    id: nuevoId("cam"),
+    jugadorId: jugador.id,
+    temporada,
+    categoria: jugador.categoria,
+    numero,
+    nombreEstampado: jugador.nombre.toUpperCase(),
+    talla,
+    precio,
+    abonado,
+    medioPago: abonado > 0 ? "transferencia" : "",
+    fechaPago: abonado > 0 ? `${temporada}-03-14` : "",
+    comprobante: abonado > 0 ? "TR-00842" : "",
+    entregada,
+    fechaEntrega: entregada ? `${temporada}-03-22` : "",
+    notas: "",
+    creadaEn: ahora,
+    actualizadaEn: ahora,
+  };
+}
+
 /** Datos de demostración: cuatro jugadores y su historial de evaluaciones. */
 export function datosDemo(): Backup {
   const matias = armarJugador("CGA-F-12-001", "Matías", "Rodríguez", "2012-06-12", "SUB-12", "Volante ofensivo", "Derecho", 148, "10");
@@ -143,12 +180,20 @@ export function datosDemo(): Backup {
     ),
   ];
 
+  const camisetas: Camiseta[] = [
+    armarCamiseta(matias, 10, "12", 22000, 22000, true),
+    armarCamiseta(emilia, 5, "12", 22000, 22000, false),
+    armarCamiseta(benja, 1, "14", 22000, 10000, false),
+    armarCamiseta(tomas, 9, "10", 22000, 0, false),
+  ];
+
   return {
     formato: "cga-evaluacion-futbol",
-    version: 2,
+    version: 3,
     exportadoEn: new Date().toISOString(),
     jugadores: [matias, emilia, benja, tomas],
     evaluaciones,
+    camisetas,
     configuracion: CONFIGURACION_BASE,
   };
 }
