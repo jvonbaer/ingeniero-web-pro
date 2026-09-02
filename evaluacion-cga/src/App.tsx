@@ -6,6 +6,7 @@ import { Jugadores } from "./pages/Jugadores";
 import { JugadorForm } from "./pages/JugadorForm";
 import { JugadorFicha } from "./pages/JugadorFicha";
 import { Evaluar } from "./pages/Evaluar";
+import { Camisetas } from "./pages/Camisetas";
 import { Informe } from "./pages/Informe";
 import { HojaPapel } from "./pages/HojaPapel";
 import { Parametros } from "./pages/Parametros";
@@ -27,6 +28,7 @@ function BarraSuperior() {
 
         <nav className="topbar__nav" aria-label="Secciones">
           <NavLink to="/" end className="topbar__link">Jugadores</NavLink>
+          <NavLink to="/camisetas" className="topbar__link">Camisetas</NavLink>
           <NavLink to="/parametros" className="topbar__link">Parámetros</NavLink>
           <NavLink to="/datos" className="topbar__link">Datos</NavLink>
         </nav>
@@ -89,6 +91,7 @@ export function App() {
             <Route path="/informe/:evaluacionId" element={<Informe />} />
             <Route path="/hoja/:pautaId" element={<HojaPapel />} />
             <Route path="/hoja/:pautaId/:jugadorId" element={<HojaPapel />} />
+            <Route path="/camisetas" element={<Camisetas />} />
             <Route path="/parametros" element={<Parametros />} />
             <Route path="/datos" element={<Datos />} />
             <Route path="*" element={<p className="vacio">Esta página no existe.</p>} />

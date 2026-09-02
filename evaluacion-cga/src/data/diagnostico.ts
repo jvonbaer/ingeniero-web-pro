@@ -25,14 +25,14 @@ export interface Prueba {
   remedio?: string;
 }
 
-const TABLAS = ["jugadores", "evaluaciones", "rubrica", "hojas"] as const;
+const TABLAS = ["jugadores", "evaluaciones", "camisetas", "rubrica", "hojas"] as const;
 
 /** El informe sale siempre en este orden, se hayan corrido las pruebas o no. */
 const ORDEN = ["proyecto", "tablas", "rls", "sesion", "lectura", "escritura"] as const;
 
 const TITULOS: Record<(typeof ORDEN)[number], string> = {
   proyecto: "El proyecto responde y acepta la clave",
-  tablas: "Las cuatro tablas están creadas",
+  tablas: "Las cinco tablas están creadas",
   rls: "Los datos no se leen sin iniciar sesión",
   sesion: "La cuenta del entrenador inicia sesión",
   lectura: "Con sesión se pueden leer las tablas",
@@ -119,7 +119,7 @@ export async function revisarInstalacion({
       detalle: `Sin sesión ya se alcanzan a leer filas de: ${detalle}. Las fichas de los niños están a la vista de cualquiera que abra el sitio.`,
       remedio:
         "Falta la parte de seguridad del esquema. Vuelva a correr supabase/schema.sql completo: " +
-        "activa RLS en las cuatro tablas y deja las políticas sólo para usuarios con sesión.",
+        "activa RLS en las cinco tablas y deja las políticas sólo para usuarios con sesión.",
     });
 
   } else {
@@ -308,7 +308,7 @@ async function probarTablas(
       id: "tablas",
       titulo,
       estado: "ok",
-      detalle: "jugadores, evaluaciones, rubrica y hojas responden.",
+      detalle: "jugadores, evaluaciones, camisetas, rubrica y hojas responden.",
     },
     expuestas,
   };
@@ -329,7 +329,7 @@ async function probarLectura(sb: Cliente): Promise<Prueba> {
       };
     }
   }
-  return { id: "lectura", titulo, estado: "ok", detalle: "Las cuatro tablas se dejan consultar." };
+  return { id: "lectura", titulo, estado: "ok", detalle: "Las cinco tablas se dejan consultar." };
 }
 
 /**

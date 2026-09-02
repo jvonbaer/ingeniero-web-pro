@@ -4,6 +4,16 @@ import { useDatos } from "../data/DatosContext";
 import { EntradaFoto } from "../components/Foto";
 import { RadarChart, type SerieRadar } from "../components/RadarChart";
 import { BarraCategoria, Delta, NivelTexto, Puntaje, Vacio } from "../components/ui";
+import type { Camiseta } from "../domain/types";
+import {
+  estadoPago,
+  etiquetaEstado,
+  etiquetaTalla,
+  historialDe,
+  pesos,
+  saldoDe,
+  sinCosto,
+} from "../domain/camisetas";
 import {
   calcular,
   delta,
@@ -26,11 +36,13 @@ const COLORES_SERIE = [
 
 export function JugadorFicha() {
   const { id = "" } = useParams();
-  const { jugadores, evaluaciones, configuracion, eliminarEvaluacion, guardarJugador } = useDatos();
+  const { jugadores, evaluaciones, camisetas, configuracion, eliminarEvaluacion, guardarJugador } =
+    useDatos();
   const [estadoFoto, setEstadoFoto] = useState<string | null>(null);
 
   const jugador = useMemo(() => jugadores.find((j) => j.id === id), [jugadores, id]);
   const finalizadas = useMemo(() => historial(evaluaciones, id), [evaluaciones, id]);
+  const susCamisetas = useMemo(() => historialDe(camisetas, id), [camisetas, id]);
   const borradores = useMemo(
     () => evaluaciones.filter((e) => e.jugadorId === id && e.estado === "borrador"),
     [evaluaciones, id],
@@ -183,6 +195,8 @@ export function JugadorFicha() {
               </div>
             </div>
           )}
+
+          <TarjetaCamisetas camisetas={susCamisetas} />
         </div>
 
         <div style={{ display: "grid", gap: 16 }}>
@@ -314,6 +328,58 @@ function Dato({ rotulo, valor }: { rotulo: string; valor: string }) {
     <div className="dato">
       <dt>{rotulo}</dt>
       <dd>{valor}</dd>
+    </div>
+  );
+}
+
+/**
+ * Las camisetas del jugador, temporada por temporada.
+ *
+ * Se muestra en la ficha y no sólo en la pantalla del pedido porque las dos
+ * preguntas que llegan por WhatsApp son "¿qué número tenía?" y "¿pagó la
+ * camiseta?", y las dos se responden acá sin salir de la ficha del niño.
+ */
+function TarjetaCamisetas({ camisetas }: { camisetas: Camiseta[] }) {
+  return (
+    <div className="card">
+      <h2 className="card__titulo">Camisetas</h2>
+      <div className="card__cuerpo">
+        {camisetas.length === 0 ? (
+          <p className="campo__ayuda" style={{ margin: 0 }}>
+            Todavía no tiene camiseta inscrita. Se agrega desde{" "}
+            <Link to="/camisetas">Camisetas</Link>.
+          </p>
+        ) : (
+          <ul className="lista-limpia">
+            {camisetas.map((c) => {
+              const estado = estadoPago(c);
+              return (
+                <li key={c.id} className="fila-simple">
+                  <span className="dorsal">{c.numero}</span>
+                  <span className="fila-simple__texto">
+                    {c.nombreEstampado}
+                    <span className="jugador-item__meta" style={{ display: "block" }}>
+                      {c.temporada} · {c.categoria} · talla {etiquetaTalla(c.talla) || "—"}
+                    </span>
+                  </span>
+                  <span style={{ textAlign: "right" }}>
+                    <span className={`pago pago--${sinCosto(c) ? "sin-costo" : estado}`}>
+                      {sinCosto(c) ? "Sin costo" : etiquetaEstado(estado)}
+                    </span>
+                    <span className="jugador-item__meta" style={{ display: "block" }}>
+                      {sinCosto(c)
+                        ? "La cubre el club"
+                        : estado === "pagado"
+                          ? pesos(c.precio)
+                          : `Debe ${pesos(saldoDe(c))}`}
+                    </span>
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

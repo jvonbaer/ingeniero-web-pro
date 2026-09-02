@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { CONFIGURACION_BASE } from "../config/pautas";
-import type { Backup, Configuracion, Evaluacion, Jugador } from "../domain/types";
+import type { Backup, Camiseta, Configuracion, Evaluacion, Jugador } from "../domain/types";
 import { store } from "./index";
 import { construirBackup, type EstadoDatos } from "./store";
 
@@ -21,6 +21,8 @@ interface Contexto extends EstadoDatos {
   eliminarJugador: (id: string) => Promise<void>;
   guardarEvaluacion: (evaluacion: Evaluacion) => Promise<void>;
   eliminarEvaluacion: (id: string) => Promise<void>;
+  guardarCamiseta: (camiseta: Camiseta) => Promise<void>;
+  eliminarCamiseta: (id: string) => Promise<void>;
   guardarConfiguracion: (configuracion: Configuracion) => Promise<void>;
   leerHoja: (evaluacionId: string) => Promise<string | null>;
   guardarHoja: (evaluacion: Evaluacion, dataUrl: string | null) => Promise<void>;
@@ -34,6 +36,7 @@ const Ctx = createContext<Contexto | null>(null);
 export function ProveedorDatos({ children }: { children: ReactNode }) {
   const [jugadores, setJugadores] = useState<Jugador[]>([]);
   const [evaluaciones, setEvaluaciones] = useState<Evaluacion[]>([]);
+  const [camisetas, setCamisetas] = useState<Camiseta[]>([]);
   const [configuracion, setConfiguracion] = useState<Configuracion>(CONFIGURACION_BASE);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +47,7 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
       const estado = await store.cargar();
       setJugadores(estado.jugadores);
       setEvaluaciones(estado.evaluaciones);
+      setCamisetas(estado.camisetas);
       setConfiguracion(estado.configuracion);
       setError(null);
     } catch (e) {
@@ -91,6 +95,7 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
         await store.eliminarJugador(id);
         setJugadores((prev) => prev.filter((j) => j.id !== id));
         setEvaluaciones((prev) => prev.filter((e) => e.jugadorId !== id));
+        setCamisetas((prev) => prev.filter((c) => c.jugadorId !== id));
       });
     },
     [conError],
@@ -117,6 +122,32 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
       await conError(async () => {
         await store.eliminarEvaluacion(id);
         setEvaluaciones((prev) => prev.filter((e) => e.id !== id));
+      });
+    },
+    [conError],
+  );
+
+  const guardarCamiseta = useCallback(
+    async (camiseta: Camiseta) => {
+      await conError(async () => {
+        await store.guardarCamiseta(camiseta);
+        setCamisetas((prev) => {
+          const i = prev.findIndex((c) => c.id === camiseta.id);
+          if (i < 0) return [...prev, camiseta];
+          const copia = [...prev];
+          copia[i] = camiseta;
+          return copia;
+        });
+      });
+    },
+    [conError],
+  );
+
+  const eliminarCamiseta = useCallback(
+    async (id: string) => {
+      await conError(async () => {
+        await store.eliminarCamiseta(id);
+        setCamisetas((prev) => prev.filter((c) => c.id !== id));
       });
     },
     [conError],
@@ -154,6 +185,7 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
         await store.importar(backup);
         setJugadores(backup.jugadores);
         setEvaluaciones(backup.evaluaciones);
+        setCamisetas(backup.camisetas);
         setConfiguracion(backup.configuracion);
       });
     },
@@ -164,6 +196,7 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
     () => ({
       jugadores,
       evaluaciones,
+      camisetas,
       configuracion,
       cargando,
       error,
@@ -173,17 +206,20 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
       eliminarJugador,
       guardarEvaluacion,
       eliminarEvaluacion,
+      guardarCamiseta,
+      eliminarCamiseta,
       guardarConfiguracion,
       leerHoja: (id: string) => store.leerHoja(id),
       guardarHoja,
       importar,
-      exportar: () => construirBackup({ jugadores, evaluaciones, configuracion }),
+      exportar: () => construirBackup({ jugadores, evaluaciones, camisetas, configuracion }),
       recargar,
     }),
     [
-      jugadores, evaluaciones, configuracion, cargando, error,
-      guardarJugador, eliminarJugador, guardarEvaluacion,
-      eliminarEvaluacion, guardarConfiguracion, guardarHoja, importar, recargar,
+      jugadores, evaluaciones, camisetas, configuracion, cargando, error,
+      guardarJugador, eliminarJugador, guardarEvaluacion, eliminarEvaluacion,
+      guardarCamiseta, eliminarCamiseta, guardarConfiguracion, guardarHoja,
+      importar, recargar,
     ],
   );
 

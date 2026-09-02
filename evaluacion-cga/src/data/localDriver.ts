@@ -1,19 +1,21 @@
-import type { Backup, Evaluacion, Jugador } from "../domain/types";
+import type { Backup, Camiseta, Evaluacion, Jugador } from "../domain/types";
 import { migrarConfiguracion, migrarEvaluaciones } from "./migrar";
 import { idbGet, idbSet } from "./idb";
 import type { EstadoDatos, Store } from "./store";
 
 const K_JUGADORES = "jugadores";
 const K_EVALUACIONES = "evaluaciones";
+const K_CAMISETAS = "camisetas";
 const K_CONFIG = "configuracion";
 const K_HOJA = (id: string) => `hoja:${id}`;
 /** Clave del formato 1: se sigue leyendo para migrar dispositivos ya en uso. */
 const K_RUBRICA_ANTIGUA = "rubrica";
 
 async function leerEstado(): Promise<EstadoDatos> {
-  const [jugadores, evaluaciones, config, rubricaAntigua] = await Promise.all([
+  const [jugadores, evaluaciones, camisetas, config, rubricaAntigua] = await Promise.all([
     idbGet<Jugador[]>(K_JUGADORES),
     idbGet<Evaluacion[]>(K_EVALUACIONES),
+    idbGet<Camiseta[]>(K_CAMISETAS),
     idbGet<unknown>(K_CONFIG),
     idbGet<unknown>(K_RUBRICA_ANTIGUA),
   ]);
@@ -22,6 +24,7 @@ async function leerEstado(): Promise<EstadoDatos> {
   return {
     jugadores: jugadores ?? [],
     evaluaciones: migrarEvaluaciones(evaluaciones ?? [], configuracion),
+    camisetas: camisetas ?? [],
     configuracion,
   };
 }
@@ -48,7 +51,16 @@ export const localDriver: Store = {
     const evaluaciones = ((await idbGet<Evaluacion[]>(K_EVALUACIONES)) ?? []).filter(
       (e) => e.jugadorId !== id,
     );
-    await Promise.all([idbSet(K_JUGADORES, jugadores), idbSet(K_EVALUACIONES, evaluaciones)]);
+    // La camiseta se va con la ficha, como en la nube: si quedara huérfana,
+    // seguiría bloqueando su número en la categoría sin dueño que lo reclame.
+    const camisetas = ((await idbGet<Camiseta[]>(K_CAMISETAS)) ?? []).filter(
+      (c) => c.jugadorId !== id,
+    );
+    await Promise.all([
+      idbSet(K_JUGADORES, jugadores),
+      idbSet(K_EVALUACIONES, evaluaciones),
+      idbSet(K_CAMISETAS, camisetas),
+    ]);
   },
 
   async guardarEvaluacion(evaluacion) {
@@ -62,6 +74,19 @@ export const localDriver: Store = {
   async eliminarEvaluacion(id) {
     const lista = ((await idbGet<Evaluacion[]>(K_EVALUACIONES)) ?? []).filter((e) => e.id !== id);
     await idbSet(K_EVALUACIONES, lista);
+  },
+
+  async guardarCamiseta(camiseta) {
+    const lista = (await idbGet<Camiseta[]>(K_CAMISETAS)) ?? [];
+    const i = lista.findIndex((c) => c.id === camiseta.id);
+    if (i >= 0) lista[i] = camiseta;
+    else lista.push(camiseta);
+    await idbSet(K_CAMISETAS, lista);
+  },
+
+  async eliminarCamiseta(id) {
+    const lista = ((await idbGet<Camiseta[]>(K_CAMISETAS)) ?? []).filter((c) => c.id !== id);
+    await idbSet(K_CAMISETAS, lista);
   },
 
   async guardarConfiguracion(configuracion) {
@@ -80,6 +105,7 @@ export const localDriver: Store = {
     await Promise.all([
       idbSet(K_JUGADORES, backup.jugadores),
       idbSet(K_EVALUACIONES, backup.evaluaciones),
+      idbSet(K_CAMISETAS, backup.camisetas),
       idbSet(K_CONFIG, backup.configuracion),
     ]);
   },
