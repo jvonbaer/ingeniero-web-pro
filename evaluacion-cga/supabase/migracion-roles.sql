@@ -129,7 +129,7 @@ $$;
 -- más de uno.
 -- ---------------------------------------------------------------------------
 
-update public.perfiles set rol = 'admin' where email = 'CAMBIE-ESTO@ejemplo.cl';
+update public.perfiles set rol = 'admin' where email = 'jvonbaer@gmail.com';
 
 -- ---------------------------------------------------------------------------
 -- 4. Red de seguridad
