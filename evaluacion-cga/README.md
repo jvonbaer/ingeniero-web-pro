@@ -254,7 +254,9 @@ El PDF lo genera el navegador, así que no hay ningún costo ni servicio asociad
 
 Para pasar los datos que ya tenía en una tablet: **Datos → Descargar respaldo** en modo local, y **Datos → Cargar respaldo** una vez conectado a la nube.
 
-> **Si la nube ya estaba funcionando antes de las camisetas**, vuelva a correr `supabase/schema.sql` completo: es idempotente y sólo agrega la tabla `camisetas` y su vista. Mientras no lo haga, la aplicación sigue trabajando igual que siempre —el pedido aparece vacío— y avisa qué correr recién cuando alguien intenta guardar una camiseta.
+> **Si la nube ya estaba funcionando antes de las camisetas**, corra [`supabase/migracion-camisetas.sql`](supabase/migracion-camisetas.sql), que agrega sólo lo nuevo y no toca las cuatro tablas que ya tiene andando —ni sus datos, ni su estructura, ni sus permisos—. Mientras no lo haga, la aplicación sigue trabajando igual que siempre —el pedido aparece vacío— y avisa qué correr recién cuando alguien intenta guardar una camiseta.
+>
+> `schema.sql` completo también sirve y es igual de seguro: las tablas se crean con `create table if not exists`, así que una que ya existe queda intacta. La diferencia es que vuelve a escribir las reglas de permiso de las cuatro tablas anteriores —idénticas a las que ya están— y eso hace que Supabase muestre su aviso de «operaciones destructivas», que en este caso se refiere a los `drop policy` de esas reglas y no a ningún dato. La migración no contiene ningún `drop`.
 
 Dos vistas quedan listas para consultar en SQL o bajar como CSV desde el propio Supabase, sin entender el `jsonb`: **`v_puntajes`**, una fila por sub-punto respondido, y **`v_camisetas`**, el pedido con el jugador, el apoderado y el saldo al lado del número.
 
@@ -316,7 +318,9 @@ evaluacion-cga/
 │   │   └── print.css            Reglas de impresión
 │   └── fuentes/                 Barlow (la repone `npm install`, no se versiona)
 ├── scripts/preparar-fuentes.mjs Descarga las tipografías al proyecto
-└── supabase/schema.sql          Esquema, seguridad y vista de consulta
+└── supabase/
+    ├── schema.sql               Esquema completo, seguridad y vistas de consulta
+    └── migracion-camisetas.sql  Sólo lo nuevo, para una base que ya está en uso
 ```
 
 Decisiones que conviene conocer antes de tocar el código:
