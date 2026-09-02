@@ -1,4 +1,9 @@
 ﻿n;veredicto;nombre_excel;nombres;apellidos;rut;rut_valido;fecha_nac;origen_fecha;categoria_calculada;codigo_asignado;codigo_bd_coincidente;nombre_bd;accion
+3;CONFIRMADO;FEDERICO THOMAS GEISSE YEVENES;Federico Thomas;Geisse Yevenes;27616833-9;si;2021-09-12;fecha completa;SUB-6;;CGA-F-20-004;Federico Heisse;confirmado por Juaco, completar
+7;CONFIRMADO;ALONSO ANDRES CARO ORENA;Alonso Andres;Caro Orena;27240174-1;NO;2020-01-25;fecha completa;SUB-6;;CGA-F-20-005;Alonso Caro;confirmado por Juaco, completar
+21;CONFIRMADO;JUAN JOSE HIRSCH ESCOBAR;Juan Jose;Hirsch Escobar;26945778-3;si;;sin dato;;;CGA-F-19-001;Juan José Miguel Hirsch;confirmado por Juaco, completar
+31;CONFIRMADO;SIMON ALEJANDRO CASTET FERNANDEZ;Simon Alejandro;Castet Fernandez;27623860-4;si;2021-09-22;fecha completa;SUB-6;;CGA-F-20-002;Simon Castel;confirmado por Juaco, completar
+35;CONFIRMADO;JULIAN MARTINEZ SEPULVEDA;Julian;Martinez Sepulveda;27400174-4;NO;2020-11-21;fecha completa;SUB-6;;CGA-F-20-001;Julián Eduardo Martínez Sepúlveda;confirmado por Juaco, completar
 1;EXACTO;NICOLAS IGNACIO TRONCOSO COOPER;Nicolas Ignacio;Troncoso Cooper;26358550-K;si;2018-06-28;fecha completa;SUB-8;;CGA-F-18-002;Nicolás Ignacio Troncoso;completar campos vacios
 16;EXACTO;JUAN CRISTOBAL GUZMAN TASSISTRO;Juan Cristobal;Guzman Tassistro;25861886-6;si;2017-08-07;fecha completa;SUB-10;;CGA-F-17-002;Juan Cristóbal Guzmán;completar campos vacios
 26;EXACTO;OSCAR ANTONIO NAVARRETE LARA;Oscar Antonio;Navarrete Lara;26154451-2;si;2018-03-05;fecha completa;SUB-8;;CGA-F-18-003;Óscar Antonio Navarrete;completar campos vacios
@@ -38,9 +43,4 @@
 43;NUEVO;FERNANDO ROMERO;Fernando;Romero;23938719-5;si;;solo año;SUB-14;CGA-F-12-004;;;insertar
 44;NUEVO;IÑAKI MURO;Iñaki;Muro;23939995-9;si;;solo año;SUB-14;CGA-F-12-005;;;insertar
 45;NUEVO;CLEMENTE PARANT;Clemente;Parant;23949149-9;si;;solo año;SUB-14;CGA-F-12-006;;;insertar
-30;PROBABLE;JOSE PAULSEN;Jose;Paulsen;;;;sin dato;;;CGA-F-20-003;José Paulsen;CONFIRMAR y completar
-3;REVISAR;FEDERICO THOMAS GEISSE YEVENES;Federico Thomas;Geisse Yevenes;27616833-9;si;2021-09-12;fecha completa;SUB-6;;CGA-F-20-004;Federico Heisse;DECISION MANUAL
-7;REVISAR;ALONSO ANDRES CARO ORENA;Alonso Andres;Caro Orena;27240174-1;NO;2020-01-25;fecha completa;SUB-6;;CGA-F-20-005;Alonso Caro;DECISION MANUAL
-21;REVISAR;JUAN JOSE HIRSCH ESCOBAR;Juan Jose;Hirsch Escobar;26945778-3;si;;sin dato;;;CGA-F-19-001;Juan José Miguel Hirsch;DECISION MANUAL
-31;REVISAR;SIMON ALEJANDRO CASTET FERNANDEZ;Simon Alejandro;Castet Fernandez;27623860-4;si;2021-09-22;fecha completa;SUB-6;;CGA-F-20-002;Simon Castel;DECISION MANUAL
-35;REVISAR;JULIAN MARTINEZ SEPULVEDA;Julian;Martinez Sepulveda;27400174-4;NO;2020-11-21;fecha completa;SUB-6;;CGA-F-20-001;Julián Eduardo Martínez Sepúlveda;DECISION MANUAL
+30;PROBABLE;JOSE PAULSEN;Jose;Paulsen;;;;sin dato;;;CGA-F-20-003;José Paulsen;confirmado, completar

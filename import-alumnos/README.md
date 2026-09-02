@@ -10,8 +10,8 @@ Importa las 45 filas de `LISTA_ALUMNOS_FUTBOL.xlsx` al proyecto Supabase
 | NUEVO | 32 | se insertan con código generado |
 | BLOQUEADO | 3 | nuevos sin año de nacimiento: no se les puede generar código |
 | EXACTO | 4 | ya existen; solo se rellenan campos vacíos |
-| PROBABLE | 1 | ya existe; confirmar antes de aplicar |
-| REVISAR | 5 | decisión manual, no se aplican solos |
+| PROBABLE | 1 | ya existe; confirmado |
+| CONFIRMADO | 5 | resueltos manualmente por Juaco: los 5 son la misma persona |
 
 ## Garantía de no sobrescritura
 
@@ -58,6 +58,21 @@ y 12 evaluaciones de producción, y se corrió el ciclo completo:
   de cada año. No se reutilizan los códigos que libera `04`.
 - **Registros de prueba eliminados**: `CGA-F-03-001`, `CGA-F-17-001`, `CGA-F-18-001`,
   `CGA-F-94-001`.
+
+## Estado
+
+**Aplicado en producción el 2026-09-02.** 47 jugadores tras el import; luego se
+eliminaron los 4 de prueba junto con sus 6 evaluaciones, quedando 43 alumnos y
+6 evaluaciones. Verificado contra `respaldo_jugadores_20260902`: ningún campo
+preexistente fue pisado fuera de las correcciones autorizadas.
+
+### Correcciones autorizadas (bloque C de 03)
+
+| Código | Cambio |
+|---|---|
+| CGA-F-20-002 | apellido Castel → Castet; fecha placeholder → 2021-09-22 |
+| CGA-F-20-004 | apellido Heisse → Geisse; fecha placeholder → 2021-09-12 |
+| CGA-F-20-005 | fecha placeholder → 2020-01-25 |
 
 ## Pendiente de decisión
 
