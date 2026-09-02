@@ -59,6 +59,15 @@ export function traducirError(mensaje: string): string {
       ? "Ese jugador ya tiene una camiseta inscrita en esta temporada. Recargue la lista para verla."
       : "Ese número ya lo tomó otra persona en esta categoría mientras usted lo escribía. Recargue la lista y elija otro.";
   }
+  // PostgreSQL rechaza la escritura de golpe cuando la política de permisos no
+  // deja pasar la fila nueva. El borrado, en cambio, no da error: afecta cero
+  // filas y calla. Ese caso se detecta en supabaseDriver y no acá.
+  if (/row-level security|violates row-level|42501|permission denied/i.test(mensaje)) {
+    return (
+      "Su cuenta no tiene permiso para eso. Pídaselo a un administrador del club, " +
+      "o revise su rol en Supabase → Table Editor → perfiles."
+    );
+  }
   if (esTablaAusente(mensaje)) {
     return (
       "Faltan tablas en la base de datos. Corra el archivo supabase/schema.sql en el SQL Editor de Supabase."

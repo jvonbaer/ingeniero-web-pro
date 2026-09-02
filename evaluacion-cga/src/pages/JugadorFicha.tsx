@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useDatos } from "../data/DatosContext";
+import { useSesion } from "../data/sesion";
 import { EntradaFoto } from "../components/Foto";
 import { RadarChart, type SerieRadar } from "../components/RadarChart";
 import { BarraCategoria, Delta, NivelTexto, Puntaje, Vacio } from "../components/ui";
@@ -38,6 +39,7 @@ export function JugadorFicha() {
   const { id = "" } = useParams();
   const { jugadores, evaluaciones, camisetas, configuracion, eliminarEvaluacion, guardarJugador } =
     useDatos();
+  const { esAdmin } = useSesion();
   const [estadoFoto, setEstadoFoto] = useState<string | null>(null);
 
   const jugador = useMemo(() => jugadores.find((j) => j.id === id), [jugadores, id]);
@@ -297,17 +299,21 @@ export function JugadorFicha() {
                             >
                               PDF
                             </Link>{" "}
-                            <button
-                              type="button"
-                              className="btn btn--fantasma btn--sm"
-                              onClick={() => {
-                                if (window.confirm("¿Eliminar esta evaluación del historial?")) {
-                                  void eliminarEvaluacion(r.evaluacion.id);
-                                }
-                              }}
-                            >
-                              Eliminar
-                            </button>
+                            {/* Borrar una evaluación rompe la comparación de la
+                                tela de araña para siempre. Queda para el club. */}
+                            {esAdmin && (
+                              <button
+                                type="button"
+                                className="btn btn--fantasma btn--sm"
+                                onClick={() => {
+                                  if (window.confirm("¿Eliminar esta evaluación del historial?")) {
+                                    void eliminarEvaluacion(r.evaluacion.id);
+                                  }
+                                }}
+                              >
+                                Eliminar
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}

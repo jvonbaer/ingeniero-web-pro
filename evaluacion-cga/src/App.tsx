@@ -1,4 +1,4 @@
-import { NavLink, Route, Routes } from "react-router-dom";
+import { Link, NavLink, Route, Routes } from "react-router-dom";
 import { Escudo } from "./components/Marca";
 import { useDatos } from "./data/DatosContext";
 import { useSesion } from "./data/sesion";
@@ -14,7 +14,7 @@ import { Datos } from "./pages/Datos";
 
 function BarraSuperior() {
   const { modo, etiquetaModo } = useDatos();
-  const { requiereAcceso, email, salir } = useSesion();
+  const { requiereAcceso, email, salir, esAdmin } = useSesion();
   return (
     <header className="topbar no-print">
       <div className="topbar__inner">
@@ -29,8 +29,17 @@ function BarraSuperior() {
         <nav className="topbar__nav" aria-label="Secciones">
           <NavLink to="/" end className="topbar__link">Jugadores</NavLink>
           <NavLink to="/camisetas" className="topbar__link">Camisetas</NavLink>
-          <NavLink to="/parametros" className="topbar__link">Parámetros</NavLink>
-          <NavLink to="/datos" className="topbar__link">Datos</NavLink>
+          {/* Parámetros y Datos son del club, no del cuerpo técnico: una toca
+              las pautas de toda la escuela y la otra baja el respaldo completo
+              con los datos de los apoderados. Esconderlas es sólo cortesía —lo
+              que de verdad protege son las políticas de la base—, pero evita
+              que alguien apriete un botón que le va a ser rechazado. */}
+          {esAdmin && (
+            <>
+              <NavLink to="/parametros" className="topbar__link">Parámetros</NavLink>
+              <NavLink to="/datos" className="topbar__link">Datos</NavLink>
+            </>
+          )}
         </nav>
 
         <span
@@ -54,8 +63,27 @@ function BarraSuperior() {
   );
 }
 
+/**
+ * Lo que ve un entrenador si llega a una pantalla del club escribiendo la
+ * dirección a mano. No es una barrera —la barrera está en la base— sino una
+ * explicación, para que no quede pensando que la aplicación se rompió.
+ */
+function SoloAdmin({ que }: { que: string }) {
+  return (
+    <div className="vacio">
+      <h3>Esta sección es del club</h3>
+      <p>
+        {que} está reservado a quienes administran el sistema. Si necesita algo de acá, pídaselo a
+        la coordinación de la escuela.
+      </p>
+      <Link to="/" className="btn btn--fantasma">Volver a Jugadores</Link>
+    </div>
+  );
+}
+
 export function App() {
   const { cargando, error, recargar } = useDatos();
+  const { esAdmin } = useSesion();
 
   return (
     <div className="app">
@@ -92,8 +120,14 @@ export function App() {
             <Route path="/hoja/:pautaId" element={<HojaPapel />} />
             <Route path="/hoja/:pautaId/:jugadorId" element={<HojaPapel />} />
             <Route path="/camisetas" element={<Camisetas />} />
-            <Route path="/parametros" element={<Parametros />} />
-            <Route path="/datos" element={<Datos />} />
+            <Route
+              path="/parametros"
+              element={esAdmin ? <Parametros /> : <SoloAdmin que="Editar las pautas de evaluación" />}
+            />
+            <Route
+              path="/datos"
+              element={esAdmin ? <Datos /> : <SoloAdmin que="El respaldo de los datos de la escuela" />}
+            />
             <Route path="*" element={<p className="vacio">Esta página no existe.</p>} />
           </Routes>
         )}

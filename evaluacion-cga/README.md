@@ -19,9 +19,10 @@ Aplicación para evaluar a los jugadores de la Escuela de Fútbol del **Club Gim
 4. [Por qué las evaluaciones siguen siendo comparables](#4-por-qué-las-evaluaciones-siguen-siendo-comparables)
 5. [Dónde publicarla: opciones gratuitas y muy económicas](#5-dónde-publicarla-opciones-gratuitas-y-muy-económicas)
 6. [Modo nube con Supabase](#6-modo-nube-con-supabase)
-7. [Poner el escudo oficial](#7-poner-el-escudo-oficial)
-8. [Estructura del proyecto](#8-estructura-del-proyecto)
-9. [Cuidado con los datos de menores](#9-cuidado-con-los-datos-de-menores)
+7. [Quién puede hacer qué](#7-quién-puede-hacer-qué)
+8. [Poner el escudo oficial](#8-poner-el-escudo-oficial)
+9. [Estructura del proyecto](#9-estructura-del-proyecto)
+10. [Cuidado con los datos de menores](#10-cuidado-con-los-datos-de-menores)
 
 ---
 
@@ -262,7 +263,45 @@ Dos vistas quedan listas para consultar en SQL o bajar como CSV desde el propio 
 
 ---
 
-## 7. El escudo
+## 7. Quién puede hacer qué
+
+Hay dos roles, y se administran desde **Supabase → Table Editor → `perfiles`**, cambiando el campo `rol` de una fila. No hay que tocar código ni volver a publicar el sitio.
+
+| | admin | entrenador |
+|---|---|---|
+| Ver jugadores, evaluaciones y camisetas | Sí | Sí |
+| Crear y editar fichas, evaluar, inscribir camisetas | Sí | Sí |
+| Quitar una camiseta del pedido o un escaneo mal tomado | Sí | Sí |
+| **Borrar un jugador y su historial** | Sí | **No** |
+| **Borrar una evaluación** | Sí | **No** |
+| **Editar las pautas (Parámetros)** | Sí | **No** |
+| **Respaldos, planilla y datos de ejemplo (Datos)** | Sí | **No** |
+| Nombrar administradores | Sí | **No** |
+
+Quien no tenga fila en `perfiles` es entrenador. Es deliberado que el caso «no sé quién es» caiga del lado que menos permisos tiene.
+
+### Cómo se pone en marcha
+
+Corra [`supabase/migracion-roles.sql`](supabase/migracion-roles.sql) **cambiando antes el correo del paso 3 por el suyo**. Si el correo no corresponde a ninguna cuenta, el archivo se detiene ahí, antes de tocar un solo permiso, y le dice cuáles son las cuentas que existen. Mientras no lo corra, todo sigue funcionando como hasta ahora.
+
+Para sumar a alguien después: cree la cuenta en **Authentication → Users**, entre una vez con ella, y en `perfiles` aparecerá su fila para asignarle el rol.
+
+### Lo que esto sí protege, y lo que no
+
+Lo que manda son las **políticas de la base**, no la interfaz. Que la aplicación esconda la pestaña Datos a un entrenador es una cortesía para que no apriete botones que le van a ser rechazados; la clave `anon` viaja dentro del sitio web, así que cualquiera con una cuenta puede consultar Supabase directamente sin pasar por la pantalla. Por eso las restricciones importantes están escritas en SQL y no en React.
+
+Dos límites que conviene no confundir con lo que no son:
+
+- **Un entrenador sigue viendo el correo y el teléfono del apoderado**, porque necesita leer la ficha para evaluar. El botón «Descargar respaldo» no le crea ese acceso: se lo escribe en un archivo, nada más. Esconderlo no le quita el dato. Para que de verdad no lo vea habría que sacar esos campos a una tabla aparte con su propia política, que es cirugía sobre el modelo de datos y no una casilla.
+- **Un entrenador puede escribir fichas**, porque ése es su trabajo. Con conocimientos técnicos podría sobrescribirlas desde fuera de la aplicación. Lo que no puede, ni desde fuera, es **borrar**: eso es irreversible y por eso es lo que quedó cerrado en la base.
+
+### Cuando la base dice que no
+
+PostgreSQL no protesta cuando bloquea un borrado: simplemente afecta cero filas, en silencio. La aplicación lo detecta y avisa —«esa acción está reservada al administrador del club»— en vez de dejar creer que se borró algo que sigue ahí.
+
+---
+
+## 8. El escudo
 
 El escudo del club —la cruz de las cuatro F, el *Turnerkreuz* de los clubes de gimnasia alemanes,
 dentro del anillo— está **dibujado como SVG en `src/components/Marca.tsx`**, no incrustado como
@@ -286,7 +325,7 @@ imagen. Eso permite pintarlo en tres variantes según el fondo, y que se imprima
 > El favicon (`public/brand/favicon.svg`) repite el mismo trazado a mano, porque es un archivo
 > suelto y no puede compartir el componente. Si cambia uno, cambie el otro.
 
-## 8. Estructura del proyecto
+## 9. Estructura del proyecto
 
 ```
 evaluacion-cga/
@@ -300,7 +339,7 @@ evaluacion-cga/
 │   │   ├── store.ts             Contrato de persistencia
 │   │   ├── localDriver.ts       Guardado en el dispositivo (IndexedDB)
 │   │   ├── supabaseDriver.ts    Guardado en la nube
-│   │   ├── sesion.tsx           Control de acceso del modo nube
+│   │   ├── sesion.tsx           Control de acceso y rol del modo nube
 │   │   ├── DatosContext.tsx     Estado de la aplicación
 │   │   ├── migrar.ts            Conversión de respaldos del formato 1 al 2
 │   │   └── seed.ts              Datos de demostración
@@ -320,7 +359,8 @@ evaluacion-cga/
 ├── scripts/preparar-fuentes.mjs Descarga las tipografías al proyecto
 └── supabase/
     ├── schema.sql               Esquema completo, seguridad y vistas de consulta
-    └── migracion-camisetas.sql  Sólo lo nuevo, para una base que ya está en uso
+    ├── migracion-camisetas.sql  Agrega el pedido a una base que ya está en uso
+    └── migracion-roles.sql      Agrega los roles a una base que ya está en uso
 ```
 
 Decisiones que conviene conocer antes de tocar el código:
@@ -334,11 +374,12 @@ Decisiones que conviene conocer antes de tocar el código:
 
 ---
 
-## 9. Cuidado con los datos de menores
+## 10. Cuidado con los datos de menores
 
 La aplicación guarda nombres, fotos, fechas de nacimiento y correos de apoderados de niños y niñas. Vale la pena tenerlo presente:
 
 - En **modo nube**, la base rechaza toda lectura sin sesión iniciada (políticas RLS en `supabase/schema.sql`). La clave `anon` que viaja dentro del sitio no alcanza para ver nada.
 - En **modo local**, los datos quedan en el navegador del dispositivo: conviene que la tablet tenga clave de bloqueo.
-- Los **respaldos y planillas** que se descargan sí van en claro. El `.gitignore` impide que lleguen al repositorio por accidente; guárdelos en una carpeta del club con acceso restringido, no en un correo reenviado.
+- Los **respaldos y planillas** que se descargan sí van en claro, y sólo puede bajarlos un administrador (ver [sección 7](#7-quién-puede-hacer-qué)). El `.gitignore` impide que lleguen al repositorio por accidente; guárdelos en una carpeta del club con acceso restringido, no en un correo reenviado.
+- **Un entrenador ve los datos de contacto de todos los apoderados**, porque necesita leer la ficha para evaluar. El rol limita lo que puede *hacer*, no lo que puede *ver*. Dé cuentas sólo a quien corresponda, y désela de baja en Supabase cuando alguien deja el cuerpo técnico.
 - Antes de publicar cualquier foto o informe fuera del círculo del apoderado, pida autorización a la familia.

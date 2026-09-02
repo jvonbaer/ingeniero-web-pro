@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { CATEGORIAS_EDAD, POSICIONES } from "../config/pautas";
 import { useDatos } from "../data/DatosContext";
+import { useSesion } from "../data/sesion";
 import { EntradaFoto } from "../components/Foto";
 import { Campo } from "../components/ui";
 import { generarCodigo, hoyISO, nombreCompleto, nuevoId } from "../domain/scoring";
@@ -31,6 +32,7 @@ export function JugadorForm() {
   const { id } = useParams();
   const navegar = useNavigate();
   const { jugadores, guardarJugador, eliminarJugador } = useDatos();
+  const { esAdmin } = useSesion();
 
   const original = useMemo(() => jugadores.find((j) => j.id === id), [jugadores, id]);
   const [form, setForm] = useState<Jugador>(() => original ?? jugadorVacio());
@@ -298,7 +300,9 @@ export function JugadorForm() {
             </div>
           </div>
 
-          {editando && (
+          {/* Borrar una ficha se lleva por delante todas sus evaluaciones y su
+              camiseta, y no hay vuelta atrás. Queda para el club. */}
+          {editando && esAdmin && (
             <div>
               <button type="button" className="btn btn--peligro btn--sm" onClick={borrar}>
                 Eliminar jugador y su historial

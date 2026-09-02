@@ -23,6 +23,23 @@ function reventar(contexto: string, error: { message: string } | null) {
   if (error) throw new Error(`${contexto}: ${traducirError(error.message)}`);
 }
 
+/**
+ * Un borrado que no borró nada.
+ *
+ * Cuando la política de permisos no deja borrar una fila, PostgreSQL no
+ * protesta: simplemente no la ve, afecta cero filas y devuelve éxito. Sin esta
+ * comprobación el entrenador vería desaparecer la ficha de la pantalla y la
+ * encontraría de vuelta al recargar, sin que nadie le haya dicho por qué. Por
+ * eso el borrado pide de vuelta lo borrado y se revisa que venga algo.
+ */
+function reventarSiNoBorro(que: string, filas: unknown[] | null) {
+  if (filas && filas.length > 0) return;
+  throw new Error(
+    `No se pudo eliminar ${que}: esa acción está reservada al administrador del club. ` +
+      "Si usted lo es, salga y vuelva a entrar para refrescar sus permisos.",
+  );
+}
+
 /** Espera sin bloquear, para el reintento de la carga inicial. */
 const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -112,8 +129,9 @@ export const supabaseDriver: Store = {
   },
 
   async eliminarJugador(id) {
-    const { error } = await db().from("jugadores").delete().eq("id", id);
+    const { data, error } = await db().from("jugadores").delete().eq("id", id).select("id");
     reventar("No se pudo eliminar el jugador", error);
+    reventarSiNoBorro("el jugador", data);
   },
 
   async guardarEvaluacion(evaluacion) {
@@ -131,8 +149,9 @@ export const supabaseDriver: Store = {
   },
 
   async eliminarEvaluacion(id) {
-    const { error } = await db().from("evaluaciones").delete().eq("id", id);
+    const { data, error } = await db().from("evaluaciones").delete().eq("id", id).select("id");
     reventar("No se pudo eliminar la evaluación", error);
+    reventarSiNoBorro("la evaluación", data);
   },
 
   async guardarCamiseta(camiseta) {
@@ -161,10 +180,18 @@ export const supabaseDriver: Store = {
   },
 
   async guardarConfiguracion(configuracion) {
-    const { error } = await db()
+    // Mismo silencio que en el borrado: si la política no deja actualizar la
+    // rúbrica, el upsert vuelve sin error y sin haber cambiado nada.
+    const { data, error } = await db()
       .from("rubrica")
-      .upsert({ id: 1, datos: configuracion, actualizado_en: new Date().toISOString() });
+      .upsert({ id: 1, datos: configuracion, actualizado_en: new Date().toISOString() })
+      .select("id");
     reventar("No se pudieron guardar los parámetros", error);
+    if (!data || data.length === 0) {
+      throw new Error(
+        "No se guardaron los parámetros: editar las pautas está reservado al administrador del club.",
+      );
+    }
   },
 
   async leerHoja(evaluacionId) {
