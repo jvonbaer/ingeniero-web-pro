@@ -12,6 +12,7 @@ import type {
 import { motivoParaNoEliminar } from "../domain/cobros";
 import { nombreCompleto } from "../domain/types";
 import { idbGet, idbSet } from "./idb";
+import { tarifasDelClub } from "./tarifas";
 import { etiquetaOperador } from "./operador";
 import { estadoVacio, type EstadoDatos, type Store } from "./store";
 
@@ -31,6 +32,12 @@ const K = {
   avisos: "avisos",
   bitacora: "bitacora",
 } as const;
+
+/**
+ * Marca de que este navegador ya se estrenó. Existe para no resucitar las
+ * tarifas después de un «Borrar todo»: quien borró todo quiso dejarlo vacío.
+ */
+const K_ESTRENADO = "estrenado";
 
 type Coleccion = keyof typeof K;
 
@@ -138,15 +145,39 @@ export const localDriver: Store = {
   modo: "local",
   etiqueta: "Este computador",
 
+  /**
+   * La primera vez que la aplicación se abre en un computador, deja cargadas
+   * las tarifas del club.
+   *
+   * Sin esto, quien entra se encuentra con Planes vacío y no puede inscribir a
+   * nadie —hay que elegir un plan para hacerlo— sin antes descubrir por su
+   * cuenta el botón «Cargar ejemplo» en otra pantalla. La familia inventada
+   * sigue detrás de ese botón; lo que se siembra acá son sólo los precios.
+   */
   async cargar(): Promise<EstadoDatos> {
-    const [personas, vinculos, planes, inscripciones, pagos, avisos] = await Promise.all([
-      leer<Persona>("personas"),
-      leer<Vinculo>("vinculos"),
-      leer<Plan>("planes"),
-      leer<Inscripcion>("inscripciones"),
-      leer<Pago>("pagos"),
-      leer<Aviso>("avisos"),
-    ]);
+    const [personas, vinculos, planes, inscripciones, pagos, avisos, estrenado] =
+      await Promise.all([
+        leer<Persona>("personas"),
+        leer<Vinculo>("vinculos"),
+        leer<Plan>("planes"),
+        leer<Inscripcion>("inscripciones"),
+        leer<Pago>("pagos"),
+        leer<Aviso>("avisos"),
+        idbGet<boolean>(K_ESTRENADO),
+      ]);
+
+    if (!estrenado && planes.length === 0 && personas.length === 0) {
+      const tarifas = tarifasDelClub();
+      await Promise.all([idbSet(K.planes, tarifas), idbSet(K_ESTRENADO, true)]);
+      await anotar(
+        "creó",
+        "sistema",
+        "tarifas",
+        `Cargó las ${tarifas.length} tarifas del club al abrir por primera vez`,
+      );
+      return { personas, vinculos, planes: tarifas, inscripciones, pagos, avisos };
+    }
+
     return { personas, vinculos, planes, inscripciones, pagos, avisos };
   },
 
@@ -278,6 +309,7 @@ export const localDriver: Store = {
 
   async vaciar() {
     await Promise.all([
+      idbSet(K_ESTRENADO, true),
       idbSet(K.personas, []),
       idbSet(K.vinculos, []),
       idbSet(K.planes, []),
