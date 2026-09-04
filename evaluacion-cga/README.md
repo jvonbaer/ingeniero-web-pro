@@ -284,7 +284,7 @@ Quien no tenga fila en `perfiles` es entrenador. Es deliberado que el caso «no 
 
 Corra [`supabase/migracion-roles.sql`](supabase/migracion-roles.sql) **cambiando antes el correo del paso 3 por el suyo**. Va después de `migracion-camisetas.sql`, porque reparte permisos sobre la tabla `camisetas`; si se corre antes, se detiene en el paso 0 sin tocar nada y lo dice. Si el correo no corresponde a ninguna cuenta, el archivo se detiene ahí, antes de tocar un solo permiso, y le dice cuáles son las cuentas que existen. Mientras no lo corra, todo sigue funcionando como hasta ahora.
 
-Para sumar a alguien después: cree la cuenta en **Authentication → Users**, entre una vez con ella, y en `perfiles` aparecerá su fila para asignarle el rol.
+Para sumar a alguien después: cree la cuenta en **Authentication → Users**, entre una vez con ella, y en `perfiles` aparecerá su fila para asignarle el rol. El paso a paso, con los enredos habituales y las consultas de comprobación, está en [`ACCESOS.md`](ACCESOS.md).
 
 ### Lo que esto sí protege, y lo que no
 
