@@ -166,6 +166,26 @@ export function Evaluar() {
     }
   }
 
+  /**
+   * Finalizar no exige el 100%: dejar un indicador en blanco es deliberado
+   * cuando no se pudo observar ese día. Pero finalizar con la mitad sin
+   * responder casi siempre es haber llegado al final sin darse cuenta, así que
+   * se avisa una vez. La evaluación queda editable igual desde la ficha.
+   */
+  async function finalizar() {
+    const total = resultado.categorias.reduce((a, c) => a + c.total, 0);
+    const respondidos = resultado.categorias.reduce((a, c) => a + c.respondidos, 0);
+    const faltan = total - respondidos;
+    if (faltan > 0) {
+      const ok = window.confirm(
+        `Quedan ${faltan} de ${total} indicadores sin responder. ` +
+          "¿Finalizar igual? Podrá volver a abrirla desde la ficha del jugador para completarla.",
+      );
+      if (!ok) return;
+    }
+    await guardar("finalizada");
+  }
+
   async function adjuntarHoja(dataUrl: string | null) {
     setGuardandoHoja(true);
     try {
@@ -320,7 +340,7 @@ export function Evaluar() {
           <button
             type="button"
             className="btn btn--primario"
-            onClick={() => void guardar("finalizada")}
+            onClick={() => void finalizar()}
             disabled={guardando || resultado.general === null}
           >
             {guardando ? "Guardando…" : "Finalizar y ver informe"}

@@ -39,6 +39,34 @@ export function Jugadores() {
     return mapa;
   }, [jugadores, evaluaciones, configuracion]);
 
+  /**
+   * Evaluaciones a medio llenar: tanto las que quedaron en borrador como las
+   * que se finalizaron con indicadores sin responder. Las segundas son la
+   * mayoría y hasta ahora no se notaban desde ninguna parte, porque en el
+   * historial se ven igual que una completa. Se listan acá para que el
+   * entrenador las vea al entrar y pueda ir directo a terminarlas.
+   */
+  const incompletas = useMemo(() => {
+    const porId = new Map(jugadores.map((j) => [j.id, j]));
+    const lista: { evaluacionId: string; jugador: Jugador; fecha: string; pct: number; faltan: number }[] = [];
+    for (const e of evaluaciones) {
+      const jugador = porId.get(e.jugadorId);
+      if (!jugador) continue;
+      const { categorias } = calcular(e, pautaDeEvaluacion(configuracion, e, jugador));
+      const total = categorias.reduce((a, c) => a + c.total, 0);
+      const respondidos = categorias.reduce((a, c) => a + c.respondidos, 0);
+      if (total === 0 || respondidos >= total) continue;
+      lista.push({
+        evaluacionId: e.id,
+        jugador,
+        fecha: e.fecha,
+        pct: Math.round((respondidos / total) * 100),
+        faltan: total - respondidos,
+      });
+    }
+    return lista.sort((a, b) => (a.fecha < b.fecha ? 1 : -1));
+  }, [evaluaciones, jugadores, configuracion]);
+
   const visibles = useMemo(() => {
     const texto = busqueda.trim().toLowerCase();
     return jugadores
@@ -53,6 +81,24 @@ export function Jugadores() {
   }, [jugadores, busqueda, categoria, verInactivos]);
 
   const pendientes = visibles.filter((j) => (resumenPorJugador.get(j.id)?.total ?? 0) === 0).length;
+
+  // Se acotan al filtro activo para que la tarjeta y la lista digan lo mismo.
+  const incompletasVisibles = useMemo(() => {
+    const ids = new Set(visibles.map((j) => j.id));
+    return incompletas.filter((i) => ids.has(i.jugador.id));
+  }, [incompletas, visibles]);
+  // La lista viene de la más reciente a la más antigua, así que el distintivo
+  // de la fila se queda con la primera que aparece de cada jugador y cuenta
+  // cuántas tiene: mostrar la más vieja sería lo menos útil.
+  const incompletaPorJugador = useMemo(() => {
+    const mapa = new Map<string, { pct: number; faltan: number; cuantas: number }>();
+    for (const i of incompletasVisibles) {
+      const previo = mapa.get(i.jugador.id);
+      if (previo) previo.cuantas += 1;
+      else mapa.set(i.jugador.id, { pct: i.pct, faltan: i.faltan, cuantas: 1 });
+    }
+    return mapa;
+  }, [incompletasVisibles]);
 
   return (
     <>
@@ -71,6 +117,34 @@ export function Jugadores() {
           <Tarjeta rotulo="Jugadores activos" valor={jugadores.filter((j) => j.activo).length} />
           <Tarjeta rotulo="Evaluaciones registradas" valor={evaluaciones.filter((e) => e.estado === "finalizada").length} />
           <Tarjeta rotulo="Sin evaluar todavía" valor={pendientes} destacar={pendientes > 0} />
+          <Tarjeta
+            rotulo="Evaluaciones incompletas"
+            valor={incompletasVisibles.length}
+            destacar={incompletasVisibles.length > 0}
+          />
+        </div>
+      )}
+
+      {incompletasVisibles.length > 0 && (
+        <div className="aviso aviso--acento" role="status" style={{ marginBottom: 18 }}>
+          <strong>
+            {incompletasVisibles.length === 1
+              ? "Hay 1 evaluación sin completar."
+              : `Hay ${incompletasVisibles.length} evaluaciones sin completar.`}
+          </strong>{" "}
+          Se guardaron con indicadores en blanco. Entre a terminarlas:
+          <ul className="lista-limpia" style={{ marginTop: 8 }}>
+            {incompletasVisibles.map((i) => (
+              <li key={i.evaluacionId} style={{ marginBottom: 4 }}>
+                <Link to={`/evaluaciones/${i.evaluacionId}`}>
+                  {nombreCompleto(i.jugador)}
+                </Link>{" "}
+                <span className="jugador-item__meta">
+                  {fechaCorta(i.fecha)} · {i.pct}% respondido · faltan {i.faltan}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 
@@ -119,7 +193,11 @@ export function Jugadores() {
         <ul className="lista-limpia">
           {visibles.map((jugador) => (
             <li key={jugador.id}>
-              <FilaJugador jugador={jugador} resumen={resumenPorJugador.get(jugador.id)} />
+              <FilaJugador
+                jugador={jugador}
+                resumen={resumenPorJugador.get(jugador.id)}
+                incompleta={incompletaPorJugador.get(jugador.id)}
+              />
             </li>
           ))}
         </ul>
@@ -144,9 +222,11 @@ function Tarjeta({ rotulo, valor, destacar }: { rotulo: string; valor: number; d
 function FilaJugador({
   jugador,
   resumen,
+  incompleta,
 }: {
   jugador: Jugador;
   resumen?: { general: number | null; fecha: string; total: number };
+  incompleta?: { pct: number; faltan: number; cuantas: number };
 }) {
   return (
     <Link to={`/jugadores/${jugador.id}`} className="jugador-item">
@@ -157,6 +237,16 @@ function FilaJugador({
           <span className="chip" style={{ marginRight: 6 }}>{jugador.codigo}</span>
           {jugador.categoria} · {jugador.posicion}
           {!jugador.activo && " · Retirado"}
+          {/* Va como span y no como Link: la fila entera ya es un ancla y
+              anidar otra es inválido. El enlace directo está en el aviso de
+              arriba; desde acá se entra por la ficha. */}
+          {incompleta && (
+            <span className="chip chip--rojo" style={{ marginLeft: 6 }}>
+              {incompleta.cuantas > 1
+                ? `${incompleta.cuantas} incompletas`
+                : `Incompleta · ${incompleta.pct}%`}
+            </span>
+          )}
         </div>
       </div>
       <div className="jugador-item__score">
