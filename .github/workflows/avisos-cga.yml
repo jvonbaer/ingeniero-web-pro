@@ -1,0 +1,60 @@
+# Avisos de renovación del Club Gimnástico Alemán.
+#
+# Corre todos los días a las 12:00 UTC —08:00 en Temuco en horario de invierno,
+# 09:00 en verano— y le escribe al pagador de cada cuota vencida o que vence
+# dentro de su ventana de aviso (cinco días por omisión).
+#
+# Es gratuito: GitHub Actions no cobra por los repositorios públicos y regala
+# 2.000 minutos al mes en los privados; esta tarea usa menos de un minuto al día.
+#
+# Antes de que funcione hay que cargar los secretos en
+# Settings → Secrets and variables → Actions → New repository secret:
+#
+#   SUPABASE_URL          https://abcdefgh.supabase.co
+#   SUPABASE_SERVICE_KEY  clave «service_role» (Project Settings → API)
+#   RESEND_API_KEY        clave de resend.com
+#   REMITENTE             Club Gimnástico Alemán <avisos@sudominio.cl>
+#   RESPONDER_A           (opcional) correo del club para las respuestas
+#
+# Mientras falte RESEND_API_KEY la tarea corre en modo ensayo: lista a quién
+# habría que avisarle y no envía nada.
+
+name: Avisos de renovación CGA
+
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+    inputs:
+      ensayo:
+        description: "Sólo listar, sin enviar correos"
+        type: boolean
+        default: false
+
+# Dos ejecuciones a la vez mandarían el mismo aviso dos veces si coincidieran
+# entre la consulta y el registro.
+concurrency:
+  group: avisos-cga
+  cancel-in-progress: false
+
+jobs:
+  avisar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # El script no tiene dependencias: no hace falta `npm install`.
+      - name: Enviar los avisos
+        working-directory: socios-cga
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          REMITENTE: ${{ secrets.REMITENTE }}
+          RESPONDER_A: ${{ secrets.RESPONDER_A }}
+          ENSAYO: ${{ inputs.ensayo && '1' || '' }}
+        run: node avisos/enviar.mjs

@@ -6,6 +6,7 @@ Aplicación para evaluar a los jugadores de la Escuela de Fútbol del **Club Gim
 - **Los datos se acumulan**: cada evaluación nueva se suma al historial y se compara con las anteriores.
 - **Gráfico de tela de araña** que superpone hasta tres evaluaciones para ver el avance de un vistazo.
 - **Informe en una hoja A4 vertical** que se imprime o se guarda como PDF desde el propio navegador.
+- **Pedido de camisetas** sobre la misma base de jugadores: número único por categoría, nombre estampado, talla y estado de pago.
 - Identidad visual del CGA, rama Fútbol: Rojo CGA, Negro Carbón, Amarillo DFB, tipografía Barlow.
 
 ---
@@ -142,9 +143,30 @@ Dos sub-puntos se responden con nombres propios en vez de números pelados: «Pa
 
 > Si la escuela quiere una versión recortada para las categorías chicas, **duplique esta pauta y desactive los sub-puntos que no correspondan**, en vez de escribir una nueva desde cero. Los puntajes se guardan contra el identificador del sub-punto, así que una pauta duplicada mantiene el historial comparable; una escrita de nuevo parte de cero. Por lo mismo: renombrar un sub-punto es inofensivo, cambiarle el identificador equivale a borrarlo.
 
+### Camisetas
+
+**Camisetas**. Es el pedido de la temporada, armado sobre las mismas fichas que se evalúan: no hay que volver a escribir a los niños en ninguna parte.
+
+Cada camiseta guarda **número, nombre estampado, talla, precio, lo abonado y si ya se entregó**. Todo se elige en una sola ventana, con la espalda de la camiseta dibujada arriba para ver cómo va a quedar el estampado antes de mandarlo.
+
+**El número no se puede repetir dentro de una categoría y una temporada.** La aplicación lo revisa antes de guardar y dice quién lo tiene tomado; en el modo nube, además, la propia base lo rechaza (`unique (temporada, categoria, numero)`), que es lo que salva la situación cuando dos entrenadores inscriben al mismo tiempo desde teléfonos distintos. Al costado, el **mapa de números** muestra el 1 al 99 de la categoría elegida con los tomados marcados.
+
+Otras reglas que conviene tener claras:
+
+- **Una camiseta por jugador y temporada.** Al inscribir sólo aparecen los jugadores activos que todavía no la tienen.
+- **La categoría se copia al inscribir**, no se sigue leyendo de la ficha. Si el niño sube de SUB-10 a SUB-12 el año siguiente, el pedido del año pasado no cambia de casillero ni choca con el número de otro compañero. Cuando eso pasa, la fila lo avisa con una marca *hoy SUB-12*.
+- **El dorsal de la ficha queda mandado por el pedido vigente.** Ese campo se escribía a mano y era justamente el que dejaba números repetidos; ahora lo fija la única lista que los controla.
+- **El nombre estampado se pasa a mayúsculas y se corta en 12 caracteres** mientras se escribe, que es lo que entra legible sobre el número. Si otro niño de la misma categoría eligió el mismo nombre, la ventana lo advierte —se puede, pero llegan dos camisetas iguales—.
+- **El estado de pago no se guarda: se deduce** del precio y de lo abonado. Así no queda mintiendo cuando alguien corrige un monto.
+- El botón **Cobrar** de cada fila registra el pago completo en el momento, y la casilla de **Entrega** se va tildando mientras se reparte en la cancha. El medio de pago queda *Sin registrar* a propósito: es un dato que hay que completar, no adivinar.
+
+**Descargar pedido (CSV)** baja una fila por camiseta —categoría, número, estampado, talla, jugador, saldo, entrega— para mandársela al proveedor o revisarla en Excel. La tarjeta **Cuántas de cada talla** es el recuento que el proveedor pide para cotizar.
+
+> **Lo que este apartado no es.** No es un sistema de cobranzas: registra si la camiseta está pagada y cuánto falta, y hasta ahí. Las cuotas de la escuela, los planes y los avisos de vencimiento viven en el registro de socios (`socios-cga`), que es otra aplicación con otra base. Meter acá la cobranza mensual sería duplicar ese sistema a medias.
+
 ### Respaldos
 
-**Datos**. Descarga un respaldo completo en un archivo (jugadores + evaluaciones + parámetros) y también una **planilla CSV** con una fila por evaluación, que se abre directo en Excel o Google Sheets.
+**Datos**. Descarga un respaldo completo en un archivo (jugadores + evaluaciones + camisetas + parámetros) y también una **planilla CSV** con una fila por evaluación, que se abre directo en Excel o Google Sheets.
 
 > En modo local, descargue un respaldo al terminar cada jornada de evaluaciones y guárdelo en el Drive del club. Es la única copia que existe.
 
@@ -222,7 +244,7 @@ El PDF lo genera el navegador, así que no hay ningún costo ni servicio asociad
 ## 6. Modo nube con Supabase
 
 1. Cree un proyecto gratuito en [supabase.com](https://supabase.com).
-2. **SQL Editor → New query**: pegue el contenido de [`supabase/schema.sql`](supabase/schema.sql) y ejecútelo. Crea las tablas, activa la seguridad por fila y agrega una vista de consulta. Compruébelo en **Table Editor**: deben aparecer `jugadores`, `evaluaciones`, `rubrica` y `hojas`.
+2. **SQL Editor → New query**: pegue el contenido de [`supabase/schema.sql`](supabase/schema.sql) y ejecútelo. Crea las tablas, activa la seguridad por fila y agrega las vistas de consulta. Compruébelo en **Table Editor**: deben aparecer `jugadores`, `evaluaciones`, `camisetas`, `rubrica` y `hojas`.
 3. **Authentication → Users → Add user**: una cuenta por entrenador, con *Auto Confirm User* activado. No hay registro abierto; las cuentas las crea el club.
 4. **Project Settings → API**: copie el `Project URL` y la clave `anon public`. La `service_role` no se usa y no debe salir del servidor.
 5. Conecte la aplicación por cualquiera de los dos caminos:
@@ -231,6 +253,12 @@ El PDF lo genera el navegador, así que no hay ningún costo ni servicio asociad
 6. Al entrar, la aplicación pide correo y clave, y la etiqueta de la barra superior cambia de *Este dispositivo* a **Nube compartida**.
 
 Para pasar los datos que ya tenía en una tablet: **Datos → Descargar respaldo** en modo local, y **Datos → Cargar respaldo** una vez conectado a la nube.
+
+> **Si la nube ya estaba funcionando antes de las camisetas**, corra [`supabase/migracion-camisetas.sql`](supabase/migracion-camisetas.sql), que agrega sólo lo nuevo y no toca las cuatro tablas que ya tiene andando —ni sus datos, ni su estructura, ni sus permisos—. Mientras no lo haga, la aplicación sigue trabajando igual que siempre —el pedido aparece vacío— y avisa qué correr recién cuando alguien intenta guardar una camiseta.
+>
+> `schema.sql` completo también sirve y es igual de seguro: las tablas se crean con `create table if not exists`, así que una que ya existe queda intacta. La diferencia es que vuelve a escribir las reglas de permiso de las cuatro tablas anteriores —idénticas a las que ya están— y eso hace que Supabase muestre su aviso de «operaciones destructivas», que en este caso se refiere a los `drop policy` de esas reglas y no a ningún dato. La migración no contiene ningún `drop`.
+
+Dos vistas quedan listas para consultar en SQL o bajar como CSV desde el propio Supabase, sin entender el `jsonb`: **`v_puntajes`**, una fila por sub-punto respondido, y **`v_camisetas`**, el pedido con el jugador, el apoderado y el saldo al lado del número.
 
 ---
 
@@ -266,7 +294,8 @@ evaluacion-cga/
 │   ├── config/pautas.ts         Pautas de fábrica, asignaciones y cuerpo técnico
 │   ├── domain/
 │   │   ├── types.ts             Modelo de datos
-│   │   └── scoring.ts           Cálculo de puntajes, niveles y códigos
+│   │   ├── scoring.ts           Cálculo de puntajes, niveles y códigos
+│   │   └── camisetas.ts         Reglas del pedido: números, tallas, pagos
 │   ├── data/
 │   │   ├── store.ts             Contrato de persistencia
 │   │   ├── localDriver.ts       Guardado en el dispositivo (IndexedDB)
@@ -281,7 +310,7 @@ evaluacion-cga/
 │   │   ├── Iconos.tsx           Iconos monocromos de categoría
 │   │   ├── Foto.tsx             Compresión de imágenes y acciones de foto
 │   │   └── Camara.tsx           Visor de cámara (teléfono y webcam)
-│   ├── pages/                   Jugadores, ficha, encuesta, informe, hoja en papel, parámetros
+│   ├── pages/                   Jugadores, ficha, encuesta, informe, hoja en papel, camisetas, parámetros
 │   ├── styles/
 │   │   ├── tokens.css           Paleta y tipografía CGA (fuente única de color)
 │   │   ├── informe.css          Maqueta A4 vertical del informe
@@ -289,7 +318,9 @@ evaluacion-cga/
 │   │   └── print.css            Reglas de impresión
 │   └── fuentes/                 Barlow (la repone `npm install`, no se versiona)
 ├── scripts/preparar-fuentes.mjs Descarga las tipografías al proyecto
-└── supabase/schema.sql          Esquema, seguridad y vista de consulta
+└── supabase/
+    ├── schema.sql               Esquema completo, seguridad y vistas de consulta
+    └── migracion-camisetas.sql  Sólo lo nuevo, para una base que ya está en uso
 ```
 
 Decisiones que conviene conocer antes de tocar el código:
@@ -298,6 +329,8 @@ Decisiones que conviene conocer antes de tocar el código:
 - **El PDF lo genera el navegador** con `@media print`, sin librerías de PDF. Es lo que hace que el informe salga idéntico a lo que se ve en pantalla.
 - **Las tipografías van dentro del proyecto**, no desde Google Fonts: la escuela evalúa a pie de cancha, donde la señal es mala o no hay. Como son archivos binarios, no se versionan: `npm install` las descarga con `scripts/preparar-fuentes.mjs`, y si no hay conexión en ese momento el script deja el proyecto apuntando al CDN de Google para que la compilación nunca se caiga.
 - **Los iconos son dibujos propios, no emoji.** El emoji cambia según el sistema operativo y varios se pintan en azul, un color que la identidad del CGA reserva a Natación.
+- **Las camisetas son un registro aparte, no campos de la ficha.** El pedido se repite cada temporada y el número cambia de dueño; con campos sueltos en la ficha, el pedido nuevo borraría el anterior y nadie podría revisar quién pagó el año pasado.
+- **`camisetas` es la única tabla que saca campos del `jsonb` a columnas propias** (`temporada`, `categoria`, `numero`). No es una inconsistencia: sobre esas tres va el índice único, y la última palabra sobre un número repetido tiene que tenerla la base, no la pantalla.
 
 ---
 

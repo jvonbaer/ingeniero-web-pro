@@ -11,6 +11,7 @@ import {
 } from "../data/conexion";
 import { revisarInstalacion, type Prueba } from "../data/diagnostico";
 import { datosDemo } from "../data/seed";
+import { estadoPago } from "../domain/camisetas";
 import {
   calcular,
   fechaCorta,
@@ -32,7 +33,8 @@ const HOY = () => new Date().toISOString().slice(0, 10);
 
 export function Datos() {
   const {
-    jugadores, evaluaciones, configuracion, modo, etiquetaModo, exportar, importar, recargar,
+    jugadores, evaluaciones, camisetas, configuracion, modo, etiquetaModo,
+    exportar, importar, recargar,
   } = useDatos();
   const archivo = useRef<HTMLInputElement>(null);
   const [aviso, setAviso] = useState<string | null>(null);
@@ -102,7 +104,7 @@ export function Datos() {
     try {
       const backup = validarBackup(JSON.parse(await file.text()));
       const seguro = window.confirm(
-        `El respaldo trae ${backup.jugadores.length} jugadores y ${backup.evaluaciones.length} evaluaciones. Reemplazará todo lo que hay ahora. ¿Continuar?`,
+        `El respaldo trae ${backup.jugadores.length} jugadores, ${backup.evaluaciones.length} evaluaciones y ${backup.camisetas.length} camisetas. Reemplazará todo lo que hay ahora. ¿Continuar?`,
       );
       if (!seguro) return;
       await importar(backup);
@@ -122,6 +124,7 @@ export function Datos() {
   }
 
   const conEvaluacion = jugadores.filter((j) => historial(evaluaciones, j.id).length > 0).length;
+  const porCobrar = camisetas.filter((c) => estadoPago(c) !== "pagado").length;
 
   return (
     <>
@@ -167,6 +170,8 @@ export function Datos() {
               <div className="dato"><dt>Con al menos una evaluación</dt><dd>{conEvaluacion}</dd></div>
               <div className="dato"><dt>Evaluaciones finalizadas</dt><dd>{evaluaciones.filter((e) => e.estado === "finalizada").length}</dd></div>
               <div className="dato"><dt>Borradores pendientes</dt><dd>{evaluaciones.filter((e) => e.estado === "borrador").length}</dd></div>
+              <div className="dato"><dt>Camisetas inscritas</dt><dd>{camisetas.length}</dd></div>
+              <div className="dato"><dt>Camisetas por cobrar</dt><dd>{porCobrar}</dd></div>
               <div className="dato"><dt>Pautas de evaluación</dt><dd>{configuracion.pautas.length}</dd></div>
               <div className="dato"><dt>Evaluadores</dt><dd>{configuracion.entrenadores.length}</dd></div>
               <div className="dato"><dt>Última actualización</dt><dd>{fechaCorta(configuracion.actualizadaEn.slice(0, 10))}</dd></div>
@@ -179,8 +184,8 @@ export function Datos() {
             <h2 className="card__titulo">Respaldo completo</h2>
             <div className="card__cuerpo">
               <p style={{ marginTop: 0, fontSize: 14 }}>
-                Un solo archivo con jugadores, evaluaciones y parámetros. Sirve para mover todo a
-                otro dispositivo o para recuperar la información si algo pasa.
+                Un solo archivo con jugadores, evaluaciones, camisetas y parámetros. Sirve para
+                mover todo a otro dispositivo o para recuperar la información si algo pasa.
               </p>
               <div style={{ display: "flex", gap: 9, flexWrap: "wrap" }}>
                 <button type="button" className="btn btn--primario" onClick={exportarRespaldo}>

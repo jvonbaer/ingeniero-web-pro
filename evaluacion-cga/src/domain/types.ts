@@ -138,11 +138,74 @@ export interface Evaluacion {
 
 export interface Backup {
   formato: "cga-evaluacion-futbol";
-  version: 2;
+  /** 3 desde que el respaldo incluye las camisetas. Los de la 2 se siguen leyendo. */
+  version: 3;
   exportadoEn: string;
   jugadores: Jugador[];
   evaluaciones: Evaluacion[];
+  camisetas: Camiseta[];
   configuracion: Configuracion;
+}
+
+/* ---------- Camisetas ---------- */
+
+/**
+ * Medio por el que se recibió el pago de la camiseta. Vacío mientras no se
+ * haya recibido nada.
+ */
+export type MedioPagoCamiseta =
+  | ""
+  | "transferencia"
+  | "efectivo"
+  | "webpay"
+  | "otro";
+
+/** Se deduce del precio y de lo abonado; no se guarda. */
+export type EstadoPagoCamiseta = "pendiente" | "abonado" | "pagado";
+
+/**
+ * La camiseta pedida por un jugador para una temporada.
+ *
+ * Es un registro aparte de la ficha del jugador y no un puñado de campos dentro
+ * de ella, porque el pedido se repite cada temporada: el niño que este año usó
+ * el 7 en SUB-10 el próximo puede quedar con el 14 en SUB-12, y las dos cosas
+ * tienen que seguir siendo ciertas al mismo tiempo. Con campos sueltos en la
+ * ficha, el pedido nuevo borraría el anterior y nadie podría revisar quién pagó
+ * el año pasado.
+ */
+export interface Camiseta {
+  id: string;
+  jugadorId: string;
+  /** Temporada del pedido, en años: "2026". Un jugador pide una por temporada. */
+  temporada: string;
+  /**
+   * Categoría del jugador al momento de inscribirlo. Es una **copia** y no una
+   * referencia a la ficha: el número es único dentro de la categoría, y si el
+   * niño sube de SUB-10 a SUB-12 el pedido del año pasado no puede cambiar de
+   * casillero solo y chocar con el número de otro compañero.
+   */
+  categoria: string;
+  /** Dorsal estampado, 1 a 99. Único dentro de la temporada y la categoría. */
+  numero: number;
+  /** Nombre elegido por el jugador, en mayúsculas, tal cual se manda a estampar. */
+  nombreEstampado: string;
+  /** Talla del catálogo (ver TALLAS en domain/camisetas.ts). */
+  talla: string;
+  /** Precio cobrado, en pesos. Cero cuando la camiseta va por cuenta del club. */
+  precio: number;
+  /** Recibido a cuenta, en pesos. Igual al precio cuando está pagada del todo. */
+  abonado: number;
+  medioPago: MedioPagoCamiseta;
+  /** ISO aaaa-mm-dd del último abono. Vacío mientras no se reciba nada. */
+  fechaPago: string;
+  /** N.º de transferencia, boleta o lo que el club use para respaldar el pago. */
+  comprobante: string;
+  entregada: boolean;
+  /** ISO aaaa-mm-dd de la entrega. Vacío mientras no se entregue. */
+  fechaEntrega: string;
+  notas: string;
+  creadaEn: string;
+  actualizadaEn: string;
 }
 
 /* ---------- Resultados calculados ---------- */

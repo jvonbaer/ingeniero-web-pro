@@ -26,6 +26,11 @@ export function esSesionVencida(mensaje: string): boolean {
   return /jwt expired|token is expired|invalid refresh token/i.test(mensaje);
 }
 
+/** La tabla no existe: falta correr —o volver a correr— supabase/schema.sql. */
+export function esTablaAusente(mensaje: string): boolean {
+  return /does not exist|could not find the table/i.test(mensaje);
+}
+
 export function traducirError(mensaje: string): string {
   if (esDesfaseDeReloj(mensaje)) {
     return (
@@ -44,7 +49,17 @@ export function traducirError(mensaje: string): string {
   if (/failed to fetch|networkerror|load failed/i.test(mensaje)) {
     return "No hay conexión con el servidor. Revise la señal e inténtelo de nuevo.";
   }
-  if (/does not exist|could not find the table/i.test(mensaje)) {
+  // El índice único del pedido de camisetas. Salta cuando dos entrenadores
+  // asignan el mismo dorsal al mismo tiempo desde teléfonos distintos: la
+  // pantalla de cada uno validó contra lo que había cargado, y la base es la
+  // que se entera del choque.
+  if (/camisetas_numero_unico|camisetas_jugador_unico/i.test(mensaje)) {
+    const porJugador = /camisetas_jugador_unico/i.test(mensaje);
+    return porJugador
+      ? "Ese jugador ya tiene una camiseta inscrita en esta temporada. Recargue la lista para verla."
+      : "Ese número ya lo tomó otra persona en esta categoría mientras usted lo escribía. Recargue la lista y elija otro.";
+  }
+  if (esTablaAusente(mensaje)) {
     return (
       "Faltan tablas en la base de datos. Corra el archivo supabase/schema.sql en el SQL Editor de Supabase."
     );

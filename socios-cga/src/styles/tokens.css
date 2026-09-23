@@ -1,0 +1,92 @@
+/* ============================================================
+   TOKENS DE IDENTIDAD — Club Gimnástico Alemán (CGA)
+
+   FUENTE ÚNICA DE COLOR DEL PROYECTO. Ningún otro archivo lleva
+   un color literal: todo pasa por estas variables, tanto el CSS
+   como los SVG dibujados en línea.
+
+   Dos excepciones inevitables, que hay que mantener a mano si
+   cambia la paleta:
+     · index.html → <meta name="theme-color">
+     · public/brand/favicon.svg → archivo suelto, sin CSS
+   ============================================================
+   Esta aplicación es INSTITUCIONAL: cubre a todo el club, no a
+   una rama. Por eso el acento es el Rojo CGA y no el color de
+   ninguna rama en particular.
+
+   Los colores de rama aparecen sólo en la insignia que identifica
+   a cada rama —el azul únicamente en la de Natación, que es su
+   dueña exclusiva— y nunca como color general de una pantalla:
+   una lista con socios de tenis y de natación no puede teñirse
+   del color de una de las dos.
+   ============================================================ */
+:root {
+  /* --- Base institucional --- */
+  --cga-rojo: #c8102e;
+  --cga-carbon: #1c1c1c;
+  --cga-gris: #5a5a5a;
+  --cga-blanco: #ffffff;
+  --cga-amarillo: #eaaa00;
+
+  /* --- Colores de rama (sólo para insignias de rama) --- */
+  --rama-club: #c8102e;
+  --rama-futbol: #eaaa00;
+  --rama-outdoor: #3d6b35;
+  --rama-tenis: #b8860b;
+  --rama-natacion: #006ea6;
+
+  /* --- Escala neutra derivada del Negro Carbón --- */
+  --carbon-900: #101010;
+  --carbon-800: #161616;
+  --carbon-700: #1c1c1c;
+  --carbon-600: #242424;
+  --carbon-500: #2e2e2e;
+  --carbon-400: #3a3a3a;
+  --gris-300: #5a5a5a;
+  --gris-200: #8a8a8a;
+  --gris-100: #c9c9c9;
+  --hueso: #f4f3f1;
+  --hueso-2: #e9e7e3;
+
+  /* --- Roles semánticos --- */
+  --bg: var(--hueso);
+  --bg-panel: var(--cga-blanco);
+  --bg-oscuro: var(--carbon-700);
+  --texto: var(--carbon-700);
+  --texto-suave: var(--cga-gris);
+  --texto-inverso: var(--cga-blanco);
+  --borde: #dedbd6;
+  --borde-oscuro: var(--carbon-500);
+  --acento: var(--cga-rojo);
+  --acento-contraste: var(--cga-blanco);
+  --acento-hover: #a90d26; /* Rojo CGA oscurecido, sólo para hover */
+
+  /* --- Estados de cobranza ---
+     No son colores de marca, informan del estado de una cuota. El verde se
+     elige distinto del Verde Bosque #3D6B35 de Outdoor & Trail para que no se
+     lea como una insignia de rama; el atraso usa el Rojo CGA, que sí es
+     institucional y cumple las dos funciones sin contradecir el manual. */
+  --al-dia: #1f7a38;
+  --por-vencer: #b07a1a;
+  --vencida: var(--cga-rojo);
+  --neutro: var(--cga-gris);
+  --exito: #1f7a38;
+  --alerta: var(--cga-rojo);
+
+  --velo: rgba(16, 16, 16, 0.74); /* fondo de las ventanas modales */
+  --divisor-sobre-acento: rgba(28, 28, 28, 0.35);
+
+  /* --- Tipografía --- */
+  --fuente: "Barlow", system-ui, -apple-system, sans-serif;
+  --fuente-cond: "Barlow Condensed", "Barlow", system-ui, sans-serif;
+
+  /* --- Métricas --- */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 16px;
+  --r-xl: 22px;
+  --franja: 5px; /* franja institucional obligatoria */
+  --sombra-1: 0 1px 2px rgba(28, 28, 28, 0.06), 0 2px 8px rgba(28, 28, 28, 0.05);
+  --sombra-2: 0 2px 6px rgba(28, 28, 28, 0.08), 0 12px 32px rgba(28, 28, 28, 0.1);
+  --tap: 48px; /* área táctil mínima en tablet/teléfono */
+}

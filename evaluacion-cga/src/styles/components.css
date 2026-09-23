@@ -673,3 +673,128 @@
   padding-bottom: 4px;
   border-bottom: 1px solid var(--borde);
 }
+
+/* ---------- Camisetas ---------- */
+
+/* La lista manda y el tablero de números la acompaña; en pantalla angosta el
+   tablero baja, porque lo primero que se busca en el teléfono es el pedido. */
+.grid--camisetas { grid-template-columns: minmax(0, 1fr) minmax(0, 330px); align-items: start; }
+
+@media (max-width: 1000px) {
+  .grid--camisetas { grid-template-columns: minmax(0, 1fr); }
+}
+
+.grid--metricas-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+@media (max-width: 720px) {
+  .grid--metricas-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* Los montos en pesos no caben en el tamaño de un puntaje de dos dígitos. */
+.metrica__valor--texto { font-size: 26px; letter-spacing: -0.01em; }
+
+@media (max-width: 720px) {
+  .metrica__valor--texto { font-size: 21px; }
+}
+
+.dorsal {
+  font-family: var(--fuente-cond);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.estampado {
+  font-family: var(--fuente-cond);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.pago {
+  font-family: var(--fuente-cond);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.pago--pendiente { color: var(--cga-rojo); }
+.pago--abonado { color: var(--nivel-desarrollo); }
+.pago--pagado { color: var(--exito); }
+
+.fila-acciones { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+
+/* Tablero del 1 al 99: las casillas tomadas se distinguen por color y por peso
+   de la letra, no sólo por color, para que se lean también en blanco y negro
+   y para quien no distingue el rojo del verde. */
+.mapa-numeros {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.mapa-numeros__celda {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  border: 1px solid var(--borde);
+  border-radius: var(--r-sm);
+  font-family: var(--fuente-cond);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--texto-suave);
+  background: var(--bg-panel);
+}
+
+.mapa-numeros__celda--tomada {
+  background: var(--carbon-700);
+  border-color: var(--carbon-700);
+  color: var(--cga-blanco);
+  font-weight: 800;
+}
+
+/* Vista previa de la espalda de la camiseta. No es decoración: es lo que evita
+   que el nombre se apruebe en la pantalla y se descubra cortado en la cancha. */
+.camiseta-vista {
+  display: grid;
+  place-items: center;
+  gap: 2px;
+  padding: 14px 12px 16px;
+  margin: 0 0 15px;
+  border-radius: var(--r-md);
+  background: var(--bg-oscuro);
+  color: var(--cga-blanco);
+}
+
+.camiseta-vista__nombre {
+  font-family: var(--fuente-cond);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  word-break: break-word;
+}
+
+.camiseta-vista__numero {
+  font-family: var(--fuente-cond);
+  font-size: 54px;
+  font-weight: 800;
+  line-height: 0.95;
+  color: var(--rama-futbol);
+  font-variant-numeric: tabular-nums;
+}
+
+/* El formulario del pedido lleva campos en dos columnas y no entra en el ancho
+   de una ventana modal corriente. */
+.modal__caja--ancha { max-width: 560px; }
+
+.fila-acciones .btn { min-height: 34px; padding: 0 11px; font-size: 13px; }
+
+.entrega { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+.pago--sin-costo { color: var(--texto-suave); }

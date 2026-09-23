@@ -56,8 +56,32 @@ create table if not exists public.hojas (
   actualizado_en  timestamptz not null default now()
 );
 
+
+-- Camisetas del pedido de cada temporada.
+--
+-- A diferencia de las otras tablas, acá SÍ salen tres campos del jsonb a
+-- columnas propias: sobre ellos va el índice único que impide que dos niños de
+-- la misma categoría terminen con el mismo dorsal. La aplicación valida lo
+-- mismo antes de guardar, pero esa validación no sirve cuando dos entrenadores
+-- inscriben al mismo tiempo desde teléfonos distintos: la última palabra tiene
+-- que tenerla la base.
+create table if not exists public.camisetas (
+  id              text primary key,
+  jugador_id      text not null references public.jugadores(id) on delete cascade,
+  temporada       text not null,
+  categoria       text not null,
+  numero          integer not null check (numero between 1 and 99),
+  datos           jsonb not null,
+  actualizado_en  timestamptz not null default now(),
+  -- Un número por categoría y temporada.
+  constraint camisetas_numero_unico unique (temporada, categoria, numero),
+  -- Y una camiseta por jugador y temporada.
+  constraint camisetas_jugador_unico unique (temporada, jugador_id)
+);
+
 create index if not exists evaluaciones_jugador_idx on public.evaluaciones (jugador_id, fecha desc);
 create index if not exists jugadores_categoria_idx  on public.jugadores (categoria) where activo;
+create index if not exists camisetas_temporada_idx   on public.camisetas (temporada, categoria, numero);
 
 -- ---------------------------------------------------------------------------
 -- Seguridad
@@ -71,6 +95,7 @@ create index if not exists jugadores_categoria_idx  on public.jugadores (categor
 
 alter table public.jugadores    enable row level security;
 alter table public.evaluaciones enable row level security;
+alter table public.camisetas    enable row level security;
 alter table public.rubrica      enable row level security;
 alter table public.hojas        enable row level security;
 
@@ -78,7 +103,7 @@ do $$
 declare
   t text;
 begin
-  foreach t in array array['jugadores', 'evaluaciones', 'rubrica', 'hojas'] loop
+  foreach t in array array['jugadores', 'evaluaciones', 'camisetas', 'rubrica', 'hojas'] loop
     execute format('drop policy if exists "cuerpo tecnico lee %1$s" on public.%1$I', t);
     execute format('drop policy if exists "cuerpo tecnico escribe %1$s" on public.%1$I', t);
 
@@ -149,6 +174,47 @@ cross join lateral jsonb_array_elements(p.categoria -> 'indicadores') as ind(val
 where e.estado = 'finalizada'
   and e.datos -> 'puntajes' ? (ind.valor ->> 'id');
 
+
+-- ---------------------------------------------------------------------------
+-- Vista de consulta: el pedido de camisetas, listo para la tesorería.
+--
+-- Trae el jugador al lado del número y calcula el saldo, que es la pregunta que
+-- siempre se hace: quién debe y cuánto. Se puede bajar como CSV desde el propio
+-- Supabase sin entender el jsonb.
+-- ---------------------------------------------------------------------------
+
+create or replace view public.v_camisetas
+with (security_invoker = true) as
+select
+  c.temporada,
+  c.categoria,
+  c.numero,
+  c.datos ->> 'nombreEstampado'                             as nombre_estampado,
+  c.datos ->> 'talla'                                       as talla,
+  j.codigo                                                  as jugador_codigo,
+  (j.datos ->> 'nombre') || ' ' || (j.datos ->> 'apellido') as jugador,
+  j.datos -> 'apoderado' ->> 'nombre'                       as apoderado,
+  j.datos -> 'apoderado' ->> 'telefono'                     as telefono_apoderado,
+  (c.datos ->> 'precio')::numeric                           as precio,
+  (c.datos ->> 'abonado')::numeric                          as abonado,
+  greatest(
+    (c.datos ->> 'precio')::numeric - (c.datos ->> 'abonado')::numeric,
+    0
+  )                                                         as saldo,
+  case
+    when (c.datos ->> 'abonado')::numeric >= (c.datos ->> 'precio')::numeric then 'pagado'
+    when (c.datos ->> 'abonado')::numeric > 0 then 'abonado'
+    else 'pendiente'
+  end                                                       as estado_pago,
+  nullif(c.datos ->> 'medioPago', '')                       as medio_pago,
+  nullif(c.datos ->> 'fechaPago', '')::date                 as fecha_pago,
+  nullif(c.datos ->> 'comprobante', '')                     as comprobante,
+  (c.datos ->> 'entregada')::boolean                        as entregada,
+  nullif(c.datos ->> 'fechaEntrega', '')::date              as fecha_entrega,
+  nullif(c.datos ->> 'notas', '')                           as notas
+from public.camisetas c
+join public.jugadores j on j.id = c.jugador_id;
+
 -- ---------------------------------------------------------------------------
 -- Comprobación rápida (opcional)
 -- ---------------------------------------------------------------------------
@@ -157,3 +223,8 @@ where e.estado = 'finalizada'
 -- from public.v_puntajes
 -- group by jugador, categoria, pauta, fecha, categoria_evaluacion
 -- order by fecha desc, jugador;
+--
+-- select categoria, numero, nombre_estampado, talla, jugador, estado_pago, saldo
+-- from public.v_camisetas
+-- where temporada = '2026'
+-- order by categoria, numero;

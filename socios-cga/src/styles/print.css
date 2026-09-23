@@ -1,0 +1,26 @@
+/* ============================================================
+   IMPRESIÓN — el navegador genera el PDF, sin librerías.
+   Se usa sobre todo para llevar a papel el listado de cobranzas
+   de la semana y el estado de cuenta de una familia.
+   ============================================================ */
+@page { size: A4; margin: 14mm; }
+
+@media print {
+  html, body { background: var(--cga-blanco); margin: 0; padding: 0; }
+
+  .no-print, .modal, .topbar, .filtros, .pestanas, .form-pie, .btn { display: none !important; }
+
+  .app__main { max-width: none; padding: 0; margin: 0; }
+
+  .card { border: 1px solid var(--borde); box-shadow: none; break-inside: avoid; }
+
+  .tabla { font-size: 11pt; }
+  .tabla th, .tabla td { padding: 5px 7px; }
+
+  /* Sin esto, Chrome descarta los fondos y los estados de cobranza salen todos
+     del mismo color. */
+  .chip, .estado, .metrica__valor {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

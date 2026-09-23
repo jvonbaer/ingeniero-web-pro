@@ -1,7 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { Backup, Evaluacion, Jugador } from "../domain/types";
+import type { Backup, Camiseta, Evaluacion, Jugador } from "../domain/types";
 import { conexion } from "./conexion";
-import { esDesfaseDeReloj, traducirError } from "./mensajes";
+import { esDesfaseDeReloj, esTablaAusente, traducirError } from "./mensajes";
 import { migrarConfiguracion, migrarEvaluaciones } from "./migrar";
 import type { EstadoDatos, Store } from "./store";
 
@@ -40,6 +40,12 @@ function leerTodo() {
   return Promise.all([
     db().from("jugadores").select("datos").order("codigo", { ascending: true }),
     db().from("evaluaciones").select("datos").order("fecha", { ascending: false }),
+    db()
+      .from("camisetas")
+      .select("datos")
+      .order("temporada", { ascending: false })
+      .order("categoria", { ascending: true })
+      .order("numero", { ascending: true }),
     db().from("rubrica").select("datos").eq("id", 1).maybeSingle(),
   ]);
 }
@@ -49,24 +55,33 @@ export const supabaseDriver: Store = {
   etiqueta: "Nube compartida",
 
   async cargar(): Promise<EstadoDatos> {
-    let [rj, re, rr] = await leerTodo();
+    let [rj, re, rc, rr] = await leerTodo();
 
     // El token recién firmado puede llegar con unos milisegundos de adelanto
     // respecto del servicio que lo valida, y entonces la primera lectura tras
     // iniciar sesión falla sola. Se reintenta una vez antes de dar la cara:
     // si era eso, el entrenador nunca se entera; si era el reloj del teléfono,
     // vuelve a fallar y el mensaje ya dice qué revisar.
-    const desfase = [rj.error, re.error, rr.error].some(
+    const desfase = [rj.error, re.error, rc.error, rr.error].some(
       (e) => e && esDesfaseDeReloj(e.message),
     );
     if (desfase) {
       await esperar(1500);
-      [rj, re, rr] = await leerTodo();
+      [rj, re, rc, rr] = await leerTodo();
     }
 
     reventar("No se pudieron leer los jugadores", rj.error);
     reventar("No se pudieron leer las evaluaciones", re.error);
     reventar("No se pudieron leer los parámetros", rr.error);
+
+    // La tabla de camisetas llegó después que el resto del esquema. Una escuela
+    // que ya venía trabajando y todavía no ha vuelto a correr schema.sql tiene
+    // que poder seguir evaluando igual que ayer: se entra con el pedido vacío y
+    // el aviso aparece recién cuando alguien intenta guardar una camiseta, con
+    // el mensaje que dice qué correr. Cualquier otro error de esa lectura sí se
+    // levanta, porque ahí sí hay algo roto.
+    const sinTablaCamisetas = Boolean(rc.error && esTablaAusente(rc.error.message));
+    if (!sinTablaCamisetas) reventar("No se pudieron leer las camisetas", rc.error);
 
     // La fila 1 de `rubrica` guarda la configuración completa. Si viene en el
     // formato antiguo —una sola rúbrica— se migra al leerla.
@@ -77,6 +92,7 @@ export const supabaseDriver: Store = {
         (re.data ?? []).map((f) => f.datos as Evaluacion),
         configuracion,
       ),
+      camisetas: sinTablaCamisetas ? [] : (rc.data ?? []).map((f) => f.datos as Camiseta),
       configuracion,
     };
   },
@@ -119,6 +135,31 @@ export const supabaseDriver: Store = {
     reventar("No se pudo eliminar la evaluación", error);
   },
 
+  async guardarCamiseta(camiseta) {
+    // `temporada`, `categoria` y `numero` salen del jsonb a columnas propias
+    // porque sobre esas tres está el índice único del esquema: es la base, y no
+    // la pantalla, la que garantiza que dos niños de la misma categoría no
+    // terminen con el mismo dorsal aunque dos entrenadores los inscriban al
+    // mismo tiempo desde teléfonos distintos.
+    const { error } = await db()
+      .from("camisetas")
+      .upsert({
+        id: camiseta.id,
+        jugador_id: camiseta.jugadorId,
+        temporada: camiseta.temporada,
+        categoria: camiseta.categoria,
+        numero: camiseta.numero,
+        datos: camiseta,
+        actualizado_en: new Date().toISOString(),
+      });
+    reventar("No se pudo guardar la camiseta", error);
+  },
+
+  async eliminarCamiseta(id) {
+    const { error } = await db().from("camisetas").delete().eq("id", id);
+    reventar("No se pudo eliminar la camiseta", error);
+  },
+
   async guardarConfiguracion(configuracion) {
     const { error } = await db()
       .from("rubrica")
@@ -156,5 +197,6 @@ export const supabaseDriver: Store = {
     await this.guardarConfiguracion(backup.configuracion);
     for (const j of backup.jugadores) await this.guardarJugador(j);
     for (const e of backup.evaluaciones) await this.guardarEvaluacion(e);
+    for (const c of backup.camisetas) await this.guardarCamiseta(c);
   },
 };

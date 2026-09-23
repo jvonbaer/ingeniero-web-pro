@@ -1,4 +1,4 @@
-import type { Backup, Configuracion, Evaluacion, Jugador } from "../domain/types";
+import type { Backup, Camiseta, Configuracion, Evaluacion, Jugador } from "../domain/types";
 import { migrarConfiguracion, migrarEvaluaciones } from "./migrar";
 
 export type ModoAlmacenamiento = "local" | "nube";
@@ -6,6 +6,7 @@ export type ModoAlmacenamiento = "local" | "nube";
 export interface EstadoDatos {
   jugadores: Jugador[];
   evaluaciones: Evaluacion[];
+  camisetas: Camiseta[];
   configuracion: Configuracion;
 }
 
@@ -22,6 +23,8 @@ export interface Store {
   eliminarJugador(id: string): Promise<void>;
   guardarEvaluacion(evaluacion: Evaluacion): Promise<void>;
   eliminarEvaluacion(id: string): Promise<void>;
+  guardarCamiseta(camiseta: Camiseta): Promise<void>;
+  eliminarCamiseta(id: string): Promise<void>;
   guardarConfiguracion(configuracion: Configuracion): Promise<void>;
   /** Hoja de papel escaneada. Se guarda y se lee aparte de la evaluación. */
   leerHoja(evaluacionId: string): Promise<string | null>;
@@ -32,18 +35,20 @@ export interface Store {
 export function construirBackup(estado: EstadoDatos): Backup {
   return {
     formato: "cga-evaluacion-futbol",
-    version: 2,
+    version: 3,
     exportadoEn: new Date().toISOString(),
     jugadores: estado.jugadores,
     evaluaciones: estado.evaluaciones,
+    camisetas: estado.camisetas,
     configuracion: estado.configuracion,
   };
 }
 
 /**
- * Acepta respaldos de las dos versiones del formato. Los de la versión 1 traen
- * una sola rúbrica; se convierten a la estructura de pautas al vuelo, así un
- * archivo bajado hace meses se sigue pudiendo cargar.
+ * Acepta respaldos de las tres versiones del formato. Los de la versión 1 traen
+ * una sola rúbrica; se convierten a la estructura de pautas al vuelo. Los de la
+ * 2 no traen camisetas, y entran con el pedido vacío. Así un archivo bajado
+ * hace meses se sigue pudiendo cargar.
  */
 export function validarBackup(dato: unknown): Backup {
   const b = dato as (Partial<Backup> & { rubrica?: unknown }) | undefined;
@@ -60,10 +65,11 @@ export function validarBackup(dato: unknown): Backup {
   const configuracion = migrarConfiguracion(b.configuracion ?? b.rubrica);
   return {
     formato: "cga-evaluacion-futbol",
-    version: 2,
+    version: 3,
     exportadoEn: b.exportadoEn ?? new Date().toISOString(),
     jugadores: b.jugadores,
     evaluaciones: migrarEvaluaciones(b.evaluaciones, configuracion),
+    camisetas: Array.isArray(b.camisetas) ? b.camisetas : [],
     configuracion,
   };
 }
