@@ -273,6 +273,18 @@ export function JugadorFicha() {
                             <Link to={`/informe/${r.evaluacion.id}`} className="btn btn--fantasma btn--sm">
                               Ver
                             </Link>{" "}
+                            {/* Una evaluación finalizada sigue siendo editable: se
+                                finaliza a menudo con indicadores sin responder y
+                                hay que poder volver a entrar a completarlos. Sin
+                                este enlace la única salida era eliminarla y
+                                rehacerla, perdiendo lo ya cargado. */}
+                            <Link
+                              to={`/evaluaciones/${r.evaluacion.id}`}
+                              className="btn btn--fantasma btn--sm"
+                              title="Volver a abrirla para completar o corregir puntajes"
+                            >
+                              Editar
+                            </Link>{" "}
                             {/* Atajo para mandarle el informe al apoderado sin
                                 pasar por la pantalla intermedia: abre el cuadro
                                 de impresión apenas termina de componerse. */}
