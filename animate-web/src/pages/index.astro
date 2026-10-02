@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import Foto from '../components/Foto.astro';
 import Formas from '../components/Formas.astro';
-import { contacto, impacto, contextoRegional, experiencias, alianzas, formasDeColaborar, llamadoDona } from '../data/sitio';
+import { contacto, impacto, contextoRegional, experiencias, alianzas, formasDeColaborar, llamadoDona, donacion } from '../data/sitio';
 
 const trio = [
   { titulo: 'Persona', texto: 'Intervenciones centradas en necesidades, recursos y contexto.', color: 'turquesa' },
@@ -265,24 +265,25 @@ const pasos = [
   </section>
 
   <!-- Cómo colaborar -->
-  <section class="seccion seccion-morada sobre-morado">
+  <section class="seccion seccion-morada sobre-morado" id="colaborar">
     <div class="wrap">
       <div class="cabecera-seccion">
         <p class="etiqueta">Cómo colaborar</p>
         <h2 class="titulo">Anímate a ser parte</h2>
-        <p class="lectura">Hay varias formas de apoyar el trabajo de la fundación.</p>
+        <p class="lectura">Tu aporte permite que más personas accedan a procesos continuos de terapia, educación y bienestar con apoyo de animales.</p>
       </div>
       <div class="rejilla-3">
         {formasDeColaborar.map((f) => (
           <article class="tarjeta tarjeta__cuerpo" style="color:var(--ink);">
             <h3 class="encabezado">{f.titulo}</h3>
             <p>{f.texto}</p>
+            <a class="enlace-flecha" href={f.href} {...(f.externo ? { target: '_blank', rel: 'noopener' } : {})}>{f.cta} →{f.externo && <span class="solo-lector"> (se abre en una pestaña nueva)</span>}</a>
           </article>
         ))}
       </div>
       <div class="acciones" style="margin-top:40px;">
-        <a class="btn btn-claro" href={llamadoDona.href}>Quiero apoyar</a>
-        <a class="btn btn-contorno-claro" href="/contacto/#visitanos">Visita la granja</a>
+        <a class="btn btn-claro" href={donacion.url} target="_blank" rel="noopener">Donar ahora<span class="solo-lector"> (se abre en una pestaña nueva)</span></a>
+        <a class="btn btn-contorno-claro" href={llamadoDona.href}>Más formas de ayudar</a>
       </div>
     </div>
   </section>

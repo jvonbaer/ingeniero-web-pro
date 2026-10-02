@@ -26,15 +26,15 @@ Para publicar en Netlify, usa esta carpeta (`animate-web`) como directorio base.
 
 ## Estado
 
-- **Hecho:** Inicio, Quiénes somos, Proyectos, Contacto, Modelo, líneas terapéutica, educativa y formativa, encabezado, pie y estilos del design system.
-- **Pendiente de contenido:** las demás páginas (`/equipo/`, `/dona/`, `/transparencia/`) existen como páginas en construcción con `noindex`. Se reemplazan una a una.
+- **Hecho:** Inicio, Quiénes somos, Proyectos, Dona, Contacto, Modelo, líneas terapéutica, educativa y formativa, encabezado, pie y estilos del design system.
+- **Pendiente de contenido:** las demás páginas (`/equipo/` y `/transparencia/`) existen como páginas en construcción con `noindex`. Se reemplazan una a una.
 - Las cifras de impacto están vacías en `src/data/sitio.ts`: mientras no haya datos, esa sección no se muestra.
 - Las cifras regionales (CASEN 2021, ENDISC 2021) vienen de la propuesta original y hay que revisar si existen datos más nuevos.
 - Los convenios y reconocimientos de `alianzas` hay que confirmarlos antes de publicar.
-- Las formas de colaborar (donación, becas, certificado) están abiertas para completar cuando se definan los mecanismos.
+- Donaciones: el botón lleva a `https://www.donando.cl` (reemplazar por la página propia de la fundación en Donando). Los datos de transferencia se completan en `src/data/sitio.ts` (`transferencia`); mientras falte alguno, la página pide los datos por correo. Becas y certificado de donación siguen sin definir y no se mencionan.
 - El tema oscuro del design system no está implementado: el sitio es solo claro.
 - El logo disponible es una imagen de baja resolución: conviene pedir el archivo vectorial (SVG).
 
 ## Formularios de contacto
 
-Los dos formularios de `/contacto/` usan Netlify Forms (`solicitar-atencion` e `instituciones`) y llevan una trampa antispam. Solo funcionan una vez publicado el sitio en Netlify, no en `npm run dev`. El correo que recibe los avisos **no está en el código**: se configura en Netlify, en *Forms → Form notifications → Add notification → Email notification*, con `informaciones.animate@gmail.com`. Hay que hacerlo para cada formulario.
+Los tres formularios (`solicitar-atencion` e `instituciones` en `/contacto/`, y `apadrinar` en `/dona/`) usan Netlify Forms y llevan una trampa antispam. Solo funcionan una vez publicado el sitio en Netlify, no en `npm run dev`. El correo que recibe los avisos **no está en el código**: se configura en Netlify, en *Forms → Form notifications → Add notification → Email notification*, con `informaciones.animate@gmail.com`. Hay que hacerlo para cada formulario.

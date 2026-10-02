@@ -77,9 +77,42 @@ export const alianzas = [
   'IAHAIO · miembro asociado',
 ];
 
-// Formas de colaborar. Rellenar cuando estén definidos los mecanismos (transferencia, certificado, etc.).
-export const formasDeColaborar: { titulo: string; texto: string }[] = [
-  { titulo: 'Donación', texto: 'Tu aporte financia terapias y programas para quienes más lo necesitan.' },
-  { titulo: 'Empresas e instituciones', texto: 'Alianzas para llevar bienestar a más comunidades de La Araucanía.' },
-  { titulo: 'Visita la granja', texto: 'Conoce el espacio donde trabajamos y a los animales que nos acompañan.' },
+// Donaciones. La plataforma inicial es Donando. Ideal: reemplazar la URL por la página propia de la fundación dentro de Donando.
+export const donacion = {
+  url: 'https://www.donando.cl',
+  plataforma: 'Donando',
+};
+
+// Transferencia directa. Completar los seis datos: mientras falte alguno, la página muestra
+// un aviso para pedir los datos por correo en vez de publicar una cuenta incompleta.
+export const transferencia = {
+  titular: '',
+  rut: '',
+  banco: '',
+  tipoCuenta: '',
+  numeroCuenta: '',
+  correoComprobante: '',
+};
+
+// Formas de colaborar de la portada.
+export const formasDeColaborar: { titulo: string; texto: string; href: string; cta: string; externo?: boolean }[] = [
+  {
+    titulo: 'Dona en línea',
+    texto: 'Haz tu aporte a través de Donando, la plataforma de donaciones de la fundación.',
+    href: donacion.url,
+    cta: 'Donar ahora',
+    externo: true,
+  },
+  {
+    titulo: 'Transferencia directa',
+    texto: 'Si prefieres, puedes aportar directamente a la cuenta de la fundación.',
+    href: '/dona/#transferencia',
+    cta: 'Ver cómo transferir',
+  },
+  {
+    titulo: 'Apadrina',
+    texto: 'Apadrina una terapia o a un animal de la granja y acompáñanos de forma cercana.',
+    href: '/dona/#apadrina',
+    cta: 'Quiero apadrinar',
+  },
 ];

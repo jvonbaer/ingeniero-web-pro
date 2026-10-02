@@ -5,7 +5,6 @@ import Base from '../layouts/Base.astro';
 export function getStaticPaths() {
   const paginas = [
     { slug: 'equipo', titulo: 'Equipo' },
-    { slug: 'dona', titulo: 'Dona' },
     { slug: 'transparencia', titulo: 'Transparencia' },
   ];
   return paginas.map((p) => ({ params: { slug: p.slug }, props: p }));

@@ -1,0 +1,149 @@
+---
+import Base from '../layouts/Base.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import { contacto, donacion, transferencia } from '../data/sitio';
+
+const transferenciaCompleta = Object.values(transferencia).every(Boolean);
+const datosTransferencia = [
+  ['Titular', transferencia.titular],
+  ['RUT', transferencia.rut],
+  ['Banco', transferencia.banco],
+  ['Tipo de cuenta', transferencia.tipoCuenta],
+  ['Número de cuenta', transferencia.numeroCuenta],
+  ['Correo para el comprobante', transferencia.correoComprobante],
+];
+---
+<Base
+  titulo="Dona"
+  descripcion="Dona a Fundación Anímate en línea, por transferencia directa, o apadrina una terapia o a un animal de la granja."
+>
+  <EncabezadoPagina
+    etiqueta="Dona"
+    titulo="Ayúdanos a llegar a más personas"
+    bajada="Tu aporte ayuda a que más niños, niñas, adolescentes, adultos y personas mayores accedan a procesos continuos de terapia asistida con animales. Elige cómo quieres colaborar."
+  >
+    <div class="acciones">
+      <a class="btn btn-primario" href={donacion.url} target="_blank" rel="noopener">Donar en línea<span class="solo-lector"> (se abre en una pestaña nueva)</span></a>
+      <a class="btn btn-secundario" href="#transferencia">Transferir directamente</a>
+      <a class="btn btn-secundario" href="#apadrina">Apadrinar</a>
+    </div>
+  </EncabezadoPagina>
+
+  <!-- Donación en línea -->
+  <section class="seccion seccion-suave ancla" id="donar">
+    <div class="wrap dos-col-contacto">
+      <div style="display:grid;gap:20px;">
+        <p class="etiqueta">Opción 1</p>
+        <h2 class="titulo">Dona en línea</h2>
+        <p class="lectura">
+          Recibimos donaciones a través de {donacion.plataforma}, la plataforma que usa la fundación por ahora. Al presionar el botón se abre su sitio en una pestaña nueva.
+        </p>
+      </div>
+      <div class="panel" style="display:grid;gap:16px;justify-items:start;">
+        <h3 class="encabezado">Donar con {donacion.plataforma}</h3>
+        <p>Es la forma más directa de aportar. Allí completas tu donación sin salir de tu casa.</p>
+        <a class="btn btn-primario" href={donacion.url} target="_blank" rel="noopener">Donar en {donacion.plataforma}<span class="solo-lector"> (se abre en una pestaña nueva)</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Transferencia -->
+  <section class="seccion ancla" id="transferencia">
+    <div class="wrap dos-col-contacto">
+      <div style="display:grid;gap:20px;">
+        <p class="etiqueta">Opción 2</p>
+        <h2 class="titulo">Transferencia directa</h2>
+        <p class="lectura">Si prefieres no usar una plataforma, puedes aportar directamente a la cuenta de la fundación.</p>
+      </div>
+      <div class="panel" style="box-shadow:0 8px 28px rgba(90,39,132,.12);">
+        {transferenciaCompleta ? (
+          <dl class="datos">
+            {datosTransferencia.map(([k, v]) => (<div><dt>{k}</dt><dd>{v}</dd></div>))}
+          </dl>
+        ) : (
+          <div style="display:grid;gap:12px;">
+            <h3 class="encabezado">Pide los datos de la cuenta</h3>
+            <p>
+              Escríbenos a <a href={`mailto:${contacto.correo}`}>{contacto.correo}</a> y te enviamos los datos para transferir.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- Apadrina -->
+  <section class="seccion seccion-suave ancla" id="apadrina">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Opción 3</p>
+        <h2 class="titulo">Apadrina</h2>
+        <p class="lectura">Apadrinar es acompañar de forma cercana. Puedes apadrinar la terapia de una persona o a un animal de la granja.</p>
+      </div>
+      <div class="rejilla-2" style="margin-bottom:40px;">
+        <article class="tarjeta tarjeta__cuerpo">
+          <span class="disco-icono f-turquesa" aria-hidden="true"></span>
+          <h3 class="encabezado">Apadrina una terapia</h3>
+          <p>Tu aporte ayuda a que una persona acceda a un proceso continuo de terapia asistida con animales.</p>
+        </article>
+        <article class="tarjeta tarjeta__cuerpo">
+          <span class="disco-icono f-sol" aria-hidden="true"></span>
+          <h3 class="encabezado">Apadrina un animal</h3>
+          <p>Contribuyes al cuidado de uno de los animales de la granja que participan en las terapias y los programas.</p>
+        </article>
+      </div>
+      <div class="panel" style="max-width:760px;">
+        <h3 class="encabezado" style="margin-bottom:16px;">Cuéntanos qué te gustaría apadrinar</h3>
+        <form class="form" name="apadrinar" method="POST" action="/gracias/" data-netlify="true" netlify-honeypot="campo-trampa">
+          <input type="hidden" name="form-name" value="apadrinar" />
+          <p class="trampa" aria-hidden="true"><label>No completar este campo: <input name="campo-trampa" tabindex="-1" autocomplete="off" /></label></p>
+          <div class="dos">
+            <div class="campo">
+              <label for="ap-nombre">Tu nombre</label>
+              <input id="ap-nombre" name="nombre" type="text" autocomplete="name" required />
+            </div>
+            <div class="campo">
+              <label for="ap-correo">Correo</label>
+              <input id="ap-correo" name="correo" type="email" autocomplete="email" required />
+            </div>
+          </div>
+          <div class="dos">
+            <div class="campo">
+              <label for="ap-telefono">Teléfono o WhatsApp</label>
+              <input id="ap-telefono" name="telefono" type="tel" autocomplete="tel" inputmode="tel" />
+              <span class="ayuda">Opcional.</span>
+            </div>
+            <div class="campo">
+              <label for="ap-que">¿Qué quieres apadrinar?</label>
+              <select id="ap-que" name="que-apadrinar" required>
+                <option value="">Elige una opción</option>
+                <option>Una terapia</option>
+                <option>Un animal de la granja</option>
+                <option>No estoy seguro o segura: quiero conocer las opciones</option>
+              </select>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="ap-mensaje">Mensaje</label>
+            <textarea id="ap-mensaje" name="mensaje"></textarea>
+            <span class="ayuda">Opcional.</span>
+          </div>
+          <div class="consentimiento">
+            <input id="ap-acepto" name="acepto" type="checkbox" required />
+            <label for="ap-acepto">Acepto que Fundación Anímate use estos datos solo para contactarme por esta consulta.</label>
+          </div>
+          <div><button class="btn btn-primario" type="submit">Enviar</button></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Empresas y especie -->
+  <section class="seccion seccion-morada sobre-morado">
+    <div class="wrap" style="display:grid;gap:24px;justify-items:start;">
+      <h2 class="titulo">¿Eres una empresa o quieres donar bienes o servicios?</h2>
+      <p class="lectura" style="max-width:640px;">Escríbenos y buscamos juntos la mejor forma de colaborar.</p>
+      <a class="btn btn-claro" href="/contacto/#instituciones">Escribir como institución</a>
+    </div>
+  </section>
+</Base>
