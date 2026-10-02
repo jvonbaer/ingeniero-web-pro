@@ -5,3 +5,10 @@
 
 [build.environment]
   NODE_VERSION = "22"
+
+# SITIO DE PRUEBA: pide a los buscadores que no lo indexen.
+# QUITAR este bloque (y el Disallow de public/robots.txt) al lanzar el sitio definitivo.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Robots-Tag = "noindex, nofollow"

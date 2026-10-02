@@ -1,2 +1,3 @@
+# SITIO DE PRUEBA: quitar el Disallow al lanzar el sitio definitivo.
 User-agent: *
-Allow: /
+Disallow: /
