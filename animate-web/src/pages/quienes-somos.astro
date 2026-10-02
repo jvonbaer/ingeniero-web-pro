@@ -1,0 +1,163 @@
+---
+import Base from '../layouts/Base.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import Foto from '../components/Foto.astro';
+import { contacto, contextoRegional, alianzas } from '../data/sitio';
+
+const hitos = [
+  {
+    fecha: 'Desde hace décadas', color: 'f-lima', titulo: 'Granja Educativa y Turística «Llamas del Sur»',
+    texto: 'En el sector Jardín del Edén, en Huichahue, comuna de Padre Las Casas, a media hora de Temuco camino a Cunco, se desarrolla este emprendimiento. Su infraestructura y su trayectoria son el punto de partida de la fundación.',
+  },
+  {
+    fecha: 'Septiembre de 2021', color: 'f-sol', titulo: 'Nace la Fundación Anímate',
+    texto: 'Obtenemos la personería jurídica como institución de la sociedad civil sin fines de lucro, con su Directorio y su Consejo Consultivo, para desarrollar procesos terapéuticos y educativos asistidos con diferentes especies de animales domésticos.',
+  },
+  {
+    fecha: 'Hoy', color: 'f-turquesa', titulo: 'Un espacio de trabajo interdisciplinario',
+    texto: 'Psicología, Terapia Ocupacional y Fonoaudiología trabajan junto a la naturaleza y los animales de la granja, con alianzas con universidades, municipios y una red internacional.',
+  },
+];
+
+const universidades = alianzas.filter((a) => a.startsWith('Universidad'));
+const municipios = alianzas.filter((a) => a.startsWith('Municipalidad'));
+---
+<Base
+  titulo="Quiénes somos"
+  descripcion="Fundación Anímate: terapias y educación asistidas con animales en La Araucanía. Nuestra historia, misión y alianzas."
+>
+  <EncabezadoPagina
+    etiqueta="Quiénes somos"
+    titulo="Quiénes somos"
+    bajada="Conectar para cuidar. Cuidar para transformar. Creamos experiencias donde personas, profesionales, naturaleza y animales pueden encontrarse para favorecer bienestar, aprendizaje y desarrollo."
+  />
+
+  <!-- Misión -->
+  <section class="seccion seccion-suave">
+    <div class="wrap dividida">
+      <div style="display:grid;gap:20px;">
+        <p class="etiqueta">Misión</p>
+        <h2 class="titulo">Que nadie se quede sin apoyo por falta de recursos</h2>
+        <p class="lectura">
+          Gestionamos recursos públicos y privados, locales, regionales, nacionales e internacionales, para facilitar que
+          niños, niñas, adolescentes, adultos y personas mayores en situación de vulnerabilidad social o de discapacidad,
+          que no cuentan con recursos, accedan a un proceso continuo de apoyo y terapias adecuado a sus necesidades.
+        </p>
+      </div>
+      <div class="dividida__foto"><Foto rol="granja" sizes="(min-width: 900px) 520px, 100vw" widths={[480, 720, 960]} /></div>
+    </div>
+  </section>
+
+  <!-- Historia -->
+  <section class="seccion">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Nuestra historia</p>
+        <h2 class="titulo">De una granja a una fundación</h2>
+      </div>
+      <div class="hitos">
+        {hitos.map((h) => (
+          <div class="hito">
+            <span class={`hito__punto ${h.color}`} aria-hidden="true"></span>
+            <div>
+              <span class="hito__fecha">{h.fecha}</span>
+              <h3>{h.titulo}</h3>
+              <p>{h.texto}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Significado -->
+  <section class="seccion seccion-morada sobre-morado">
+    <div class="wrap dividida">
+      <div style="display:grid;gap:24px;">
+        <p class="etiqueta">El nombre</p>
+        <h2 class="titulo">¿Qué significa «Anímate»?</h2>
+        <p class="lectura">
+          Es una invitación a usuarios, familias, profesionales e instituciones: a animarse, a confiar y participar, a no
+          perder la esperanza y a darle sentido a este espacio, en un ambiente de trabajo interdisciplinario, motivador,
+          grato, alegre, lúdico, afectivo y conectado con la naturaleza.
+        </p>
+      </div>
+      <div class="dividida__foto"><Foto rol="llamaCielo" sizes="(min-width: 900px) 520px, 100vw" widths={[480, 720, 960]} /></div>
+    </div>
+  </section>
+
+  <!-- Por qué lo hacemos -->
+  <section class="seccion">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Por qué lo hacemos</p>
+        <h2 class="titulo">Un desafío regional</h2>
+        <p class="lectura">
+          La Araucanía concentra la mayor proporción de población rural del país y enfrenta brechas de acceso a servicios de
+          apoyo y de salud. Los servicios de salud de la región cuentan con profesionales, pero sin la dotación suficiente
+          para atender a toda la población vulnerable en tiempos adecuados. Por eso muchos niños, niñas y adolescentes no
+          reciben apoyo terapéutico, o solo uno muy esporádico.
+        </p>
+      </div>
+      <div class="cifras">
+        {contextoRegional.map((c, i) => (
+          <div class="cifra">
+            <span class={`barra ${['f-turquesa', 'f-sol', 'f-lima'][i % 3]}`} aria-hidden="true"></span>
+            <span class="cifra__valor">{c.valor}</span>
+            <p>{c.texto}</p>
+            <span class="cifra__fuente">{c.fuente}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Alianzas -->
+  <section class="seccion seccion-suave">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Alianzas</p>
+        <h2 class="titulo">Trabajamos en red</h2>
+        <p class="lectura">
+          Colaboramos con universidades y municipios de la región, y somos parte de una red internacional de intervenciones
+          humano-animales.
+        </p>
+      </div>
+      <div class="rejilla-3">
+        <article class="tarjeta tarjeta__cuerpo">
+          <span class="disco-icono f-turquesa" aria-hidden="true"></span>
+          <h3 class="encabezado">Universidades</h3>
+          <p>Espacio de investigación aplicada, innovación y prácticas de estudiantes de las carreras afines, con vinculación al entorno natural y social de la región.</p>
+          <ul class="lista-puntos">{universidades.map((u) => <li>{u}</li>)}</ul>
+        </article>
+        <article class="tarjeta tarjeta__cuerpo">
+          <span class="disco-icono f-lima" aria-hidden="true"></span>
+          <h3 class="encabezado">Municipalidades</h3>
+          <p>Acuerdos de colaboración de interés mutuo con municipios de la región, en el marco de la equidad y la inclusión social.</p>
+          <ul class="lista-puntos">{municipios.map((m) => <li>{m}</li>)}</ul>
+        </article>
+        <article class="tarjeta tarjeta__cuerpo">
+          <span class="disco-icono f-sol" aria-hidden="true"></span>
+          <h3 class="encabezado">Red internacional</h3>
+          <p>Miembro asociado de la Asociación Internacional de Intervenciones Humano-Animales (IAHAIO), que nos conecta con la experiencia y los centros de numerosos países.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Sede y cierre -->
+  <section class="seccion">
+    <div class="wrap dividida">
+      <div class="dividida__foto" style="aspect-ratio:4/3;"><Foto rol="bosque" sizes="(min-width: 900px) 520px, 100vw" widths={[480, 720, 960]} /></div>
+      <div style="display:grid;gap:20px;">
+        <p class="etiqueta">Nuestra sede</p>
+        <h2 class="titulo">{contacto.sede}</h2>
+        <p class="lectura">Un entorno natural al aire libre, con espacios abiertos y techados, donde trabajamos junto a una gran variedad de animales de granja.</p>
+        <div class="acciones">
+          <a class="btn btn-primario" href="/contacto/#visitanos">Visítanos</a>
+          <a class="btn btn-secundario" href="/equipo/">Conoce al equipo</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>

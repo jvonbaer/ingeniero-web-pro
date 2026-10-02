@@ -26,8 +26,8 @@ Para publicar en Netlify, usa esta carpeta (`animate-web`) como directorio base.
 
 ## Estado
 
-- **Hecho:** Inicio, Contacto, Modelo, líneas terapéutica, educativa y formativa, encabezado, pie y estilos del design system.
-- **Pendiente de contenido:** las demás páginas (`/quienes-somos/`, `/equipo/`, `/proyectos/`, `/dona/`, `/transparencia/`) existen como páginas en construcción con `noindex`. Se reemplazan una a una.
+- **Hecho:** Inicio, Quiénes somos, Proyectos, Contacto, Modelo, líneas terapéutica, educativa y formativa, encabezado, pie y estilos del design system.
+- **Pendiente de contenido:** las demás páginas (`/equipo/`, `/dona/`, `/transparencia/`) existen como páginas en construcción con `noindex`. Se reemplazan una a una.
 - Las cifras de impacto están vacías en `src/data/sitio.ts`: mientras no haya datos, esa sección no se muestra.
 - Las cifras regionales (CASEN 2021, ENDISC 2021) vienen de la propuesta original y hay que revisar si existen datos más nuevos.
 - Los convenios y reconocimientos de `alianzas` hay que confirmarlos antes de publicar.

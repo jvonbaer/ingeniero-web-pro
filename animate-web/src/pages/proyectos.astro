@@ -1,0 +1,66 @@
+---
+import Base from '../layouts/Base.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import { experiencias, impacto, alianzas } from '../data/sitio';
+---
+<Base
+  titulo="Proyectos"
+  descripcion="Proyectos de Fundación Anímate: terapias, talleres y programas de bienestar con escuelas, cuidadores y organismos públicos en La Araucanía."
+>
+  <EncabezadoPagina
+    etiqueta="Proyectos"
+    titulo="Experiencias destacadas"
+    bajada="Una trayectoria que integra proyectos terapéuticos, educativos y comunitarios."
+  />
+
+  <section class="seccion seccion-suave">
+    <div class="wrap">
+      <div class="rejilla-2">
+        {experiencias.map((e) => (
+          <article class="tarjeta tarjeta__cuerpo">
+            <span class={`disco-icono f-${e.color}`} aria-hidden="true"></span>
+            <h2 class="encabezado">{e.nombre}</h2>
+            <p>{e.detalle}</p>
+            <p class="pequeno suave">{e.lugar}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {impacto.length > 0 && (
+    <section class="seccion">
+      <div class="wrap">
+        <div class="cabecera-seccion">
+          <p class="etiqueta">Resultados</p>
+          <h2 class="titulo">Lo que hemos logrado</h2>
+        </div>
+        <div class="cifras">
+          {impacto.map((c) => (
+            <div class="cifra"><span class="cifra__valor">{c.valor}</span><p>{c.texto}</p></div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="seccion">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Instituciones colaboradoras</p>
+        <h2 class="titulo">Con quiénes trabajamos</h2>
+      </div>
+      <ul class="alianzas" aria-label="Instituciones colaboradoras" style="margin-top:0;">
+        {alianzas.map((a) => <li class="alianza">{a}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="seccion seccion-morada sobre-morado">
+    <div class="wrap" style="display:grid;gap:24px;justify-items:start;">
+      <h2 class="titulo">¿Quieres llevar Anímate a tu comunidad?</h2>
+      <p class="lectura" style="max-width:640px;">Cuéntanos qué necesita tu institución y diseñamos un proyecto a tu medida.</p>
+      <a class="btn btn-claro" href="/contacto/#instituciones">Escribir como institución</a>
+    </div>
+  </section>
+</Base>

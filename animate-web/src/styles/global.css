@@ -254,3 +254,18 @@ a { color: var(--morado-texto); }
 .rejilla-2 { display: grid; gap: 24px; }
 @media (min-width: 800px) { .rejilla-2 { grid-template-columns: repeat(2, 1fr); } }
 .cierre { margin-top: 40px; text-align: center; font-weight: 600; font-size: 18px; }
+
+/* Línea de hitos */
+.hitos { display: grid; gap: 0; max-width: 760px; }
+.hito { display: grid; grid-template-columns: 28px 1fr; gap: 20px; padding-bottom: 32px; position: relative; }
+.hito::before { content: ''; position: absolute; left: 13px; top: 28px; bottom: 0; width: 2px; background: var(--surface-raised); }
+.seccion-suave .hito::before { background: #d9c9ea; }
+.hito:last-child { padding-bottom: 0; }
+.hito:last-child::before { display: none; }
+.hito__punto { width: 28px; height: 28px; border-radius: 50%; margin-top: 2px; }
+.hito__fecha { font-size: 12px; line-height: 16px; letter-spacing: .2em; text-transform: uppercase; font-weight: 600; color: var(--ink-muted); }
+.hito h3 { font-size: 20px; line-height: 28px; font-weight: 600; margin-top: 4px; }
+.hito p { margin-top: 6px; }
+.lema { font-size: clamp(24px, 3.4vw, 34px); line-height: 1.3; font-weight: 700; }
+.lema span { display: block; }
+.lema .sol-texto { color: var(--sol); }
