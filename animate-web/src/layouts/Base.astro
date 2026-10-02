@@ -1,0 +1,38 @@
+---
+import '../styles/global.css';
+import Encabezado from '../components/Encabezado.astro';
+import Pie from '../components/Pie.astro';
+import { sitio } from '../data/sitio';
+
+interface Props { titulo?: string; descripcion?: string; noindex?: boolean }
+const { titulo, descripcion = sitio.descripcion, noindex = false } = Astro.props;
+const tituloCompleto = titulo ? `${titulo} · ${sitio.nombre}` : `${sitio.nombre} · Terapias y educación asistidas con animales`;
+const canonica = new URL(Astro.url.pathname, sitio.url).href;
+---
+<!doctype html>
+<html lang="es-CL">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{tituloCompleto}</title>
+    <meta name="description" content={descripcion} />
+    <link rel="canonical" href={canonica} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#5a2784" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_CL" />
+    <meta property="og:site_name" content={sitio.nombre} />
+    <meta property="og:title" content={tituloCompleto} />
+    <meta property="og:description" content={descripcion} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <a class="salto" href="#contenido">Saltar al contenido</a>
+    <Encabezado />
+    <main id="contenido"><slot /></main>
+    <Pie />
+  </body>
+</html>

@@ -1,0 +1,15 @@
+---
+import { Image } from 'astro:assets';
+import { foto, type RolFoto } from '../data/fotos';
+
+interface Props {
+  rol: RolFoto;
+  sizes?: string;
+  widths?: number[];
+  loading?: 'lazy' | 'eager';
+  alt?: string;
+}
+const { rol, sizes = '100vw', widths = [480, 800, 1200], loading = 'lazy', alt } = Astro.props;
+const f = foto(rol);
+---
+<Image src={f.src} alt={alt ?? f.alt} widths={widths} sizes={sizes} loading={loading} format="webp" quality={78} />

@@ -1,0 +1,289 @@
+---
+import Base from '../layouts/Base.astro';
+import Foto from '../components/Foto.astro';
+import Formas from '../components/Formas.astro';
+import { contacto, impacto, contextoRegional, experiencias, alianzas, formasDeColaborar, llamadoDona } from '../data/sitio';
+
+const trio = [
+  { titulo: 'Persona', texto: 'Intervenciones centradas en necesidades, recursos y contexto.', color: 'turquesa' },
+  { titulo: 'Naturaleza', texto: 'Experiencias de conexión, regulación, aprendizaje y bienestar.', color: 'lima' },
+  { titulo: 'Animales', texto: 'Interacciones planificadas y respetuosas como mediadores de experiencia.', color: 'sol' },
+];
+
+const lineas = [
+  {
+    chip: 'Terapéutica', rel: 'rel-morado', foto: 'terapeutica', href: '/terapeutica/',
+    lema: 'Atención especializada',
+    texto: 'Terapias Asistidas con Animales a cargo de profesionales de la salud.',
+    items: ['Psicología', 'Terapia Ocupacional', 'Fonoaudiología'],
+  },
+  {
+    chip: 'Educativa', rel: 'rel-turquesa', foto: 'educativa', href: '/educativa/',
+    lema: 'Promoción, prevención e intervención',
+    texto: 'Programas para escuelas y comunidades educativas.',
+    items: ['Autocuidado y bienestar', 'Educación emocional', 'Talleres focalizados'],
+  },
+  {
+    chip: 'Formativa', rel: 'rel-sol', foto: 'formativa', href: '/formativa/',
+    lema: 'Aprendizaje situado',
+    texto: 'Experiencias para estudiantes y equipos en contexto real.',
+    items: ['Visitas guiadas', 'Observación de prácticas', 'Trabajo interdisciplinario'],
+  },
+] as const;
+
+const pasos = [
+  { n: 1, nivel: 'Promoción y prevención', verbo: 'Conectar', texto: 'Bienestar, autocuidado y educación emocional.', rel: 'rel-turquesa' },
+  { n: 2, nivel: 'Atención focalizada', verbo: 'Fortalecer', texto: 'Necesidades específicas, grupos y cuidadores.', rel: 'rel-lima' },
+  { n: 3, nivel: 'Atención especializada', verbo: 'Acompañar', texto: 'Intervención individual con objetivos terapéuticos.', rel: 'rel-morado' },
+];
+---
+<Base>
+  <!-- Portada -->
+  <section class="hero">
+    <Formas variante="hero" />
+    <div class="wrap hero__grid">
+      <div class="hero__texto">
+        <p class="etiqueta">Fundación de Terapias y Educación Asistidas con Animales</p>
+        <h1 class="display">Naturaleza y animales para tu bienestar</h1>
+        <p class="lectura">
+          Conectamos a personas de distintas edades con la naturaleza, los animales de granja y profesionales
+          de la salud y la educación, en La Araucanía.
+        </p>
+        <div class="acciones">
+          <a class="btn btn-primario" href="/contacto/#solicitar">Solicitar atención</a>
+          <a class="btn btn-secundario" href={llamadoDona.href}>Dona</a>
+        </div>
+        <p class="pequeno suave">Sede: {contacto.sede}, Padre Las Casas.</p>
+      </div>
+      <div class="hero__foto">
+        <div class="aro"><Foto rol="hero" loading="eager" sizes="(min-width: 900px) 440px, 82vw" widths={[440, 660, 880]} /></div>
+        <span class="disco f-turquesa" style="width:64px;height:64px;left:-14px;bottom:36px;" aria-hidden="true"></span>
+        <span class="disco f-magenta" style="width:36px;height:36px;right:8px;bottom:-8px;" aria-hidden="true"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Qué es Anímate -->
+  <section class="seccion seccion-suave">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Fundación Anímate</p>
+        <h2 class="titulo">Una experiencia sistémica y multidimensional</h2>
+        <p class="lectura">
+          Terapias y educación asistidas con animales como apoyo complementario al bienestar y la salud mental.
+        </p>
+      </div>
+      <div class="rejilla-3">
+        {trio.map((t) => (
+          <article class="tarjeta tarjeta__cuerpo">
+            <span class={`disco-icono ${t.color === 'turquesa' ? 'f-turquesa' : t.color === 'lima' ? 'f-lima' : 'f-sol'}`} aria-hidden="true"></span>
+            <h3 class="encabezado">{t.titulo}</h3>
+            <p>{t.texto}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Líneas de acción -->
+  <section class="seccion">
+    <Formas variante="derecha" />
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Qué hacemos</p>
+        <h2 class="titulo">Tres líneas de acción</h2>
+        <p class="lectura">Una oferta integrada para personas, comunidades educativas e instituciones.</p>
+      </div>
+      <div class="rejilla-3">
+        {lineas.map((l) => (
+          <article class="tarjeta">
+            <div class="tarjeta__foto"><Foto rol={l.foto} sizes="(min-width: 800px) 360px, 100vw" widths={[360, 540, 720]} /></div>
+            <div class="tarjeta__cuerpo">
+              <span class={`chip ${l.rel}`}>{l.chip}</span>
+              <h3 class="encabezado">{l.lema}</h3>
+              <p>{l.texto}</p>
+              <ul class="lista-puntos">{l.items.map((i) => <li>{i}</li>)}</ul>
+              <a class="enlace-flecha" href={l.href}>Conocer más<span class="sr" aria-hidden="true"> →</span></a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Modelo -->
+  <section class="seccion seccion-suave">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Nuestro modelo de intervención</p>
+        <h2 class="titulo">Del bienestar para todos al apoyo especializado</h2>
+        <p class="lectura">
+          Un recorrido que va desde experiencias universales de bienestar hasta apoyos terapéuticos especializados.
+        </p>
+      </div>
+      <ol class="pasos" style="list-style:none;padding:0;margin:0;">
+        {pasos.map((p) => (
+          <li class={`paso ${p.rel}`}>
+            <span class="paso__numero" aria-hidden="true">{p.n}</span>
+            <span class="paso__nivel">{p.nivel}</span>
+            <span class="paso__verbo">{p.verbo}</span>
+            <p>{p.texto}</p>
+          </li>
+        ))}
+      </ol>
+      <p class="transversal">
+        Transversal en los tres niveles: enfoque centrado en la persona · trabajo interdisciplinario · naturaleza ·
+        animales · evaluación de objetivos
+      </p>
+      <p class="lectura" style="text-align:center;margin-top:24px;font-style:italic;">
+        La intensidad del apoyo se ajusta a las necesidades de cada persona, grupo o comunidad.
+      </p>
+      <p style="text-align:center;margin-top:16px;"><a class="enlace-flecha" href="/modelo/">Conocer el modelo Anímate →</a></p>
+    </div>
+  </section>
+
+  <!-- Naturaleza -->
+  <section class="seccion seccion-morada sobre-morado">
+    <div class="wrap dividida">
+      <div style="display:grid;gap:24px;">
+        <p class="etiqueta">Naturaleza</p>
+        <h2 class="titulo">Naturaleza como recurso de bienestar</h2>
+        <p class="lectura">
+          La naturaleza forma parte del contexto de intervención: no como escenario decorativo, sino como una
+          experiencia sensorial, corporal y relacional que puede favorecer el bienestar.
+        </p>
+        <div class="puntos">
+          <div class="punto"><span class="disco-icono f-turquesa" aria-hidden="true"></span><div><h3>Baños de bosque</h3><p>Recorridos y pausas conscientes en contacto con el entorno.</p></div></div>
+          <div class="punto"><span class="disco-icono f-lima" aria-hidden="true"></span><div><h3>Conexión con la naturaleza</h3><p>Actividades con tierra, agua, aire, vegetación e invernadero.</p></div></div>
+          <div class="punto"><span class="disco-icono f-sol" aria-hidden="true"></span><div><h3>Regulación y presencia</h3><p>Experiencias que invitan a observar, sentir, respirar y conectar.</p></div></div>
+        </div>
+        <p class="espacios">Espacios disponibles: bosque · praderas · senderos · invernadero · laguna · salas techadas.</p>
+      </div>
+      <div class="dividida__foto"><Foto rol="naturaleza" sizes="(min-width: 900px) 520px, 100vw" widths={[480, 720, 960]} /></div>
+    </div>
+  </section>
+
+  <!-- Animales -->
+  <section class="seccion">
+    <Formas variante="izquierda" />
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Animales de granja</p>
+        <h2 class="titulo">Mediadores de experiencia</h2>
+        <p class="lectura">Interacciones planificadas, respetuosas y ajustadas a los objetivos de cada intervención.</p>
+      </div>
+      <div class="tira-animales">
+        <figure><Foto rol="ternero" sizes="(min-width: 800px) 270px, 50vw" widths={[270, 540]} /></figure>
+        <figure><Foto rol="llama" sizes="(min-width: 800px) 270px, 50vw" widths={[270, 540]} /></figure>
+        <figure><Foto rol="caballo" sizes="(min-width: 800px) 270px, 50vw" widths={[270, 540]} /></figure>
+        <figure><Foto rol="pavo" sizes="(min-width: 800px) 270px, 50vw" widths={[270, 540]} /></figure>
+      </div>
+      <div class="dos-columnas">
+        <div>
+          <h3 class="encabezado">Diversidad de especies</h3>
+          <p class="lectura" style="margin-top:8px;">Llamas · caballos · vacunos · aves · conejos · cabras · ovejas · asnos y otros animales domésticos presentes en la granja.</p>
+        </div>
+        <div>
+          <h3 class="encabezado">¿Qué aportan a la experiencia?</h3>
+          <ul class="lista-puntos" style="margin-top:8px;">
+            <li>Estímulos sensoriales y oportunidades de exploración</li>
+            <li>Motivación para participar y vincularse</li>
+            <li>Situaciones concretas para trabajar comunicación y habilidades sociales</li>
+            <li>Experiencias de cuidado, responsabilidad y cooperación</li>
+          </ul>
+          <p class="nota-sol">Siempre desde el bienestar y cuidado de las personas y los animales.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contexto regional -->
+  <section class="seccion seccion-suave">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Por qué lo hacemos</p>
+        <h2 class="titulo">En La Araucanía, el acceso a apoyo terapéutico sigue siendo desigual</h2>
+        <p class="lectura">
+          Faltan profesionales y tiempos de atención adecuados, sobre todo en zonas rurales. Muchos niños, niñas y
+          adolescentes no reciben apoyo terapéutico, o solo uno muy esporádico.
+        </p>
+      </div>
+      <div class="cifras">
+        {contextoRegional.map((c, i) => (
+          <div class="cifra">
+            <span class={`barra ${['f-turquesa', 'f-sol', 'f-lima'][i % 3]}`} aria-hidden="true"></span>
+            <span class="cifra__valor">{c.valor}</span>
+            <p>{c.texto}</p>
+            <span class="cifra__fuente">{c.fuente}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {impacto.length > 0 && (
+    <section class="seccion">
+      <div class="wrap">
+        <div class="cabecera-seccion">
+          <p class="etiqueta">Impacto</p>
+          <h2 class="titulo">Lo que hemos logrado</h2>
+        </div>
+        <div class="cifras">
+          {impacto.map((c) => (
+            <div class="cifra"><span class="cifra__valor">{c.valor}</span><p>{c.texto}</p></div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Experiencia y alianzas -->
+  <section class="seccion">
+    <Formas variante="derecha" />
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Experiencia y alianzas</p>
+        <h2 class="titulo">Trabajamos con escuelas, instituciones y universidades</h2>
+        <p class="lectura">Una trayectoria que integra proyectos terapéuticos, educativos y comunitarios.</p>
+      </div>
+      <div class="experiencias">
+        {experiencias.map((e) => (
+          <article class="experiencia">
+            <span class={`punto-color f-${e.color}`} aria-hidden="true"></span>
+            <div>
+              <h3>{e.nombre}</h3>
+              <p>{e.detalle} · <span class="suave">{e.lugar}</span></p>
+            </div>
+          </article>
+        ))}
+      </div>
+      <ul class="alianzas" aria-label="Convenios y reconocimientos">
+        {alianzas.map((a) => <li class="alianza">{a}</li>)}
+      </ul>
+      <p style="margin-top:32px;"><a class="btn btn-secundario" href="/equipo/">Conoce al equipo</a></p>
+    </div>
+  </section>
+
+  <!-- Cómo colaborar -->
+  <section class="seccion seccion-morada sobre-morado">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Cómo colaborar</p>
+        <h2 class="titulo">Anímate a ser parte</h2>
+        <p class="lectura">Hay varias formas de apoyar el trabajo de la fundación.</p>
+      </div>
+      <div class="rejilla-3">
+        {formasDeColaborar.map((f) => (
+          <article class="tarjeta tarjeta__cuerpo" style="color:var(--ink);">
+            <h3 class="encabezado">{f.titulo}</h3>
+            <p>{f.texto}</p>
+          </article>
+        ))}
+      </div>
+      <div class="acciones" style="margin-top:40px;">
+        <a class="btn btn-claro" href={llamadoDona.href}>Quiero apoyar</a>
+        <a class="btn btn-contorno-claro" href="/contacto/#visitanos">Visita la granja</a>
+      </div>
+    </div>
+  </section>
+</Base>

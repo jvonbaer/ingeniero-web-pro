@@ -1,0 +1,36 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo/animate-logo-color.png';
+import { menu, llamadoDona } from '../data/sitio';
+---
+<header class="encabezado-sitio">
+  <div class="wrap">
+    <a class="marca" href="/" aria-label="Fundación Anímate, inicio">
+      <Image src={logo} alt="Anímate" width={240} loading="eager" />
+    </a>
+    <button class="nav-boton" type="button" aria-expanded="false" aria-controls="nav-principal">Menú</button>
+    <nav class="nav" id="nav-principal" aria-label="Principal">
+      <ul>
+        {menu.map((item) => (
+          <li>
+            <a href={item.href}>{item.texto}</a>
+            {item.hijos && (
+              <ul class="submenu">
+                {item.hijos.map((h) => (<li><a href={h.href}>{h.texto}</a></li>))}
+              </ul>
+            )}
+          </li>
+        ))}
+        <li><a class="btn btn-primario" href={llamadoDona.href}>{llamadoDona.texto}</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+<script>
+  const boton = document.querySelector<HTMLButtonElement>('.nav-boton');
+  const nav = document.getElementById('nav-principal');
+  boton?.addEventListener('click', () => {
+    const abierta = nav?.classList.toggle('abierta') ?? false;
+    boton.setAttribute('aria-expanded', String(abierta));
+  });
+</script>

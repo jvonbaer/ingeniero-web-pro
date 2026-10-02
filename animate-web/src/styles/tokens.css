@@ -1,0 +1,29 @@
+/* Generado desde el design system de Fundación Anímate (tokens.json). Tema claro. */
+:root {
+  --surface: #ffffff;
+  --surface-raised: #f5f0fa;
+  --ink: #5a2784;
+  --ink-muted: #7b5a9c;
+  --border: #8a6aa8;
+  --focus: #5a2784;
+  --morado: #5a2784;
+  --on-morado: #ffffff;
+  --morado-texto: #5a2784;
+  --sol: #fbb919;
+  --magenta: #bd338b;
+  --azul: #1b8bbd;
+  --turquesa: #14b2a6;
+  --lima: #99c21c;
+  --naranja: #eb5d15;
+  --rojo: #e62d24;
+  --on-acento: #170d20;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 40px;
+  --radius-sm: 8px;
+  --radius-lg: 24px;
+  --radius-full: 50%;
+  --font-sans: "Poppins", system-ui, -apple-system, "Segoe UI", sans-serif;
+}

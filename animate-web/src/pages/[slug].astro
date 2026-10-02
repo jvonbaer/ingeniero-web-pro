@@ -1,0 +1,29 @@
+---
+// Páginas aún sin contenido final. Se reemplazan una a una por su página definitiva.
+import Base from '../layouts/Base.astro';
+
+export function getStaticPaths() {
+  const paginas = [
+    { slug: 'quienes-somos', titulo: 'Quiénes somos' },
+    { slug: 'equipo', titulo: 'Equipo' },
+    { slug: 'modelo', titulo: 'Modelo Anímate' },
+    { slug: 'terapeutica', titulo: 'Línea terapéutica' },
+    { slug: 'educativa', titulo: 'Línea educativa' },
+    { slug: 'formativa', titulo: 'Línea formativa' },
+    { slug: 'proyectos', titulo: 'Proyectos' },
+    { slug: 'dona', titulo: 'Dona' },
+    { slug: 'contacto', titulo: 'Contacto' },
+    { slug: 'transparencia', titulo: 'Transparencia' },
+  ];
+  return paginas.map((p) => ({ params: { slug: p.slug }, props: p }));
+}
+const { titulo } = Astro.props;
+---
+<Base titulo={titulo} noindex>
+  <section class="wrap construccion">
+    <span class="raya" aria-hidden="true"></span>
+    <h1 class="display">{titulo}</h1>
+    <p class="lectura">Estamos terminando esta página. Vuelve pronto.</p>
+    <a class="btn btn-primario" href="/">Volver al inicio</a>
+  </section>
+</Base>

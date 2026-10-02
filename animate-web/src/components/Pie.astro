@@ -1,0 +1,37 @@
+---
+import { Image } from 'astro:assets';
+import logo from '../assets/logo/animate-logo-color.png';
+import { sitio, contacto, personeria, menu, llamadoDona } from '../data/sitio';
+---
+<footer class="pie sobre-morado">
+  <div class="wrap">
+    <div class="pie__grid">
+      <div>
+        <a class="pie__logo" href="/" aria-label="Fundación Anímate, inicio">
+          <Image src={logo} alt="Anímate" width={260} loading="lazy" />
+        </a>
+        <p style="margin-top:16px;max-width:340px;">{sitio.bajada}</p>
+      </div>
+      <div>
+        <h2>Contacto</h2>
+        <address>
+          {contacto.telefono && <span>{contacto.telefono}</span>}
+          <span>{contacto.web}</span>
+          <a href={`mailto:${contacto.correo}`}>{contacto.correo}</a>
+          <span>{contacto.direccion}</span>
+          <span>{contacto.region}</span>
+          <a href={contacto.instagram.url} rel="noopener">{contacto.instagram.usuario}</a>
+        </address>
+      </div>
+      <div>
+        <h2>Explora</h2>
+        <ul>
+          {menu.flatMap((i) => i.hijos ?? [i]).map((i) => (<li><a href={i.href}>{i.texto}</a></li>))}
+          <li><a href={llamadoDona.href}>{llamadoDona.texto}</a></li>
+          <li><a href="/transparencia/">Transparencia</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="pie__linea">{personeria} © {new Date().getFullYear()} {sitio.nombre}.</p>
+  </div>
+</footer>

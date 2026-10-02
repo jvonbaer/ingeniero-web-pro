@@ -1,0 +1,28 @@
+---
+// Manchas orgánicas del design system: en esquinas, nunca detrás del texto; una translúcida al 72 %.
+interface Props { variante?: 'hero' | 'derecha' | 'izquierda' }
+const { variante = 'derecha' } = Astro.props;
+const blob1 = 'border-radius:63% 37% 54% 46% / 55% 48% 52% 45%';
+const blob2 = 'border-radius:38% 62% 47% 53% / 52% 40% 60% 48%';
+---
+<div class="formas" aria-hidden="true">
+  {variante === 'hero' && (
+    <>
+      <div class="forma f-morado" style={`width:340px;height:300px;top:-130px;right:-120px;${blob1}`}></div>
+      <div class="forma f-turquesa f-translucida" style={`width:230px;height:210px;top:10px;right:-130px;${blob2}`}></div>
+      <div class="forma forma-fija f-sol" style="width:180px;height:180px;bottom:-115px;left:-70px;border-radius:50%"></div>
+    </>
+  )}
+  {variante === 'derecha' && (
+    <>
+      <div class="forma f-turquesa" style={`width:260px;height:240px;top:-120px;right:-100px;${blob2}`}></div>
+      <div class="forma f-morado f-translucida" style={`width:180px;height:170px;top:-30px;right:-110px;${blob1}`}></div>
+    </>
+  )}
+  {variante === 'izquierda' && (
+    <>
+      <div class="forma f-sol" style={`width:240px;height:220px;bottom:-110px;left:-90px;${blob1}`}></div>
+      <div class="forma f-magenta f-translucida" style={`width:160px;height:150px;bottom:-60px;left:-100px;${blob2}`}></div>
+    </>
+  )}
+</div>
