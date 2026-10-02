@@ -251,3 +251,6 @@ a { color: var(--morado-texto); }
 .trinomio .tarjeta__cuerpo { text-align: left; }
 .solo-lector { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .seccion-suave .aviso { background: var(--surface); }
+.rejilla-2 { display: grid; gap: 24px; }
+@media (min-width: 800px) { .rejilla-2 { grid-template-columns: repeat(2, 1fr); } }
+.cierre { margin-top: 40px; text-align: center; font-weight: 600; font-size: 18px; }

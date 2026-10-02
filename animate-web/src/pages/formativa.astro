@@ -1,0 +1,70 @@
+---
+import Base from '../layouts/Base.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import Foto from '../components/Foto.astro';
+import { alianzas } from '../data/sitio';
+
+const universidades = alianzas.filter((a) => a.startsWith('Universidad'));
+---
+<Base
+  titulo="Línea formativa"
+  descripcion="Visitas guiadas y experiencias de aprendizaje situado en la Granja Educativa «Llamas del Sur» para estudiantes y equipos de Psicología, Terapia Ocupacional y Fonoaudiología."
+>
+  <EncabezadoPagina
+    etiqueta="Línea formativa"
+    titulo="Programas formativos"
+    bajada="Aprender haciendo: acercamos a estudiantes y equipos al trabajo interdisciplinario en contexto real."
+  >
+    <div class="acciones">
+      <a class="btn btn-primario" href="/contacto/#instituciones">Coordinar una visita</a>
+      <a class="btn btn-secundario" href="/modelo/">Conocer el modelo</a>
+    </div>
+  </EncabezadoPagina>
+
+  <section class="seccion seccion-suave">
+    <div class="wrap nivel">
+      <div class="nivel__texto">
+        <span class="chip rel-sol">Visitas guiadas</span>
+        <h2 class="titulo">Una experiencia de aprendizaje situado en la Granja Educativa «Llamas del Sur»</h2>
+        <ul class="lista-puntos">
+          <li>Dirigidas a estudiantes de pregrado y otros procesos formativos.</li>
+          <li>Especialmente vinculadas a Psicología, Terapia Ocupacional y Fonoaudiología.</li>
+          <li>Observación del contexto, los espacios, los animales y las experiencias asistidas.</li>
+          <li>Diálogo sobre intervención, ética, bienestar animal y trabajo interdisciplinario.</li>
+        </ul>
+        <p class="enfasis rel-sol">También desarrollamos experiencias formativas adaptadas a instituciones y equipos.</p>
+      </div>
+      <div class="nivel__foto"><Foto rol="bosque" sizes="(min-width: 900px) 540px, 100vw" widths={[480, 720, 1080]} /></div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="wrap dividida">
+      <div class="dividida__foto" style="aspect-ratio:4/3;"><Foto rol="invernadero" sizes="(min-width: 900px) 520px, 100vw" widths={[480, 720, 960]} /></div>
+      <div style="display:grid;gap:20px;">
+        <p class="etiqueta">Trabajo interdisciplinario</p>
+        <h2 class="titulo">Ver cómo se trabaja en equipo, en contexto real</h2>
+        <p class="lectura">
+          En Anímate trabajan juntas la Psicología, la Terapia Ocupacional y la Fonoaudiología, con la naturaleza y los animales
+          de granja como parte del proceso. La visita permite conocer ese trabajo en el lugar donde ocurre.
+        </p>
+        {universidades.length > 0 && (
+          <div>
+            <p class="encabezado">Vinculación con universidades</p>
+            <ul class="alianzas" style="margin-top:12px;" aria-label="Universidades">
+              {universidades.map((u) => <li class="alianza">{u}</li>)}
+            </ul>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion seccion-morada sobre-morado">
+    <div class="wrap" style="display:grid;gap:24px;justify-items:start;">
+      <h2 class="titulo">¿Quieres traer a tu curso o equipo?</h2>
+      <p class="lectura" style="max-width:640px;">Cuéntanos de qué carrera o institución son y cuántas personas serían. Coordinamos la visita contigo.</p>
+      <a class="btn btn-claro" href="/contacto/#instituciones">Coordinar una visita</a>
+    </div>
+  </section>
+</Base>

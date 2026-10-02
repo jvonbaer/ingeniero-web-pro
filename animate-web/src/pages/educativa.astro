@@ -1,0 +1,105 @@
+---
+import Base from '../layouts/Base.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import Foto from '../components/Foto.astro';
+import { experiencias } from '../data/sitio';
+
+const programas = [
+  { chip: 'Autocuidado y bienestar', rel: 'rel-turquesa', foto: 'autocuidado', texto: 'Herramientas prácticas para el cuidado personal y colectivo.' },
+  { chip: 'Educación emocional', rel: 'rel-sol', foto: 'educativa', texto: 'Reconocimiento, expresión y regulación de emociones.' },
+  { chip: 'Talleres focalizados', rel: 'rel-lima', foto: 'fonoaudiologia', texto: 'Intervenciones diseñadas para necesidades específicas del grupo.' },
+  { chip: 'TAA individual', rel: 'rel-morado', foto: 'terapeutica', texto: 'Apoyo especializado integrado a procesos educativos o terapéuticos.' },
+] as const;
+
+const destinatarios = [
+  { titulo: 'Estudiantes', texto: 'Experiencias grupales para aprender, regularse y vincularse en la naturaleza.', color: 'f-turquesa' },
+  { titulo: 'Familias', texto: 'Programas para cuidadores y familias, con el contexto y las redes de cada persona.', color: 'f-lima' },
+  { titulo: 'Equipos educativos', texto: 'Intervenciones en comunidades educativas y herramientas para quienes acompañan.', color: 'f-sol' },
+];
+
+const enColegios = experiencias.filter((e) => e.nombre === 'Terapia complementaria PIE' || e.nombre === 'Convivencia escolar');
+---
+<Base
+  titulo="Línea educativa"
+  descripcion="Programas de promoción, prevención e intervención para escuelas, familias y comunidades: autocuidado y bienestar, educación emocional y talleres focalizados."
+>
+  <EncabezadoPagina
+    etiqueta="Línea educativa"
+    titulo="Programas educativos"
+    bajada="Promoción, prevención e intervención: propuestas flexibles para escuelas, familias, equipos y otras comunidades."
+  >
+    <div class="acciones">
+      <a class="btn btn-primario" href="/contacto/#instituciones">Escribir como institución</a>
+      <a class="btn btn-secundario" href="/modelo/">Conocer el modelo</a>
+    </div>
+  </EncabezadoPagina>
+
+  <section class="seccion seccion-suave">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Programas</p>
+        <h2 class="titulo">Cuatro formas de trabajar con tu comunidad</h2>
+        <p class="lectura">Diseñamos los programas según la población, los objetivos, la duración y el contexto institucional.</p>
+      </div>
+      <div class="rejilla-2">
+        {programas.map((p) => (
+          <article class="tarjeta">
+            <div class="tarjeta__foto"><Foto rol={p.foto} sizes="(min-width: 800px) 540px, 100vw" widths={[480, 720, 1080]} /></div>
+            <div class="tarjeta__cuerpo">
+              <span class={`chip ${p.rel}`}>{p.chip}</span>
+              <p>{p.texto}</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Para quién</p>
+        <h2 class="titulo">Estudiantes, familias y equipos</h2>
+        <p class="lectura">Trabajamos en los dos primeros niveles del modelo: promover el bienestar y atender necesidades específicas.</p>
+      </div>
+      <div class="rejilla-3">
+        {destinatarios.map((d) => (
+          <article class="tarjeta tarjeta-suave tarjeta__cuerpo">
+            <span class={`disco-icono ${d.color}`} aria-hidden="true"></span>
+            <h3 class="encabezado">{d.titulo}</h3>
+            <p>{d.texto}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion seccion-suave">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Experiencia</p>
+        <h2 class="titulo">Ya trabajamos en establecimientos educativos</h2>
+      </div>
+      <div class="experiencias">
+        {enColegios.map((e) => (
+          <article class="experiencia">
+            <span class={`punto-color f-${e.color}`} aria-hidden="true"></span>
+            <div>
+              <h3>{e.nombre}</h3>
+              <p>{e.detalle} · <span class="suave">{e.lugar}</span></p>
+            </div>
+          </article>
+        ))}
+      </div>
+      <p style="margin-top:24px;"><a class="enlace-flecha" href="/proyectos/">Ver todos los proyectos →</a></p>
+    </div>
+  </section>
+
+  <section class="seccion seccion-morada sobre-morado">
+    <div class="wrap" style="display:grid;gap:24px;justify-items:start;">
+      <h2 class="titulo">¿Quieres un programa para tu institución?</h2>
+      <p class="lectura" style="max-width:640px;">Cuéntanos quiénes participarían y qué necesitan. Diseñamos la propuesta con ustedes.</p>
+      <a class="btn btn-claro" href="/contacto/#instituciones">Escribir como institución</a>
+    </div>
+  </section>
+</Base>

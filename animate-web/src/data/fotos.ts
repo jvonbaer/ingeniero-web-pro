@@ -23,6 +23,7 @@ export const fotos = {
   caballo: { archivo: 'animal-caballo.jpg', alt: 'Una niña acaricia un caballo a través de un cerco de madera.' },
   pavo: { archivo: 'animal-pavo.jpg', alt: 'Un pavo real de plumaje azul, de frente.' },
   invernadero: { archivo: 'invernadero.jpg', alt: 'Niños y una profesora cosechan lechugas dentro de un invernadero.' },
+  autocuidado: { archivo: 'autocuidado-conejo.jpg', alt: 'Una niña y una adulta acarician un conejo en un corral.' },
   llamaCielo: { archivo: 'llama-cielo.jpg', alt: 'Una llama blanca frente a un cielo despejado.' },
 } as const;
 
