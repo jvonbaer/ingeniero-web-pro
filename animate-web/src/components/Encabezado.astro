@@ -2,6 +2,10 @@
 import { Image } from 'astro:assets';
 import logo from '../assets/logo/animate-logo-color.png';
 import { menu, llamadoDona } from '../data/sitio';
+
+const ruta = Astro.url.pathname;
+const actual = (href: string) => ruta === href;
+const enSeccion = (item: { href: string; hijos?: { href: string }[] }) => actual(item.href) || (item.hijos ?? []).some((h) => actual(h.href));
 ---
 <header class="encabezado-sitio">
   <div class="wrap">
@@ -13,10 +17,10 @@ import { menu, llamadoDona } from '../data/sitio';
       <ul>
         {menu.map((item) => (
           <li>
-            <a href={item.href}>{item.texto}</a>
+            <a href={item.href} aria-current={enSeccion(item) ? 'page' : undefined}>{item.texto}</a>
             {item.hijos && (
               <ul class="submenu">
-                {item.hijos.map((h) => (<li><a href={h.href}>{h.texto}</a></li>))}
+                {item.hijos.map((h) => (<li><a href={h.href} aria-current={actual(h.href) ? 'page' : undefined}>{h.texto}</a></li>))}
               </ul>
             )}
           </li>

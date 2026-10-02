@@ -269,3 +269,5 @@ a { color: var(--morado-texto); }
 .lema { font-size: clamp(24px, 3.4vw, 34px); line-height: 1.3; font-weight: 700; }
 .lema span { display: block; }
 .lema .sol-texto { color: var(--sol); }
+.nav a[aria-current='page'] { font-weight: 700; box-shadow: inset 0 -3px 0 var(--sol); border-radius: 0; }
+@media (max-width: 959px) { .nav a[aria-current='page'] { box-shadow: inset 4px 0 0 var(--sol); } }

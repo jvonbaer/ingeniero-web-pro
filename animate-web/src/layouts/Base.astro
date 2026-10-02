@@ -1,4 +1,8 @@
 ---
+import '@fontsource/poppins/latin-400.css';
+import '@fontsource/poppins/latin-500.css';
+import '@fontsource/poppins/latin-600.css';
+import '@fontsource/poppins/latin-700.css';
 import '../styles/global.css';
 import Encabezado from '../components/Encabezado.astro';
 import Pie from '../components/Pie.astro';
@@ -25,9 +29,6 @@ const canonica = new URL(Astro.url.pathname, sitio.url).href;
     <meta property="og:title" content={tituloCompleto} />
     <meta property="og:description" content={descripcion} />
     {noindex && <meta name="robots" content="noindex" />}
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body>
     <a class="salto" href="#contenido">Saltar al contenido</a>
