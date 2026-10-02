@@ -6,13 +6,10 @@ export function getStaticPaths() {
   const paginas = [
     { slug: 'quienes-somos', titulo: 'Quiénes somos' },
     { slug: 'equipo', titulo: 'Equipo' },
-    { slug: 'modelo', titulo: 'Modelo Anímate' },
-    { slug: 'terapeutica', titulo: 'Línea terapéutica' },
     { slug: 'educativa', titulo: 'Línea educativa' },
     { slug: 'formativa', titulo: 'Línea formativa' },
     { slug: 'proyectos', titulo: 'Proyectos' },
     { slug: 'dona', titulo: 'Dona' },
-    { slug: 'contacto', titulo: 'Contacto' },
     { slug: 'transparencia', titulo: 'Transparencia' },
   ];
   return paginas.map((p) => ({ params: { slug: p.slug }, props: p }));

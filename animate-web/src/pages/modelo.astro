@@ -1,0 +1,147 @@
+---
+import Base from '../layouts/Base.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import Foto from '../components/Foto.astro';
+
+const niveles = [
+  {
+    n: 1, chip: 'Nivel 1 · Conectar', rel: 'rel-turquesa', foto: 'bosque', invertido: false,
+    titulo: 'Promoción y prevención',
+    bajada: 'Abrimos espacios para el bienestar antes de que aparezca o se intensifique una dificultad.',
+    proposito: 'Promover recursos socioemocionales, autocuidado, vínculos y participación mediante experiencias grupales significativas.',
+    items: [
+      'Talleres de autocuidado y bienestar',
+      'Educación emocional',
+      'Experiencias de conexión con la naturaleza',
+      'Actividades grupales asistidas con animales',
+      'Acciones de promoción en comunidades educativas',
+    ],
+    enfasis: 'Énfasis: fortalecer capacidades y factores protectores.', enfasisRel: 'rel-turquesa',
+  },
+  {
+    n: 2, chip: 'Nivel 2 · Fortalecer', rel: 'rel-lima', foto: 'fortalecer', invertido: true,
+    titulo: 'Atención focalizada',
+    bajada: 'Intervenciones dirigidas a necesidades específicas de una persona, grupo o comunidad.',
+    proposito: 'Apoyamos a quienes presentan una necesidad identificada, sin perder de vista su contexto y sus redes.',
+    items: [
+      'Talleres focalizados para grupos específicos',
+      'Programas para cuidadores y familias',
+      'Intervenciones en comunidades educativas',
+      'Actividades de regulación emocional y habilidades para la vida',
+      'Terapias y apoyos complementarios según objetivos definidos',
+    ],
+    enfasis: '', enfasisRel: '',
+  },
+  {
+    n: 3, chip: 'Nivel 3 · Acompañar', rel: 'rel-morado', foto: 'terapeutica', invertido: false,
+    titulo: 'Atención especializada',
+    bajada: 'Intervención profesional individualizada, con objetivos terapéuticos definidos y seguimiento del proceso.',
+    proposito: 'Atención individual a cargo de profesionales de la salud, con la terapia asistida con animales como apoyo complementario.',
+    items: ['Psicología', 'Terapia Ocupacional', 'Fonoaudiología'],
+    enfasis: 'TAA como apoyo complementario', enfasisRel: 'rel-morado',
+  },
+] as const;
+---
+<Base
+  titulo="Modelo Anímate"
+  descripcion="El modelo de intervención de Fundación Anímate: tres niveles de apoyo, de la promoción del bienestar a la atención especializada, con naturaleza y animales de granja."
+>
+  <EncabezadoPagina
+    etiqueta="Qué hacemos"
+    titulo="Modelo Anímate"
+    bajada="Un recorrido que va desde experiencias universales de bienestar hasta apoyos terapéuticos especializados. La intensidad del apoyo se ajusta a las necesidades de cada persona, grupo o comunidad."
+  />
+
+  <section class="seccion seccion-suave">
+    <div class="wrap">
+      {niveles.map((nv, i) => (
+        <>
+          {i > 0 && <hr class="nivel-separador" />}
+          <article class={`nivel${nv.invertido ? ' invertido' : ''}`}>
+            <div class="nivel__texto">
+              <span class={`chip ${nv.rel}`}>{nv.chip}</span>
+              <h2 class="titulo">{nv.titulo}</h2>
+              <p class="lectura">{nv.bajada}</p>
+              <p class="encabezado">{nv.proposito}</p>
+              <ul class="lista-puntos">{nv.items.map((it) => <li>{it}</li>)}</ul>
+              {nv.enfasis && <p class={`enfasis ${nv.enfasisRel}`}>{nv.enfasis}</p>}
+              {nv.n === 3 && <a class="enlace-flecha" href="/terapeutica/">Conocer la línea terapéutica →</a>}
+            </div>
+            <div class="nivel__foto"><Foto rol={nv.foto} sizes="(min-width: 900px) 540px, 100vw" widths={[480, 720, 1080]} /></div>
+          </article>
+        </>
+      ))}
+      <p class="transversal">
+        Transversal en los tres niveles: enfoque centrado en la persona · trabajo interdisciplinario · naturaleza ·
+        animales · evaluación de objetivos
+      </p>
+    </div>
+  </section>
+
+  <!-- Naturaleza -->
+  <section class="seccion seccion-morada sobre-morado">
+    <div class="wrap dividida">
+      <div style="display:grid;gap:24px;">
+        <p class="etiqueta">Naturaleza</p>
+        <h2 class="titulo">Naturaleza como recurso de bienestar</h2>
+        <p class="lectura">
+          La naturaleza forma parte del contexto de intervención: no como escenario decorativo, sino como una
+          experiencia sensorial, corporal y relacional que puede favorecer el bienestar.
+        </p>
+        <div class="puntos">
+          <div class="punto"><span class="disco-icono f-turquesa" aria-hidden="true"></span><div><h3>Baños de bosque</h3><p>Recorridos y pausas conscientes en contacto con el entorno.</p></div></div>
+          <div class="punto"><span class="disco-icono f-lima" aria-hidden="true"></span><div><h3>Conexión con la naturaleza</h3><p>Actividades con tierra, agua, aire, vegetación e invernadero.</p></div></div>
+          <div class="punto"><span class="disco-icono f-sol" aria-hidden="true"></span><div><h3>Regulación y presencia</h3><p>Experiencias que invitan a observar, sentir, respirar y conectar.</p></div></div>
+        </div>
+        <p class="espacios">Espacios disponibles: bosque · praderas · senderos · invernadero · laguna · salas techadas.</p>
+      </div>
+      <div class="dividida__foto"><Foto rol="invernadero" sizes="(min-width: 900px) 520px, 100vw" widths={[480, 720, 960]} /></div>
+    </div>
+  </section>
+
+  <!-- Animales -->
+  <section class="seccion">
+    <div class="wrap dividida">
+      <div class="dividida__foto"><Foto rol="llamaCielo" sizes="(min-width: 900px) 520px, 100vw" widths={[480, 720, 960]} /></div>
+      <div style="display:grid;gap:20px;">
+        <p class="etiqueta">Animales de granja</p>
+        <h2 class="titulo">Mediadores de experiencia</h2>
+        <p class="lectura">Interacciones planificadas, respetuosas y ajustadas a los objetivos de cada intervención.</p>
+        <div>
+          <h3 class="encabezado">Diversidad de especies</h3>
+          <p style="margin-top:4px;">Llamas · caballos · vacunos · aves · conejos · cabras · ovejas · asnos y otros animales domésticos presentes en la granja.</p>
+        </div>
+        <div>
+          <h3 class="encabezado">¿Qué aportan a la experiencia?</h3>
+          <ul class="lista-puntos" style="margin-top:8px;">
+            <li>Estímulos sensoriales y oportunidades de exploración</li>
+            <li>Motivación para participar y vincularse</li>
+            <li>Situaciones concretas para trabajar comunicación y habilidades sociales</li>
+            <li>Experiencias de cuidado, responsabilidad y cooperación</li>
+          </ul>
+        </div>
+        <p class="nota-sol" style="justify-self:start;margin-top:0;">Siempre desde el bienestar y cuidado de las personas y los animales.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Fundamentos -->
+  <section class="seccion seccion-suave">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Fundamentos</p>
+        <h2 class="titulo">Biofilia: la necesidad de estar cerca de la naturaleza</h2>
+        <p class="lectura">
+          Es un concepto acuñado por el biólogo Edward Wilson (1984) para nombrar la necesidad ancestral del ser humano de
+          interactuar con los animales y con la naturaleza. El contacto y la interacción en espacios naturales se asocian con
+          tranquilidad, relajación y bienestar, que se refuerzan con la empatía y el afecto que se establece entre una persona
+          y un animal.
+        </p>
+      </div>
+      <div class="acciones">
+        <a class="btn btn-primario" href="/contacto/#solicitar">Solicitar atención</a>
+        <a class="btn btn-secundario" href="/contacto/#instituciones">Escribir como institución</a>
+      </div>
+    </div>
+  </section>
+</Base>

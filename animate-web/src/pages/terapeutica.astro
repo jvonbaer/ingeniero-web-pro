@@ -1,0 +1,113 @@
+---
+import Base from '../layouts/Base.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import Foto from '../components/Foto.astro';
+
+const trinomio = [
+  { titulo: 'Profesional de la salud', texto: 'Dirige el proceso y define los objetivos terapéuticos y las medidas de cambio.', color: 'f-turquesa' },
+  { titulo: 'Asistente de animales', texto: 'Participa en la sesión y acompaña al animal durante el proceso.', color: 'f-lima' },
+  { titulo: 'Animal facilitador', texto: 'Un animal doméstico debidamente preparado, que actúa como facilitador del proceso terapéutico.', color: 'f-sol' },
+];
+
+const profesiones = [
+  { chip: 'Psicología', rel: 'rel-morado', foto: 'terapeutica', texto: 'Procesos de salud mental, regulación emocional y bienestar.' },
+  { chip: 'Terapia Ocupacional', rel: 'rel-turquesa', foto: 'terapiaOcupacional', texto: 'Participación, autonomía, desempeño y habilidades para la vida diaria.' },
+  { chip: 'Fonoaudiología', rel: 'rel-sol', foto: 'fonoaudiologia', texto: 'Comunicación, interacción y habilidades asociadas al lenguaje.' },
+] as const;
+---
+<Base
+  titulo="Línea terapéutica"
+  descripcion="Terapias Asistidas con Animales a cargo de profesionales de Psicología, Terapia Ocupacional y Fonoaudiología, con objetivos definidos y seguimiento."
+>
+  <EncabezadoPagina
+    etiqueta="Línea terapéutica"
+    titulo="Terapias Asistidas con Animales"
+    bajada="Atención especializada desarrollada por profesionales, según objetivos y necesidades individuales."
+  >
+    <div class="acciones">
+      <a class="btn btn-primario" href="/contacto/#solicitar">Solicitar atención</a>
+      <a class="btn btn-secundario" href="/modelo/">Conocer el modelo</a>
+    </div>
+  </EncabezadoPagina>
+
+  <!-- Qué es una TAA -->
+  <section class="seccion seccion-suave">
+    <div class="wrap dividida">
+      <div style="display:grid;gap:20px;">
+        <p class="etiqueta">Qué es una TAA</p>
+        <h2 class="titulo">Un proceso con objetivos definidos y seguimiento</h2>
+        <p class="lectura">
+          Son intervenciones dirigidas por profesionales de la salud, con objetivos terapéuticos y medidas de cambio
+          definidos, que incorporan animales domésticos como parte del proceso.
+        </p>
+        <p>
+          En Anímate, la terapia asistida con animales es un apoyo complementario al trabajo de cada disciplina. Se
+          desarrolla en un entorno natural, junto a los animales de la granja.
+        </p>
+        <p class="enfasis rel-morado" style="justify-self:start;">Modalidad individual · objetivos definidos · seguimiento profesional</p>
+      </div>
+      <div class="dividida__foto"><Foto rol="terapeutica" sizes="(min-width: 900px) 520px, 100vw" widths={[480, 720, 960]} /></div>
+    </div>
+  </section>
+
+  <!-- Trinomio -->
+  <section class="seccion">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Quiénes participan</p>
+        <h2 class="titulo">El trinomio de la terapia</h2>
+        <p class="lectura">En cada sesión participan tres integrantes que trabajan en conjunto.</p>
+      </div>
+      <div class="trinomio">
+        {trinomio.map((t) => (
+          <article class="tarjeta tarjeta__cuerpo">
+            <span class={`disco-icono ${t.color}`} aria-hidden="true"></span>
+            <h3 class="encabezado">{t.titulo}</h3>
+            <p>{t.texto}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Equipo profesional -->
+  <section class="seccion seccion-suave">
+    <div class="wrap">
+      <div class="cabecera-seccion">
+        <p class="etiqueta">Equipo profesional</p>
+        <h2 class="titulo">Tres disciplinas, un mismo proceso</h2>
+        <p class="lectura">Intervención profesional individualizada, con objetivos terapéuticos definidos y seguimiento del proceso.</p>
+      </div>
+      <div class="profesiones">
+        {profesiones.map((p) => (
+          <article class="tarjeta">
+            <div class="tarjeta__foto"><Foto rol={p.foto} sizes="(min-width: 800px) 360px, 100vw" widths={[360, 540, 720]} /></div>
+            <div class="tarjeta__cuerpo">
+              <span class={`chip ${p.rel}`}>{p.chip}</span>
+              <p>{p.texto}</p>
+              <p class="pequeno suave" style="margin-top:auto;">TAA como apoyo complementario</p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Para quién -->
+  <section class="seccion">
+    <div class="wrap dividida">
+      <div style="display:grid;gap:20px;">
+        <p class="etiqueta">Para quién</p>
+        <h2 class="titulo">Personas de todas las edades</h2>
+        <p class="lectura">
+          Atendemos a niñas, niños, adolescentes, adultos y personas mayores, en especial a quienes están en situación de
+          vulnerabilidad social o de discapacidad y no cuentan con apoyo terapéutico continuo.
+        </p>
+        <div class="acciones">
+          <a class="btn btn-primario" href="/contacto/#solicitar">Solicitar atención</a>
+        </div>
+      </div>
+      <div class="dividida__foto"><Foto rol="fortalecer" sizes="(min-width: 900px) 520px, 100vw" widths={[480, 720, 960]} /></div>
+    </div>
+  </section>
+</Base>

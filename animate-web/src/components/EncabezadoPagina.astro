@@ -1,0 +1,14 @@
+---
+import Formas from './Formas.astro';
+interface Props { etiqueta?: string; titulo: string; bajada?: string }
+const { etiqueta, titulo, bajada } = Astro.props;
+---
+<section class="pagina-hero">
+  <Formas variante="derecha" />
+  <div class="wrap pagina-hero__cuerpo">
+    {etiqueta && <p class="etiqueta">{etiqueta}</p>}
+    <h1 class="display">{titulo}</h1>
+    {bajada && <p class="lectura">{bajada}</p>}
+    <slot />
+  </div>
+</section>

@@ -200,3 +200,54 @@ a { color: var(--morado-texto); }
 /* Páginas en construcción */
 .construccion { padding-block: 96px; display: grid; gap: 20px; justify-items: start; }
 .construccion .raya { width: 64px; height: 6px; border-radius: 3px; background: var(--sol); }
+
+/* Encabezado de página interior */
+.pagina-hero { position: relative; overflow: hidden; padding-block: 56px 64px; background: var(--surface); }
+@media (min-width: 900px) { .pagina-hero { padding-block: 80px 88px; } }
+.pagina-hero__cuerpo { position: relative; z-index: 1; display: grid; gap: 20px; max-width: 760px; margin-inline: 0; }
+@media (min-width: 700px) { .pagina-hero__cuerpo { margin-left: max(32px, calc((100% - 1160px) / 2)); } }
+.pagina-hero .acciones { margin-top: 8px; }
+.ancla { scroll-margin-top: 96px; }
+
+/* Formularios */
+.form { display: grid; gap: 20px; }
+.form fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 20px; min-width: 0; }
+@media (min-width: 700px) { .form .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; } }
+.campo { display: grid; gap: 6px; }
+.campo label, .campo .rotulo { font-weight: 600; }
+.campo .ayuda { font-size: 13px; line-height: 18px; color: var(--ink-muted); }
+.campo input, .campo select, .campo textarea {
+  width: 100%; min-height: 48px; padding: 10px 14px;
+  font: inherit; color: var(--ink); background: #fff;
+  border: 2px solid var(--border); border-radius: var(--radius-sm);
+}
+.campo textarea { min-height: 140px; resize: vertical; }
+.campo input:focus-visible, .campo select:focus-visible, .campo textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-color: var(--focus); }
+.campo input:user-invalid, .campo select:user-invalid, .campo textarea:user-invalid { border-color: var(--rojo); }
+.consentimiento { display: grid; grid-template-columns: 24px 1fr; gap: 12px; align-items: start; }
+.consentimiento input { width: 24px; height: 24px; margin: 2px 0 0; accent-color: var(--morado); }
+.trampa { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.panel { background: var(--surface); border-radius: var(--radius-lg); padding: 28px; box-shadow: 0 8px 28px rgba(90,39,132,.12); }
+.seccion-suave .panel { box-shadow: 0 8px 28px rgba(90,39,132,.10); }
+.dos-col-contacto { display: grid; gap: 40px; align-items: start; }
+@media (min-width: 900px) { .dos-col-contacto { grid-template-columns: .8fr 1.2fr; gap: 64px; } }
+.datos { display: grid; gap: 14px; margin-top: 8px; }
+.datos dt { font-size: 12px; line-height: 16px; letter-spacing: .2em; text-transform: uppercase; font-weight: 600; color: var(--ink-muted); }
+.datos dd { margin: 2px 0 0; font-weight: 500; }
+.aviso { padding: 14px 18px; border-radius: var(--radius-sm); background: var(--surface-raised); font-size: 14px; line-height: 22px; }
+
+/* Niveles y profesiones */
+.nivel { display: grid; gap: 32px; align-items: center; }
+@media (min-width: 900px) { .nivel { grid-template-columns: 1fr 1fr; gap: 64px; } .nivel.invertido .nivel__foto { order: 2; } }
+.nivel__foto { border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4 / 3; }
+.nivel__foto img { width: 100%; height: 100%; object-fit: cover; }
+.nivel__texto { display: grid; gap: 16px; justify-items: start; }
+.enfasis { display: inline-block; padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 600; }
+.nivel-separador { height: 1px; background: var(--surface-raised); margin-block: 64px; border: 0; }
+.profesiones { display: grid; gap: 24px; }
+@media (min-width: 800px) { .profesiones { grid-template-columns: repeat(3, 1fr); } }
+.trinomio { display: grid; gap: 20px; }
+@media (min-width: 800px) { .trinomio { grid-template-columns: repeat(3, 1fr); } }
+.trinomio .tarjeta__cuerpo { text-align: left; }
+.solo-lector { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.seccion-suave .aviso { background: var(--surface); }

@@ -26,11 +26,15 @@ Para publicar en Netlify, usa esta carpeta (`animate-web`) como directorio base.
 
 ## Estado
 
-- **Hecho:** portada (Inicio), encabezado, pie y estilos del design system.
-- **Pendiente de contenido:** las demás páginas (`/quienes-somos/`, `/equipo/`, `/modelo/`, `/terapeutica/`, `/educativa/`, `/formativa/`, `/proyectos/`, `/dona/`, `/contacto/`, `/transparencia/`) existen como páginas en construcción con `noindex`. Se reemplazan una a una.
+- **Hecho:** Inicio, Contacto, Modelo, Línea terapéutica, encabezado, pie y estilos del design system.
+- **Pendiente de contenido:** las demás páginas (`/quienes-somos/`, `/equipo/`, `/educativa/`, `/formativa/`, `/proyectos/`, `/dona/`, `/transparencia/`) existen como páginas en construcción con `noindex`. Se reemplazan una a una.
 - Las cifras de impacto están vacías en `src/data/sitio.ts`: mientras no haya datos, esa sección no se muestra.
 - Las cifras regionales (CASEN 2021, ENDISC 2021) vienen de la propuesta original y hay que revisar si existen datos más nuevos.
 - Los convenios y reconocimientos de `alianzas` hay que confirmarlos antes de publicar.
 - Las formas de colaborar (donación, becas, certificado) están abiertas para completar cuando se definan los mecanismos.
 - El tema oscuro del design system no está implementado: el sitio es solo claro.
 - El logo disponible es una imagen de baja resolución: conviene pedir el archivo vectorial (SVG).
+
+## Formularios de contacto
+
+Los dos formularios de `/contacto/` usan Netlify Forms (`solicitar-atencion` e `instituciones`) y llevan una trampa antispam. Solo funcionan una vez publicado el sitio en Netlify, no en `npm run dev`. El correo que recibe los avisos **no está en el código**: se configura en Netlify, en *Forms → Form notifications → Add notification → Email notification*, con `informaciones.animate@gmail.com`. Hay que hacerlo para cada formulario.

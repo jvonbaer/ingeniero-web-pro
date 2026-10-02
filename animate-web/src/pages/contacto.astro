@@ -1,0 +1,196 @@
+---
+import Base from '../layouts/Base.astro';
+import EncabezadoPagina from '../components/EncabezadoPagina.astro';
+import Foto from '../components/Foto.astro';
+import { contacto } from '../data/sitio';
+---
+<Base
+  titulo="Contacto"
+  descripcion="Solicita atención, escríbenos como institución o visita la Granja Educativa «Llamas del Sur» en Padre Las Casas."
+>
+  <EncabezadoPagina
+    etiqueta="Contacto"
+    titulo="Cuéntanos qué necesitas"
+    bajada="Escríbenos para solicitar atención, proponer un programa para tu institución o visitar la granja."
+  >
+    <div class="acciones">
+      <a class="btn btn-primario" href="#solicitar">Solicitar atención</a>
+      <a class="btn btn-secundario" href="#instituciones">Soy una institución</a>
+      <a class="btn btn-secundario" href="#visitanos">Visítanos</a>
+    </div>
+  </EncabezadoPagina>
+
+  <!-- Solicitar atención -->
+  <section class="seccion seccion-suave ancla" id="solicitar">
+    <div class="wrap dos-col-contacto">
+      <div style="display:grid;gap:20px;">
+        <p class="etiqueta">Para personas y familias</p>
+        <h2 class="titulo">Solicitar atención</h2>
+        <p class="lectura">
+          Cuéntanos para quién es la atención y qué te gustaría trabajar. El equipo revisa cada solicitud y se pone en contacto contigo.
+        </p>
+        <p class="aviso">
+          No es necesario que incluyas información clínica o datos sensibles en este formulario. Eso lo conversamos después, directamente con el equipo.
+        </p>
+        <dl class="datos">
+          <div><dt>Correo</dt><dd><a href={`mailto:${contacto.correo}`}>{contacto.correo}</a></dd></div>
+          <div><dt>Instagram</dt><dd><a href={contacto.instagram.url} rel="noopener">{contacto.instagram.usuario}</a></dd></div>
+          {contacto.telefono && <div><dt>Teléfono</dt><dd>{contacto.telefono}</dd></div>}
+        </dl>
+      </div>
+      <div class="panel">
+        <form class="form" name="solicitar-atencion" method="POST" action="/gracias/" data-netlify="true" netlify-honeypot="campo-trampa">
+          <input type="hidden" name="form-name" value="solicitar-atencion" />
+          <p class="trampa" aria-hidden="true"><label>No completar este campo: <input name="campo-trampa" tabindex="-1" autocomplete="off" /></label></p>
+          <div class="dos">
+            <div class="campo">
+              <label for="sa-nombre">Tu nombre</label>
+              <input id="sa-nombre" name="nombre" type="text" autocomplete="name" required />
+            </div>
+            <div class="campo">
+              <label for="sa-correo">Correo</label>
+              <input id="sa-correo" name="correo" type="email" autocomplete="email" required />
+            </div>
+          </div>
+          <div class="dos">
+            <div class="campo">
+              <label for="sa-telefono">Teléfono o WhatsApp</label>
+              <input id="sa-telefono" name="telefono" type="tel" autocomplete="tel" inputmode="tel" />
+              <span class="ayuda">Opcional.</span>
+            </div>
+            <div class="campo">
+              <label for="sa-para">¿Para quién es la atención?</label>
+              <select id="sa-para" name="para-quien" required>
+                <option value="">Elige una opción</option>
+                <option>Un niño, niña o adolescente</option>
+                <option>Una persona adulta</option>
+                <option>Una persona mayor</option>
+                <option>Un grupo o curso</option>
+              </select>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="sa-servicio">¿Qué te interesa?</label>
+            <select id="sa-servicio" name="servicio" required>
+              <option value="">Elige una opción</option>
+              <option>No estoy seguro o segura: quiero orientación</option>
+              <option>Terapia asistida con animales</option>
+              <option>Programa educativo</option>
+              <option>Visita a la granja</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="sa-mensaje">Cuéntanos brevemente</label>
+            <textarea id="sa-mensaje" name="mensaje" required></textarea>
+          </div>
+          <div class="consentimiento">
+            <input id="sa-acepto" name="acepto" type="checkbox" required />
+            <label for="sa-acepto">Acepto que Fundación Anímate use estos datos solo para responder mi solicitud.</label>
+          </div>
+          <div><button class="btn btn-primario" type="submit">Enviar solicitud</button></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Instituciones -->
+  <section class="seccion ancla" id="instituciones">
+    <div class="wrap dos-col-contacto">
+      <div style="display:grid;gap:20px;">
+        <p class="etiqueta">Para instituciones</p>
+        <h2 class="titulo">Escribe como institución</h2>
+        <p class="lectura">
+          Diseñamos los programas según la población, los objetivos, la duración y el contexto de cada institución. Escuelas, universidades, municipios y empresas pueden contarnos qué necesitan.
+        </p>
+      </div>
+      <div class="panel" style="box-shadow:0 8px 28px rgba(90,39,132,.12);">
+        <form class="form" name="instituciones" method="POST" action="/gracias/" data-netlify="true" netlify-honeypot="campo-trampa">
+          <input type="hidden" name="form-name" value="instituciones" />
+          <p class="trampa" aria-hidden="true"><label>No completar este campo: <input name="campo-trampa" tabindex="-1" autocomplete="off" /></label></p>
+          <div class="dos">
+            <div class="campo">
+              <label for="in-institucion">Nombre de la institución</label>
+              <input id="in-institucion" name="institucion" type="text" autocomplete="organization" required />
+            </div>
+            <div class="campo">
+              <label for="in-tipo">Tipo de institución</label>
+              <select id="in-tipo" name="tipo" required>
+                <option value="">Elige una opción</option>
+                <option>Establecimiento educativo</option>
+                <option>Universidad o centro de formación</option>
+                <option>Municipalidad u organismo público</option>
+                <option>Empresa</option>
+                <option>Organización de la sociedad civil</option>
+                <option>Otra</option>
+              </select>
+            </div>
+          </div>
+          <div class="dos">
+            <div class="campo">
+              <label for="in-nombre">Nombre de contacto</label>
+              <input id="in-nombre" name="nombre" type="text" autocomplete="name" required />
+            </div>
+            <div class="campo">
+              <label for="in-cargo">Cargo</label>
+              <input id="in-cargo" name="cargo" type="text" autocomplete="organization-title" />
+            </div>
+          </div>
+          <div class="dos">
+            <div class="campo">
+              <label for="in-correo">Correo</label>
+              <input id="in-correo" name="correo" type="email" autocomplete="email" required />
+            </div>
+            <div class="campo">
+              <label for="in-telefono">Teléfono</label>
+              <input id="in-telefono" name="telefono" type="tel" autocomplete="tel" inputmode="tel" />
+              <span class="ayuda">Opcional.</span>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="in-interes">¿Qué les interesa?</label>
+            <select id="in-interes" name="interes" required>
+              <option value="">Elige una opción</option>
+              <option>Programa educativo para estudiantes</option>
+              <option>Visita guiada o experiencia formativa</option>
+              <option>Convenio o alianza</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="in-mensaje">Cuéntanos qué necesitan</label>
+            <textarea id="in-mensaje" name="mensaje" required></textarea>
+          </div>
+          <div class="consentimiento">
+            <input id="in-acepto" name="acepto" type="checkbox" required />
+            <label for="in-acepto">Acepto que Fundación Anímate use estos datos solo para responder esta consulta.</label>
+          </div>
+          <div><button class="btn btn-primario" type="submit">Enviar consulta</button></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Visítanos y cómo llegar -->
+  <section class="seccion seccion-suave ancla" id="visitanos">
+    <div class="wrap dividida">
+      <div style="display:grid;gap:20px;">
+        <p class="etiqueta">Visítanos</p>
+        <h2 class="titulo">Conoce la Granja Educativa «Llamas del Sur»</h2>
+        <p class="lectura">
+          Es la sede operativa de la fundación: un entorno natural al aire libre, con espacios abiertos y techados, y una gran variedad de animales de granja.
+        </p>
+        <p>Para visitar la granja, escríbenos por el formulario de arriba o al correo y coordinamos contigo.</p>
+        <div id="como-llegar" class="ancla" style="display:grid;gap:12px;">
+          <h3 class="encabezado">Cómo llegar</h3>
+          <address style="font-style:normal;display:grid;gap:4px;">
+            <strong>{contacto.direccion}</strong>
+            <span>{contacto.region}</span>
+          </address>
+          <p>{contacto.comoLlegar}</p>
+          <div class="acciones"><a class="btn btn-primario" href={contacto.mapaUrl} rel="noopener" target="_blank">Ver en Google Maps<span class="solo-lector"> (se abre en una pestaña nueva)</span></a></div>
+        </div>
+      </div>
+      <div class="dividida__foto"><Foto rol="granja" sizes="(min-width: 900px) 520px, 100vw" widths={[480, 720, 960]} /></div>
+    </div>
+  </section>
+</Base>

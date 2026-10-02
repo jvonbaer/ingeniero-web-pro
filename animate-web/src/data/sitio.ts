@@ -16,6 +16,8 @@ export const contacto = {
   region: 'Región de La Araucanía, Chile',
   instagram: { usuario: '@fundacion_animate', url: 'https://www.instagram.com/fundacion_animate/' },
   sede: 'Granja Educativa «Llamas del Sur», Huichahue',
+  mapaUrl: 'https://www.google.com/maps/search/?api=1&query=Parcela+11+Jard%C3%ADn+del+Ed%C3%A9n+Padre+Las+Casas+La+Araucan%C3%ADa',
+  comoLlegar: 'A media hora de Temuco, camino a Cunco, en el sector Jardín del Edén (Huichahue), comuna de Padre Las Casas.',
 };
 
 export const personeria =
