@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Metrica, Vacio } from "../components/ui";
 import { useDatos } from "../data/DatosContext";
@@ -39,21 +39,23 @@ export function Bitacora() {
   const [hasta, setHasta] = useState("");
   const [abierta, setAbierta] = useState<string | null>(null);
 
-  const cargar = useCallback(
-    async (cuantas: number) => {
-      setError(null);
-      try {
-        setEntradas(await leerBitacora(cuantas));
-      } catch (e) {
-        setError(e instanceof Error ? e.message : "No se pudo leer la bitácora.");
-      }
-    },
-    [leerBitacora],
-  );
-
+  // Los setState ocurren solo cuando llega la respuesta; `vigente` descarta las
+  // respuestas viejas si cambia el límite o se sale de la pantalla.
   useEffect(() => {
-    void cargar(limite);
-  }, [cargar, limite]);
+    let vigente = true;
+    leerBitacora(limite)
+      .then((lista) => {
+        if (!vigente) return;
+        setEntradas(lista);
+        setError(null);
+      })
+      .catch((e: unknown) => {
+        if (vigente) setError(e instanceof Error ? e.message : "No se pudo leer la bitácora.");
+      });
+    return () => {
+      vigente = false;
+    };
+  }, [leerBitacora, limite]);
 
   const usuarios = useMemo(
     () => [...new Set((entradas ?? []).map((e) => e.usuario))].sort((a, b) => a.localeCompare(b, "es")),

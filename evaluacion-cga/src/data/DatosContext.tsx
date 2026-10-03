@@ -41,25 +41,48 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const aplicar = useCallback((estado: Awaited<ReturnType<typeof store.cargar>>) => {
+    setJugadores(estado.jugadores);
+    setEvaluaciones(estado.evaluaciones);
+    setCamisetas(estado.camisetas);
+    setConfiguracion(estado.configuracion);
+    setError(null);
+  }, []);
+
+  const mensajeDeCarga = (e: unknown) =>
+    e instanceof Error ? e.message : "No se pudieron cargar los datos.";
+
+  /** Recarga a pedido del usuario: vuelve a mostrar el estado de carga. */
   const recargar = useCallback(async () => {
     setCargando(true);
     try {
-      const estado = await store.cargar();
-      setJugadores(estado.jugadores);
-      setEvaluaciones(estado.evaluaciones);
-      setCamisetas(estado.camisetas);
-      setConfiguracion(estado.configuracion);
-      setError(null);
+      aplicar(await store.cargar());
     } catch (e) {
-      setError(e instanceof Error ? e.message : "No se pudieron cargar los datos.");
+      setError(mensajeDeCarga(e));
     } finally {
       setCargando(false);
     }
-  }, []);
+  }, [aplicar]);
 
+  // Carga inicial: `cargando` ya parte en true. Los setState ocurren solo cuando
+  // llega la respuesta, y `vigente` evita escribir si el componente se desmontó.
   useEffect(() => {
-    void recargar();
-  }, [recargar]);
+    let vigente = true;
+    store
+      .cargar()
+      .then((estado) => {
+        if (vigente) aplicar(estado);
+      })
+      .catch((e: unknown) => {
+        if (vigente) setError(mensajeDeCarga(e));
+      })
+      .finally(() => {
+        if (vigente) setCargando(false);
+      });
+    return () => {
+      vigente = false;
+    };
+  }, [aplicar]);
 
   /** Escribe primero en el almacenamiento y sólo después refresca la pantalla. */
   const conError = useCallback(async (accion: () => Promise<void>) => {

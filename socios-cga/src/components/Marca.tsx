@@ -125,11 +125,17 @@ function comprobarArchivo(variante: VarianteEscudo): Promise<boolean> {
 }
 
 export function Escudo({ tamano = 40, variante = "color" }: EscudoProps) {
-  const [oficial, setOficial] = useState<boolean | null>(comprobado[variante] ?? null);
+  // `resuelto` solo sirve para volver a renderizar cuando termina la comprobación;
+  // el valor se lee primero del caché de módulo, así un cambio de variante no
+  // necesita un setState dentro del efecto.
+  const [resuelto, setResuelto] = useState<Partial<Record<VarianteEscudo, boolean>>>({});
+  const oficial = comprobado[variante] ?? resuelto[variante] ?? null;
 
   useEffect(() => {
-    if (comprobado[variante] === undefined) void comprobarArchivo(variante).then(setOficial);
-    else setOficial(comprobado[variante]!);
+    if (comprobado[variante] !== undefined) return;
+    void comprobarArchivo(variante).then((existe) =>
+      setResuelto((previo) => ({ ...previo, [variante]: existe })),
+    );
   }, [variante]);
 
   if (oficial) {
