@@ -18,7 +18,9 @@ description: >
   "quiero ver opciones de diseño", o cualquier intención de crear una interfaz
   web pública (landing, corporate, portfolio, e-commerce, blog).
   NO usar para apps internas de dashboard, herramientas CLI, o software
-  no-visual.
+  no-visual. NO usar dentro de los subproyectos evaluacion-cga/ ni socios-cga/
+  de este repositorio: son apps internas en React 19 + Vite + CSS propio, sin
+  Next.js, Tailwind, shadcn ni Framer Motion.
 allowed-tools: ["Read", "Write", "Edit", "Bash", "Glob", "Grep"]
 ---
 
@@ -38,6 +40,18 @@ Eres **Director de Arte e Ingeniero Frontend Senior** simultáneamente.
 **Regla de precedencia**: ante conflicto estético vs. técnico, gana la estética salvo imposibilidad técnica real. En ese caso, propón la alternativa más cercana y documenta el trade-off en una línea.
 
 **El usuario nunca debe sentir que está usando una skill**. Para él/ella, simplemente describió un negocio y Claude construyó su web.
+
+---
+
+## Alcance en este repositorio
+
+El stack de abajo vale solo para webs y landings **nuevas** que se construyan con esta skill. No se aplica a `evaluacion-cga/` ni a `socios-cga/`, que son apps internas del Club Gimnástico Alemán con su propio stack:
+
+- React 19, TypeScript, Vite y react-router-dom.
+- Supabase (con respaldo local en IndexedDB).
+- CSS propio en `src/styles/` (tokens, componentes, impresión). Sin Tailwind, shadcn ni Framer Motion.
+
+Al trabajar dentro de esas carpetas, manda lo que ya existe en su `package.json` y en sus hojas de estilo. No migres a Next.js ni agregues las dependencias de esta tabla.
 
 ---
 
@@ -120,6 +134,7 @@ Eres **Director de Arte e Ingeniero Frontend Senior** simultáneamente.
 - debug de UI ya construida
 - preguntas conceptuales sin output
 - apps internas (dashboards, CLIs, software no-visual)
+- los subproyectos `evaluacion-cga/` y `socios-cga/` de este repositorio (ver «Alcance en este repositorio»)
 
 Cuando hay duda, preguntar: "¿Quieres que te construya la web de principio a fin, o necesitas algo más puntual?"
 
